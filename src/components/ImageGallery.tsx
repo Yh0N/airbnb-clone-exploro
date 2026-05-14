@@ -1,0 +1,437 @@
+'use client';
+
+// ===== GALERÍA DE IMÁGENES - ESTILO AIRBNB PREMIUM =====
+// Layout de 5 imágenes con fallbacks y estados de carga
+
+import React, { useState, useRef, useEffect } from 'react';
+import { X, ChevronLeft, ChevronRight, Grid3X3, Image as ImageIcon, Camera, Upload, Loader2, RotateCcw, Check } from 'lucide-react';
+import { uploadPhoto } from '@/services/api';
+
+interface ImageGalleryProps {
+  images: string[];
+  placeName: string;
+  entityId?: number;
+  entityType?: 'place' | 'pyme';
+  onImageUploaded?: (newUrl: string) => void;
+  isOwner?: boolean;
+}
+
+export default function ImageGallery({ 
+  images = [], 
+  placeName, 
+  entityId, 
+  entityType, 
+  onImageUploaded,
+  isOwner = false
+}: ImageGalleryProps) {
+  const [showModal, setShowModal] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const [modalIndex, setModalIndex] = useState(0);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+  const validImages = images && images.length > 0 ? images : [];
+
+  const handleImageError = (index: number) => {
+    setImageErrors(prev => ({ ...prev, [index]: true }));
+  };
+
+  const openModal = (index: number) => {
+    if (validImages.length === 0) return;
+    setModalIndex(index);
+    setShowModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  const nextImage = () => {
+    setModalIndex((prev) => (prev + 1) % validImages.length);
+  };
+
+  const prevImage = () => {
+    setModalIndex((prev) => (prev - 1 + validImages.length) % validImages.length);
+  };
+
+  // Renderiza una imagen o un placeholder si hay error
+  const renderImage = (src: string, index: number, className: string) => {
+    if (imageErrors[index] || !src) {
+      return (
+        <div className={`${className} bg-neutral-100 flex flex-col items-center justify-center gap-2 border border-neutral-200`}>
+          <ImageIcon className="w-8 h-8 text-neutral-300" />
+          <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-wider">No disponible</span>
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={src}
+        alt={`${placeName} - ${index + 1}`}
+        className={`${className} object-cover group-hover:brightness-90 transition-all duration-500`}
+        onError={() => handleImageError(index)}
+      />
+    );
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | File) => {
+    let file: File | undefined;
+    
+    if (e instanceof File) {
+      file = e;
+    } else {
+      file = e.target.files?.[0];
+    }
+
+    if (!file || !entityId || !entityType) return;
+
+    setIsUploading(true);
+    try {
+      const result = await uploadPhoto(entityType, entityId, file);
+      if (onImageUploaded) {
+        onImageUploaded(result.url);
+      }
+      setShowCamera(false);
+      setCapturedImage(null);
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      alert('Error al subir la foto. Asegúrate de estar autenticado y ser el dueño.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' }, 
+        audio: false 
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setShowCamera(true);
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      alert("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
+      // Fallback a input file con capture
+      fileInputRef.current?.setAttribute('capture', 'environment');
+      fileInputRef.current?.click();
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setShowCamera(false);
+    setCapturedImage(null);
+  };
+
+  const takePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        setCapturedImage(dataUrl);
+      }
+    }
+  };
+
+  const uploadCapturedImage = async () => {
+    if (!capturedImage) return;
+    
+    const res = await fetch(capturedImage);
+    const blob = await res.blob();
+    const file = new File([blob], `camera_${Date.now()}.jpg`, { type: 'image/jpeg' });
+    
+    handleFileUpload(file);
+  };
+
+  // Caso: No hay imágenes
+  if (validImages.length === 0) {
+    return (
+      <div className="relative rounded-2xl overflow-hidden border border-neutral-200 h-[400px] md:h-[460px] bg-gradient-to-br from-neutral-50 to-neutral-100 flex flex-col items-center justify-center gap-6 group">
+        <div className="w-24 h-24 rounded-full bg-white shadow-md flex items-center justify-center text-neutral-300 group-hover:scale-110 transition-transform duration-500 relative">
+          <ImageIcon className="w-10 h-10" />
+          {isUploading && (
+            <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-airbnb animate-spin" />
+            </div>
+          )}
+        </div>
+        <div className="text-center px-6">
+          <h3 className="text-neutral-800 font-bold text-xl mb-2">Aún no hay fotos</h3>
+          <p className="text-neutral-500 text-sm max-w-xs mx-auto mb-8">
+            El anfitrión no ha subido imágenes todavía. Si eres el dueño, puedes subir una ahora.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+            />
+            
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex items-center gap-3 bg-neutral-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-neutral-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+            >
+              <Upload className="w-5 h-5" />
+              Subir Foto
+            </button>
+            
+            <button 
+              onClick={startCamera}
+              disabled={isUploading}
+              className="flex items-center gap-3 bg-white text-neutral-900 border border-neutral-200 px-8 py-4 rounded-2xl font-bold hover:bg-neutral-50 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+            >
+              <Camera className="w-5 h-5" />
+              Tomar Foto
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Layout de Imágenes */}
+      <div className="relative rounded-2xl overflow-hidden group/gallery">
+        
+        {/* Mobile Slider (Solo visible en móviles) */}
+        <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory scrollbar-hide h-[350px] gap-1">
+          {validImages.map((src, idx) => (
+            <div 
+              key={idx} 
+              className="flex-shrink-0 w-full h-full snap-start cursor-pointer"
+              onClick={() => openModal(idx)}
+            >
+              {renderImage(src, idx, "w-full h-full")}
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Grid (Oculto en móviles) */}
+        <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-2 h-[460px]">
+          {/* Imagen principal - Foto grande */}
+          <div
+            className="col-span-2 row-span-2 cursor-pointer relative group overflow-hidden"
+            onClick={() => openModal(0)}
+          >
+            {renderImage(validImages[0], 0, "w-full h-full")}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+          </div>
+
+          {/* Imágenes secundarias */}
+          {[1, 2, 3, 4].map((idx) => (
+            <div
+              key={idx}
+              className="cursor-pointer relative group overflow-hidden"
+              onClick={() => openModal(idx)}
+            >
+              {renderImage(validImages[idx], idx, "w-full h-full")}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+            </div>
+          ))}
+        </div>
+
+        {/* Botón ver todas las fotos - Estilo Premium Glassmorphism */}
+        <div className="absolute bottom-6 right-6 flex items-center gap-3">
+          {isOwner && (
+            <>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-neutral-300 text-neutral-800 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white transition-all shadow-xl hover:scale-105 active:scale-95"
+              >
+                <Upload className="w-4 h-4" />
+                Añadir
+              </button>
+              <button
+                onClick={startCamera}
+                className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-neutral-300 text-neutral-800 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white transition-all shadow-xl hover:scale-105 active:scale-95"
+              >
+                <Camera className="w-4 h-4" />
+                Tomar
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => openModal(0)}
+            className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-neutral-300 text-neutral-800 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white transition-all shadow-xl hover:scale-105 active:scale-95"
+          >
+            <Grid3X3 className="w-4 h-4" />
+            Mostrar todas
+          </button>
+        </div>
+      </div>
+
+      {/* Modal fullscreen - Estilo Cinema */}
+      {showModal && (
+        <div className="fixed inset-0 z-[100] bg-neutral-950 flex items-center justify-center animate-in fade-in duration-300">
+          {/* Header */}
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-6 z-10 bg-gradient-to-b from-black/50 to-transparent">
+            <button
+              onClick={closeModal}
+              className="flex items-center gap-2 text-white hover:bg-white/20 px-4 py-2 rounded-full transition-all backdrop-blur-sm border border-white/10"
+            >
+              <X className="w-5 h-5" />
+              <span className="text-sm font-medium">Cerrar</span>
+            </button>
+            <div className="px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white text-xs font-medium tracking-widest">
+              {modalIndex + 1} / {validImages.length}
+            </div>
+          </div>
+
+          {/* Imagen con animación suave */}
+          <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
+            <img
+              src={validImages[modalIndex]}
+              alt={`${placeName} - ${modalIndex + 1}`}
+              className="max-w-full max-h-full object-contain select-none shadow-2xl transition-all duration-500"
+            />
+          </div>
+
+          {/* Flechas Navegación Premium */}
+          {validImages.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-90 backdrop-blur-sm"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-90 backdrop-blur-sm"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+
+          {/* Miniaturas en el modal (Opcional, pero añade premium feel) */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-[80vw] p-2 scrollbar-hide">
+             {validImages.map((img, i) => (
+               <button 
+                key={i} 
+                onClick={() => setModalIndex(i)}
+                className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${modalIndex === i ? 'border-white scale-110 shadow-lg' : 'border-transparent opacity-50 hover:opacity-100'}`}
+               >
+                 <img src={img} className="w-full h-full object-cover" alt="thumb" />
+               </button>
+             ))}
+          </div>
+        </div>
+      )}
+      {/* Modal Cámara */}
+      {showCamera && (
+        <div className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300">
+          <div className="bg-neutral-900 w-full max-w-3xl rounded-[32px] overflow-hidden shadow-2xl border border-white/10 relative flex flex-col">
+            {/* Header */}
+            <div className="p-6 flex items-center justify-between border-b border-white/5">
+              <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                <Camera className="w-5 h-5 text-airbnb" />
+                Capturar Foto
+              </h3>
+              <button 
+                onClick={stopCamera}
+                className="p-2 hover:bg-white/10 rounded-full text-white/70 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Video Feed / Capture */}
+            <div className="relative aspect-video bg-black flex items-center justify-center group">
+              {!capturedImage ? (
+                <>
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    className="w-full h-full object-cover mirror"
+                  />
+                  {/* Grid overlay for better framing */}
+                  <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-20">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={`v-${i}`} className="border-r border-white" />
+                    ))}
+                    {[...Array(4)].map((_, i) => (
+                      <div key={`h-${i}`} className="border-b border-white" />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <img 
+                  src={capturedImage} 
+                  className="w-full h-full object-cover" 
+                  alt="Captured" 
+                />
+              )}
+              
+              <canvas ref={canvasRef} className="hidden" />
+              
+              {isUploading && (
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 text-white">
+                  <Loader2 className="w-12 h-12 animate-spin text-airbnb" />
+                  <p className="font-bold tracking-widest text-sm uppercase">Subiendo imagen...</p>
+                </div>
+              )}
+            </div>
+
+            {/* Controls */}
+            <div className="p-8 flex items-center justify-center gap-6">
+              {!capturedImage ? (
+                <button 
+                  onClick={takePhoto}
+                  className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center group hover:scale-105 active:scale-95 transition-all shadow-xl"
+                >
+                  <div className="w-14 h-14 bg-white rounded-full group-hover:scale-90 transition-transform" />
+                </button>
+              ) : (
+                <div className="flex items-center gap-4 w-full max-w-sm">
+                  <button 
+                    onClick={() => setCapturedImage(null)}
+                    disabled={isUploading}
+                    className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white py-4 rounded-2xl font-bold transition-all border border-white/10 active:scale-95 disabled:opacity-50"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                    Repetir
+                  </button>
+                  <button 
+                    onClick={uploadCapturedImage}
+                    disabled={isUploading}
+                    className="flex-1 flex items-center justify-center gap-2 bg-airbnb hover:bg-airbnb-dark text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-airbnb/20 active:scale-95 disabled:opacity-50"
+                  >
+                    <Check className="w-5 h-5" />
+                    Usar Foto
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
