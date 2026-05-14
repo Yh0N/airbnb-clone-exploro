@@ -63,8 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(userData);
   }, []);
 
-  const loginSocialFn = useCallback(async (provider: 'google' | 'facebook') => {
-    const { token, user: userData } = await loginSocial(provider);
+  const loginSocialFn = useCallback(async (provider: 'google' | 'facebook', rol: number = 1) => {
+    const { token, user: userData } = await loginSocial(provider, rol);
     localStorage.setItem('auth_token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);

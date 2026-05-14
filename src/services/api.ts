@@ -308,7 +308,15 @@ export const getPlaces = async (search?: string, category?: string): Promise<Pla
     }
     return results;
   }
-  const response = await api.get('/places', { params: { categoria: category } });
+  const params: any = {};
+  if (category && category !== 'all') {
+    params.categoria = category;
+  }
+  if (search) {
+    params.search = search; // El backend parece no tener este parámetro aún en list_places, pero lo dejamos por si acaso
+  }
+  
+  const response = await api.get('/places', { params });
   return response.data.map(mapPlace);
 };
 
@@ -362,7 +370,7 @@ export const getServices = async (category?: string): Promise<Service[]> => {
   return (response.data as any[]).map(mapService);
 };
 
-export const loginSocial = async (provider: 'google' | 'facebook') => {
+export const loginSocial = async (provider: 'google' | 'facebook', rol: number = 1) => {
     if (USE_MOCK) {
         await delay(1500);
         return {
@@ -380,9 +388,21 @@ export const loginSocial = async (provider: 'google' | 'facebook') => {
     // En producción, aquí se enviaría el token de Google/FB al backend
     const response = await api.post('/auth/social-login', { 
         provider,
+        rol,
         nombre: `Usuario ${provider.charAt(0).toUpperCase() + provider.slice(1)}`,
         correo: `social_${provider}@exploro.com` 
     });
+    
+    const token = response.data.access_token;
+    if (token) {
+        localStorage.setItem('auth_token', token);
+        // Obtener el perfil real del usuario recién autenticado
+        const userResponse = await api.get('/users/me', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { token, user: mapUser(userResponse.data) };
+    }
+    
     return response.data;
 };
 

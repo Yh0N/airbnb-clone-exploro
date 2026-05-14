@@ -37,11 +37,19 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
     try {
-      await loginSocial(provider);
-      router.push('/');
-    } catch {
+      // Pedimos al backend la URL de autorización
+      const API_URL = 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/v1/auth/${provider}/login`);
+      const data = await response.json();
+      
+      if (data.auth_url) {
+        window.location.href = data.auth_url;
+      } else {
+        throw new Error('No se pudo obtener la URL de autenticación');
+      }
+    } catch (err) {
+      console.error(err);
       setError(`Error al conectar con ${provider}. Intenta de nuevo.`);
-    } finally {
       setIsLoading(false);
     }
   };
