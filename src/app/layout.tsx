@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
 import './globals.css';
@@ -49,7 +50,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col bg-bg-primary text-text-primary transition-colors duration-300">
         <AuthProvider>
-          <Navbar />
+          <Suspense fallback={<div className="h-20" />}>
+            <Navbar />
+          </Suspense>
           <main className="flex-1">{children}</main>
           <Footer />
         </AuthProvider>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Building2, Loader2, MapPin, Navigation, Compass, LayoutList, Map as MapIcon, User, Store, ArrowLeft, ArrowRight, Edit } from 'lucide-react';
+import { X, Building2, Loader2, MapPin, Navigation, Compass, LayoutList, Map as MapIcon, User, Store, ArrowLeft, ArrowRight, Edit, Check } from 'lucide-react';
 import * as api from '@/services/api';
 import CustomSelect from './CustomSelect';
 import { CATEGORIAS_PYME } from '@/lib/taxonomy';
@@ -537,88 +537,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
                 </div>
               </div>
           )}
-              /* Dirección Estructurada */
-              <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-left-2 duration-300">
-                <div className="space-y-1.5 col-span-2">
-                  <label className="text-sm font-bold text-neutral-700 dark:text-neutral-300">Escribir Dirección</label>
-                  <div className="flex gap-2">
-                      <div className="w-1/3">
-                          <CustomSelect
-                              options={PREFIJOS_DIRECCION}
-                              value={form.prefijo_direccion}
-                              onChange={val => setForm({ ...form, prefijo_direccion: val })}
-                          />
-                      </div>
-                      <div className="flex-1">
-                          <input
-                              type="text"
-                              required={locationMode === 'address'}
-                              value={form.direccion_detalle}
-                              onChange={e => setForm({ ...form, direccion_detalle: e.target.value })}
-                              placeholder="Ej. 18 #25-30, Centro"
-                              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white placeholder:text-neutral-400 h-[48px]"
-                          />
-                      </div>
-                  </div>
-                </div>
-                <div className="space-y-1.5 col-span-2">
-                  <label className="text-sm font-bold text-neutral-700 dark:text-neutral-300">Ciudad / Municipio</label>
-                  <input
-                    type="text"
-                    required={locationMode === 'address'}
-                    value={form.ciudad}
-                    onChange={e => setForm({ ...form, ciudad: e.target.value })}
-                    placeholder="Pasto"
-                    className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white placeholder:text-neutral-400"
-                  />
-                </div>
-              </div>
-          ) : (
-              /* Coordenadas Geográficas */
-              <div className="space-y-1.5 bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/30 animate-in slide-in-from-right-2 duration-300">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
-                    <Compass className="w-3.5 h-3.5" />
-                    Entrada por Mapa
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleGeolocate}
-                    disabled={geoLoading}
-                    className="flex items-center gap-1.5 text-[10px] font-black text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50 uppercase bg-white dark:bg-neutral-800 px-2 py-1 rounded-lg shadow-sm border border-blue-100 dark:border-blue-900/50"
-                  >
-                    {geoLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Navigation className="w-3 h-3" />}
-                    Mi ubicación actual
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-neutral-400 ml-1 uppercase">Latitud</span>
-                    <input
-                        type="number"
-                        step="any"
-                        required={locationMode === 'coordinates'}
-                        value={form.latitud}
-                        onChange={e => setForm({ ...form, latitud: e.target.value })}
-                        placeholder="1.2136"
-                        className="w-full px-3 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white text-xs font-mono"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-neutral-400 ml-1 uppercase">Longitud</span>
-                    <input
-                        type="number"
-                        step="any"
-                        required={locationMode === 'coordinates'}
-                        value={form.longitud}
-                        onChange={e => setForm({ ...form, longitud: e.target.value })}
-                        placeholder="-77.2811"
-                        className="w-full px-3 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white text-xs font-mono"
-                    />
-                  </div>
-                </div>
-              </div>
-          )}
+
           
           {/* Espacio extra al final para que los dropdowns no se corten */}
           <div className="h-32" />

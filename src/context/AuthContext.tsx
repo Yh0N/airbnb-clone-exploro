@@ -4,7 +4,7 @@
 // Maneja el estado de autenticación global de la aplicación
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login, register as registerApi, getProfile } from '@/services/api';
+import { login, loginSocial, register as registerApi, getProfile, updateProfile } from '@/services/api';
 import type { User } from '@/services/mockData';
 
 interface AuthContextType {

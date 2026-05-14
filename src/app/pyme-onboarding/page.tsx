@@ -50,7 +50,7 @@ const PREFIJOS_DIRECCION = [
 
 export default function PymeOnboarding() {
   const router = useRouter();
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const [hasCheckedRole, setHasCheckedRole] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);

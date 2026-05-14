@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type Tab = 'stays' | 'experiences' | 'services' | 'exploro';
+export type Tab = 'stays' | 'experiences' | 'services' | 'exploro';
 type Theme = 'light' | 'dark' | 'system';
 
 interface AppState {

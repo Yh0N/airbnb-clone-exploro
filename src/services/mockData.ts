@@ -23,6 +23,7 @@ export interface Place {
   host_since: string;
   aprobado?: boolean;
   id_usuario?: number;
+  id_pyme?: number;
 }
 
 export interface Experience {

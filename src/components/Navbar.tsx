@@ -5,10 +5,10 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Search, Globe, Menu, User, LogOut, Heart, MapPin, SlidersHorizontal, Moon, Sun, Map } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, type Tab } from '@/store/useAppStore';
 import { useDebounce } from '@/hooks/useDebounce';
 import { mockPlaces as places, experiences, services } from '@/services/mockData';
 
@@ -33,8 +33,10 @@ export default function Navbar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const isFavoritesActive = pathname === '/profile' && searchParams.get('tab') === 'favorites';
 
-  const handleTabClick = (tabId: string) => {
+  const handleTabClick = (tabId: Tab) => {
     setActiveTab(tabId);
     if (pathname !== '/') {
       router.push('/');
@@ -411,7 +413,7 @@ export default function Navbar() {
         </button>
         <button 
           onClick={() => router.push(isAuthenticated ? '/profile?tab=favorites' : '/login')}
-          className={`flex flex-col items-center gap-1 ${pathname === '/profile' && activeTab === 'favorites' ? 'text-airbnb' : 'text-neutral-400'}`}
+          className={`flex flex-col items-center gap-1 ${isFavoritesActive ? 'text-airbnb' : 'text-neutral-400'}`}
         >
           <Heart className="w-6 h-6" />
           <span className="text-[10px] font-semibold">Favoritos</span>

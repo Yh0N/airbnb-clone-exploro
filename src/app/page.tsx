@@ -24,7 +24,7 @@ import type { Place, Experience, Service } from '@/services/mockData';
 import dynamic from 'next/dynamic';
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false, loading: () => <LoadingSpinner /> });
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const searchParam = searchParams.get('search');
   
@@ -193,5 +193,13 @@ export default function Home() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <React.Suspense fallback={<div className="flex justify-center py-20"><LoadingSpinner size="lg" text="Preparando Exploro..." /></div>}>
+      <HomeContent />
+    </React.Suspense>
   );
 }
