@@ -455,12 +455,12 @@ export default function ExploroDashboard() {
   }, [data, activeTab, entityFilter, user?.id, user?.rol, reviewFilter]);
 
   return (
-    <div className="flex h-[calc(100vh-100px)] bg-neutral-50 dark:bg-bg-primary rounded-[40px] overflow-hidden shadow-2xl border border-neutral-200 dark:border-border-color mt-6 mb-10 mx-4 md:mx-10 xl:mx-16">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-100px)] bg-neutral-50 dark:bg-bg-primary md:rounded-[40px] overflow-hidden shadow-2xl border border-neutral-200 dark:border-border-color mt-6 mb-10 mx-0 md:mx-10 xl:mx-16">
       
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-white dark:bg-bg-secondary border-r border-neutral-200 dark:border-border-color p-6 flex flex-col">
-        <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-1">
-          <div className="mb-8 pl-2">
+      <aside className="w-full md:w-64 bg-white dark:bg-bg-secondary border-b md:border-r md:border-b-0 border-neutral-200 dark:border-border-color p-4 md:p-6 flex flex-col shrink-0">
+        <div className="flex-1 md:space-y-2 overflow-x-auto md:overflow-y-auto custom-scrollbar md:pr-1 pb-2 md:pb-0">
+          <div className="hidden md:block mb-8 pl-2">
             <h2 className="text-xl font-bold text-airbnb tracking-tight flex items-center gap-2">
               <Zap className="w-5 h-5" />
               Ecosistema Exploro
@@ -468,7 +468,7 @@ export default function ExploroDashboard() {
             <p className="text-xs text-neutral-500 font-medium">Panel de gestión integral</p>
           </div>
 
-          <nav className="space-y-1">
+          <nav className="flex flex-row md:flex-col gap-2 md:gap-0 md:space-y-1 w-max md:w-full">
             <TabButton 
               active={activeTab === 'places_pymes'} 
               onClick={() => setActiveTab('places_pymes')} 
@@ -518,7 +518,7 @@ export default function ExploroDashboard() {
           </nav>
         </div>
 
-        <div className="pt-6 border-t border-neutral-100 dark:border-neutral-800 mt-4">
+        <div className="hidden md:block pt-6 border-t border-neutral-100 dark:border-neutral-800 mt-4">
             <div className="p-4 bg-neutral-50 dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700/50">
                 <p className="text-[10px] font-black text-neutral-400 uppercase mb-2 tracking-widest">Tu Rol</p>
                 <div className="flex items-center gap-2">
@@ -535,7 +535,7 @@ export default function ExploroDashboard() {
       <main className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-bg-primary">
         
         {/* Header content area */}
-        <header className="px-8 py-6 border-b border-neutral-200 dark:border-border-color flex justify-between items-center bg-white dark:bg-bg-secondary">
+        <header className="px-4 md:px-8 py-4 md:py-6 border-b border-neutral-200 dark:border-border-color flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white dark:bg-bg-secondary">
           <div>
             <h1 className="text-2xl font-bold text-neutral-800 dark:text-white flex items-center gap-3">
               {activeTab === 'places_pymes' ? (isAdmin ? 'Todos los Lugares y Pymes' : 'Explorar Lugares y Pymes') : 
@@ -711,9 +711,9 @@ export default function ExploroDashboard() {
                     )}
                 </div>
             ) : (
-                <div className="space-y-4 animate-fade-in">
+                <div className="space-y-4 animate-fade-in overflow-x-auto pb-4 w-full">
                     {/* ... Table UI ... */}
-                    <table className="w-full text-left border-separate border-spacing-y-3">
+                    <table className="w-full text-left border-separate border-spacing-y-3 min-w-[800px]">
                         <thead>
                             <tr className="text-xs font-bold text-neutral-400 uppercase tracking-widest pl-4">
                                 <th className="px-6 py-2">Información</th>

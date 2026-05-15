@@ -297,7 +297,7 @@ export default function RegisterPage() {
                           value={socialMedia}
                           onChange={(e) => setSocialMedia(e.target.value)}
                           className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
-                          placeholder="Instagram, Facebook, etc."
+                          placeholder="Instagram, X, etc."
                         />
                         <LinkIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
                       </div>
@@ -455,7 +455,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Social Buttons */}
-            <div className="grid grid-cols-1 gap-3">
+            <div className="space-y-3">
               <button 
                 type="button"
                 onClick={() => handleSocialLogin('google')}
@@ -469,17 +469,6 @@ export default function RegisterPage() {
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
                 Registrarse con Google
-              </button>
-              <button 
-                type="button"
-                onClick={() => handleSocialLogin('facebook')}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 border border-neutral-300 rounded-xl py-3 text-sm font-bold text-neutral-700 hover:bg-neutral-50 transition-all active:scale-[0.98] disabled:opacity-50"
-              >
-                <svg className="w-6 h-6 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
-                </svg>
-                Registrarse con Facebook
               </button>
             </div>
 

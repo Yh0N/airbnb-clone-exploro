@@ -20,9 +20,12 @@ import { useAppStore } from '@/store/useAppStore';
 import { getPlaces, getExperiences, getServices } from '@/services/api';
 import type { Place, Experience, Service } from '@/services/mockData';
 
-// Dynamic Map Component (client-side only to avoid SSR issues with Leaflet)
+// Componente de Mapa dinámico (solo cliente para evitar problemas con MapLibre/Leaflet)
 import dynamic from 'next/dynamic';
-const MapView = dynamic(() => import('@/components/MapView'), { ssr: false, loading: () => <LoadingSpinner /> });
+const ExploroMap = dynamic(() => import('@/components/map/ExploroMap'), { 
+  ssr: false, 
+  loading: () => <LoadingSpinner /> 
+});
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -84,12 +87,7 @@ function HomeContent() {
           <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 mt-6 md:mt-10">
             {showMapView ? (
               <div className="h-[calc(100vh-250px)] w-full rounded-2xl overflow-hidden shadow-card border border-neutral-200 dark:border-border-color animate-fade-in relative z-0">
-                <MapView 
-                  latitude={1.2136} 
-                  longitude={-77.2811} 
-                  name="Pasto Central" 
-                  // Here we could pass places[] to MapView to render multiple pins
-                />
+                <ExploroMap />
               </div>
             ) : isLoading ? (
               <div className="flex justify-center py-20"><LoadingSpinner size="lg" text="Cargando alojamientos..." /></div>
@@ -173,7 +171,7 @@ function HomeContent() {
 
       {/* Floating Map Toggle Button (Solo en stays y mobile) */}
       {activeTab === 'stays' && !isLoading && places.length > 0 && (
-        <div className="fixed bottom-24 md:bottom-12 left-1/2 -translate-x-1/2 z-40 animate-fade-in drop-shadow-2xl">
+        <div className="fixed bottom-28 md:bottom-12 left-1/2 -translate-x-1/2 z-40 animate-fade-in drop-shadow-2xl">
           <button
             onClick={() => setShowMapView(!showMapView)}
             className="flex items-center gap-2 bg-neutral-900 dark:bg-neutral-800 hover:bg-black dark:hover:bg-neutral-700 hover:scale-105 transition-all text-white px-5 py-3.5 rounded-full font-bold shadow-lg border border-neutral-700"

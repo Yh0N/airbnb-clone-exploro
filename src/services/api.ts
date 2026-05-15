@@ -70,7 +70,7 @@ const mapUser = (b: any): any => ({
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-const resolvePhotoUrl = (url: string): string => {
+export const resolvePhotoUrl = (url: string): string => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
   return `${API_BASE}${url}`;
@@ -140,7 +140,9 @@ const mapPyme = (b: any): any => ({
   rating: b.calificacion_promedio || 0,
   reviews_count: b.numero_reseñas || 0,
   aprobado: b.aprobado,
-  subcategoria: b.subcategoria
+  subcategoria: b.subcategoria,
+  image: resolvePhotoUrl(b.foto_principal || ''),
+  images: (b.fotos || []).map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f),
 });
 
 const mapReview = (b: any): any => ({
@@ -546,17 +548,47 @@ export const getNearbyRecommendations = async (lat: number, lng: number) => {
     return (response.data as any[]).map(mapPlace);
 };
 
-// ===== GESTIÓN DE ARCHIVOS / FOTOS =====
+// ===== GESTIÓN DE ARCHIVOS / FOTOS (RF12) =====
 export const uploadPhoto = async (entityType: 'place' | 'pyme', entityId: number, file: File) => {
-    if (USE_MOCK) return { url: 'https://via.placeholder.com/800' };
+    if (USE_MOCK) return { url: 'https://via.placeholder.com/800', id_imagen: 123 };
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post(`/upload/${entityType}/${entityId}`, formData, {
+    
+    // El backend usa 'lugares' o 'pymes' en la ruta
+    const endpoint = entityType === 'place' ? 'lugares' : 'pymes';
+    
+    const response = await api.post(`/api/v1/imagenes/${endpoint}/${entityId}`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
     });
     return response.data;
+};
+
+export const deletePhoto = async (imageId: number) => {
+    if (USE_MOCK) return { message: 'Imagen eliminada (Mock)' };
+    const response = await api.delete(`/api/v1/imagenes/${imageId}`);
+    return response.data;
+};
+
+export const deleteLegacyPhoto = async (entityType: 'place' | 'pyme', entityId: number, url: string) => {
+    if (USE_MOCK) return { message: 'Imagen legacy eliminada (Mock)' };
+    const endpoint = entityType === 'place' ? 'lugar' : 'pyme';
+    const response = await api.delete(`/api/v1/imagenes/legacy`, {
+        params: {
+            entity_type: endpoint,
+            entity_id: entityId,
+            url_to_delete: url
+        }
+    });
+    return response.data;
+};
+
+export const getEntityImages = async (entityType: 'place' | 'pyme', entityId: number) => {
+    if (USE_MOCK) return [];
+    const endpoint = entityType === 'place' ? 'lugares' : 'pymes';
+    const response = await api.get(`/api/v1/imagenes/${endpoint}/${entityId}`);
+    return response.data; // Lista de ImagenResponse
 };
 
 // Exportar la instancia de axios por si se necesita en otro lugar

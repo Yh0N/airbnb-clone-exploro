@@ -75,12 +75,17 @@ export default function CarouselGrid({ title, subtitle, children }: CarouselGrid
   return (
     <div className="py-6">
       <div className="flex items-end justify-between mb-6 px-4 sm:px-6 md:px-10 xl:px-20 max-w-[2520px] mx-auto">
-        <div>
-          <h2 className="text-[26px] font-semibold text-neutral-800 dark:text-white leading-tight">
-            {title}
-          </h2>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <h2 className="text-[22px] md:text-[26px] font-bold text-neutral-800 dark:text-white leading-tight">
+              {title}
+            </h2>
+            <button className="md:hidden flex items-center justify-center w-8 h-8 rounded-full bg-neutral-100 active:scale-90 transition-transform">
+              <ChevronRight className="w-5 h-5 text-neutral-900" />
+            </button>
+          </div>
           {subtitle && (
-            <p className="text-[15px] text-neutral-500 dark:text-neutral-400 mt-1">
+            <p className="text-[15px] text-neutral-500 dark:text-neutral-400 mt-1 hidden md:block">
               {subtitle}
             </p>
           )}

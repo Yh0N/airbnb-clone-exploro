@@ -6,7 +6,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Search, Globe, Menu, User, LogOut, Heart, MapPin, SlidersHorizontal, Moon, Sun, Map } from 'lucide-react';
+import { Search, Globe, Menu, User, LogOut, Heart, MapPin, SlidersHorizontal, Moon, Sun, Map, Compass, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useAppStore, type Tab } from '@/store/useAppStore';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -403,48 +403,92 @@ export default function Navbar() {
       </div>
 
       {/* Navegación Inferior Móvil (Mobile-first app-like) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-bg-primary border-t border-neutral-200 dark:border-border-color pb-safe flex justify-around items-center px-4 py-3">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-bg-primary border-t border-neutral-100 dark:border-border-color pb-safe flex justify-around items-center px-2 py-2 shadow-[0_-1px_10px_rgba(0,0,0,0.05)]">
         <button 
           onClick={() => handleTabClick('stays')}
-          className={`flex flex-col items-center gap-1 ${activeTab === 'stays' && pathname === '/' ? 'text-airbnb' : 'text-neutral-400'}`}
+          className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'stays' && pathname === '/' ? 'text-airbnb' : 'text-neutral-400'}`}
         >
-          <Search className="w-6 h-6" />
-          <span className="text-[10px] font-bold">Explorar</span>
+          <Search className={`w-5 h-5 ${activeTab === 'stays' && pathname === '/' ? 'stroke-[2.5px]' : ''}`} />
+          <span className="text-[10px] font-bold">Explora</span>
+        </button>
+        <button 
+          onClick={() => handleTabClick('exploro')}
+          className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'exploro' ? 'text-amber-500' : 'text-neutral-400'}`}
+        >
+          <LayoutDashboard className={`w-5 h-5 ${activeTab === 'exploro' ? 'stroke-[2.5px]' : ''}`} />
+          <span className="text-[10px] font-bold">Exploro</span>
         </button>
         <button 
           onClick={() => router.push(isAuthenticated ? '/profile?tab=favorites' : '/login')}
-          className={`flex flex-col items-center gap-1 ${isFavoritesActive ? 'text-airbnb' : 'text-neutral-400'}`}
+          className={`flex flex-col items-center gap-1.5 transition-all ${isFavoritesActive ? 'text-airbnb' : 'text-neutral-400'}`}
         >
-          <Heart className="w-6 h-6" />
-          <span className="text-[10px] font-semibold">Favoritos</span>
+          <Heart className={`w-5 h-5 ${isFavoritesActive ? 'stroke-[2.5px]' : ''}`} />
+          <span className="text-[10px] font-bold">Favoritos</span>
         </button>
-        <button onClick={() => router.push('/map')} className="flex flex-col items-center gap-1 text-neutral-400 dark:text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition-colors">
-          <Map className="w-6 h-6" />
-          <span className="text-[10px] font-semibold">Mapa</span>
-        </button>
-        <button onClick={() => router.push(isAuthenticated ? '/profile' : '/login')} className="flex flex-col items-center gap-1 text-neutral-400 dark:text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition-colors">
-          <User className="w-6 h-6" />
-          <span className="text-[10px] font-semibold">Perfil</span>
+        <button 
+          onClick={() => router.push(isAuthenticated ? '/profile' : '/login')}
+          className={`flex flex-col items-center gap-1.5 transition-all ${pathname === '/login' || pathname === '/profile' ? 'text-airbnb' : 'text-neutral-400'}`}
+        >
+          <User className={`w-5 h-5 ${pathname === '/login' || pathname === '/profile' ? 'stroke-[2.5px]' : ''}`} />
+          <span className="text-[10px] font-bold">Perfil</span>
         </button>
       </div>
 
-      {/* Búsqueda móvil (visible solo en top) */}
-      <div className="md:hidden px-4 pb-4">
-        <form onSubmit={(e) => { e.preventDefault(); executeSearch(localSearch); }} className="flex items-center gap-3 bg-white dark:bg-bg-secondary border border-neutral-200 dark:border-border-color rounded-full px-4 py-3 shadow-search">
-          <Search className="w-5 h-5 text-neutral-800 dark:text-white flex-shrink-0" />
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="¿A dónde vas?"
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              className="w-full text-sm font-semibold outline-none bg-transparent placeholder:text-neutral-800 dark:placeholder:text-white dark:text-white"
-            />
+      {/* Búsqueda y Tabs móviles (Estilo Airbnb 2025) */}
+      <div className="md:hidden pt-3 px-4 pb-1 space-y-4 bg-white dark:bg-bg-primary shadow-sm border-b border-neutral-100 dark:border-border-color">
+        {/* Barra de búsqueda estilo 'Pill' */}
+        <button 
+          onClick={() => router.push('/search')}
+          className="w-full flex items-center gap-4 bg-white dark:bg-bg-secondary border border-neutral-200 dark:border-border-color rounded-full px-5 py-3 shadow-search-mobile hover:shadow-md transition-shadow active:scale-95 duration-200"
+        >
+          <Search className="w-4 h-4 text-neutral-800 dark:text-white stroke-[3px]" />
+          <div className="flex flex-col items-start">
+            <span className="text-[13px] font-bold text-neutral-800 dark:text-white">Empieza la búsqueda</span>
+            <span className="text-[11px] text-neutral-500">Cualquier lugar • Cualquier semana • Añade huéspedes</span>
           </div>
-          <button type="button" className="flex items-center justify-center w-9 h-9 border border-neutral-300 dark:border-border-color rounded-full hover:shadow-md transition-shadow">
-            <SlidersHorizontal className="w-4 h-4 text-neutral-700 dark:text-neutral-300" />
+        </button>
+
+        {/* Tabs de Categorías Superiores (Alojamientos, Experiencias, Servicios) */}
+        <div className="flex justify-center items-center gap-8 border-b border-neutral-100 dark:border-border-color overflow-x-auto scrollbar-hide">
+          <button 
+            onClick={() => handleTabClick('stays')}
+            className={`relative pb-3 flex flex-col items-center gap-1 group min-w-[80px] transition-all ${activeTab === 'stays' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
+          >
+            <div className="flex flex-col items-center">
+              <span className="text-xl group-active:scale-90 transition-transform">🏠</span>
+              <span className={`text-xs font-bold whitespace-nowrap ${activeTab === 'stays' ? 'opacity-100' : 'opacity-80'}`}>Alojamientos</span>
+            </div>
+            {activeTab === 'stays' && (
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-neutral-900 dark:bg-white rounded-full animate-in fade-in slide-in-from-bottom-1" />
+            )}
           </button>
-        </form>
+
+          <button 
+            onClick={() => handleTabClick('experiences')}
+            className={`relative pb-3 flex flex-col items-center gap-1 group min-w-[80px] transition-all ${activeTab === 'experiences' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
+          >
+            <div className="relative flex flex-col items-center">
+              <span className="text-xl group-active:scale-90 transition-transform">🎈</span>
+              <span className={`text-xs font-bold whitespace-nowrap ${activeTab === 'experiences' ? 'opacity-100' : 'opacity-80'}`}>Experiencias</span>
+            </div>
+            {activeTab === 'experiences' && (
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-neutral-900 dark:bg-white rounded-full animate-in fade-in slide-in-from-bottom-1" />
+            )}
+          </button>
+
+          <button 
+            onClick={() => handleTabClick('services')}
+            className={`relative pb-3 flex flex-col items-center gap-1 group min-w-[80px] transition-all ${activeTab === 'services' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
+          >
+            <div className="relative flex flex-col items-center">
+              <span className="text-xl group-active:scale-90 transition-transform">🛎️</span>
+              <span className={`text-xs font-bold whitespace-nowrap ${activeTab === 'services' ? 'opacity-100' : 'opacity-80'}`}>Servicios</span>
+            </div>
+            {activeTab === 'services' && (
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-neutral-900 dark:bg-white rounded-full animate-in fade-in slide-in-from-bottom-1" />
+            )}
+          </button>
+        </div>
       </div>
 
     </nav>

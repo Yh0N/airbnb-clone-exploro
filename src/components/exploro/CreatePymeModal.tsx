@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Building2, Loader2, MapPin, Navigation, Compass, LayoutList, Map as MapIcon, User, Store, ArrowLeft, ArrowRight, Edit, Check } from 'lucide-react';
+import { X, Building2, Loader2, MapPin, Navigation, Compass, LayoutList, Map as MapIcon, User, Store, ArrowLeft, ArrowRight, Edit, Check, Camera, Upload, Trash2 } from 'lucide-react';
+import { resolvePhotoUrl } from '@/services/api';
 import * as api from '@/services/api';
+import { useAlert } from '@/context/AlertContext';
 import CustomSelect from './CustomSelect';
 import { CATEGORIAS_PYME } from '@/lib/taxonomy';
 import dynamic from 'next/dynamic';
@@ -33,6 +35,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
   const [loading, setLoading] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const { showAlert } = useAlert();
   const [locationMode, setLocationMode] = useState<LocationMode>('address');
   const [form, setForm] = useState({
     nombre: '',
@@ -44,6 +47,8 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
     latitud: '',
     longitud: '',
   });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(resolvePhotoUrl(initialData?.foto_principal || initialData?.image) || null);
 
   // Inicialización para edición
   React.useEffect(() => {
@@ -81,9 +86,12 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
       } else {
         setLocationMode('address');
       }
+      setImagePreview(resolvePhotoUrl(initialData.foto_principal || initialData.image) || null);
     } else {
       setRegistrationType(null);
       setForm({ nombre: '', categoria: '', subcategoria: '', prefijo_direccion: 'Calle', direccion_detalle: '', ciudad: 'Pasto', latitud: '', longitud: '' });
+      setImagePreview(null);
+      setSelectedImage(null);
     }
   }, [initialData, isOpen]);
 
@@ -108,7 +116,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
 
   const handleGeolocate = () => {
     if (!('geolocation' in navigator)) {
-      alert('Tu navegador no soporta geolocalización.');
+      showAlert({ type: 'error', title: 'Geolocalización', message: 'Tu navegador no soporta geolocalización.' });
       return;
     }
     setGeoLoading(true);
@@ -124,10 +132,22 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
       },
       (err) => {
         console.error('Geolocation error:', err);
-        alert('No se pudo obtener tu ubicación. Ingresa las coordenadas manualmente.');
+        showAlert({ type: 'warning', title: 'Ubicación', message: 'No se pudo obtener tu ubicación. Ingresa las coordenadas manualmente.' });
         setGeoLoading(false);
       }
     );
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,10 +167,17 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
         longitud: form.longitud ? parseFloat(form.longitud) : undefined,
       };
 
+      let pymeId = initialData?.id_pyme;
       if (initialData?.id_pyme) {
         await api.updatePyme(initialData.id_pyme, payload);
       } else {
-        await api.createPyme(payload);
+        const newPyme = await api.createPyme(payload);
+        pymeId = newPyme.id_pyme;
+      }
+      
+      // Subir foto si hay una nueva
+      if (selectedImage && pymeId) {
+        await api.uploadPhoto('pyme', pymeId, selectedImage);
       }
       
       onCreated();
@@ -158,14 +185,15 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
     } catch (error: any) {
       console.error('Error saving pyme:', error);
       const detail = error?.response?.data?.detail;
+      let message = 'No pudimos procesar el registro. Intenta de nuevo.';
+      
       if (typeof detail === 'string') {
-        alert(detail);
+        message = detail;
       } else if (Array.isArray(detail)) {
-        const messages = detail.map((err: any) => `${err.loc.join('.')}: ${err.msg}`).join('\n');
-        alert(`Error de validación:\n${messages}`);
-      } else {
-        alert('Error al guardar. Intenta de nuevo.');
+        message = detail.map((err: any) => `${err.msg}`).join('. ');
       }
+      
+      showAlert({ type: 'error', title: 'Error de Registro', message });
     } finally {
       setLoading(false);
     }
@@ -412,6 +440,54 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
               />
             </div>
           )}
+
+          {/* Imagen de la Pyme */}
+          <div className="space-y-2 bg-neutral-50 dark:bg-neutral-800/20 p-5 rounded-2xl border border-neutral-100 dark:border-border-color">
+            <label className="text-sm font-bold text-neutral-700 dark:text-neutral-300 block mb-2">Foto de tu Negocio</label>
+            
+            {imagePreview ? (
+              <div className="relative group aspect-video rounded-xl overflow-hidden border-2 border-blue-500 shadow-md">
+                <img src={imagePreview} alt="Vista previa" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => document.getElementById('pyme-image-input')?.click()}
+                    className="p-2.5 bg-white text-neutral-900 rounded-full hover:scale-110 transition-transform"
+                  >
+                    <Upload className="w-4 h-4" />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => { setSelectedImage(null); setImagePreview(null); }}
+                    className="p-2.5 bg-white text-rose-500 rounded-full hover:scale-110 transition-transform"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => document.getElementById('pyme-image-input')?.click()}
+                className="w-full aspect-video rounded-xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all flex flex-col items-center justify-center gap-2 group"
+              >
+                <div className="w-10 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center group-hover:scale-110 transition-all">
+                  <Camera className="w-5 h-5 text-neutral-400 group-hover:text-blue-500" />
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400 block group-hover:text-blue-500">Subir foto comercial</span>
+                  <span className="text-[9px] font-medium text-neutral-400">Pasto - Exploro</span>
+                </div>
+              </button>
+            )}
+            <input 
+              id="pyme-image-input"
+              type="file" 
+              accept="image/*"
+              className="hidden" 
+              onChange={handleImageChange}
+            />
+          </div>
 
           {/* Toggle de Ubicación */}
           <div className="space-y-2">

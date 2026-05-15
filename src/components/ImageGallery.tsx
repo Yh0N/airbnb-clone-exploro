@@ -4,8 +4,9 @@
 // Layout de 5 imágenes con fallbacks y estados de carga
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, Grid3X3, Image as ImageIcon, Camera, Upload, Loader2, RotateCcw, Check } from 'lucide-react';
-import { uploadPhoto } from '@/services/api';
+import { X, ChevronLeft, ChevronRight, Grid3X3, Image as ImageIcon, Camera, Upload, Loader2, RotateCcw, Check, Trash2 } from 'lucide-react';
+import { uploadPhoto, getEntityImages, deletePhoto, deleteLegacyPhoto, resolvePhotoUrl } from '@/services/api';
+import { useAlert } from '@/context/AlertContext';
 
 interface ImageGalleryProps {
   images: string[];
@@ -13,7 +14,9 @@ interface ImageGalleryProps {
   entityId?: number;
   entityType?: 'place' | 'pyme';
   onImageUploaded?: (newUrl: string) => void;
+  onImageDeleted?: (deletedUrl: string) => void;
   isOwner?: boolean;
+  currentUser?: any;
 }
 
 export default function ImageGallery({ 
@@ -22,7 +25,9 @@ export default function ImageGallery({
   entityId, 
   entityType, 
   onImageUploaded,
-  isOwner = false
+  onImageDeleted,
+  isOwner = false,
+  currentUser
 }: ImageGalleryProps) {
   const [showModal, setShowModal] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
@@ -34,8 +39,100 @@ export default function ImageGallery({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [detailedImages, setDetailedImages] = useState<any[]>([]);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const { showAlert } = useAlert();
 
   const validImages = images && images.length > 0 ? images : [];
+
+  // Cargar metadatos detallados (IDs y autores) para permitir eliminación
+  useEffect(() => {
+    if (entityId && entityType) {
+      const loadMetadata = async () => {
+        try {
+          const data = await getEntityImages(entityType, entityId);
+          setDetailedImages(data);
+        } catch (error) {
+          console.error("Error loading image metadata:", error);
+        }
+      };
+      loadMetadata();
+    }
+  }, [entityId, entityType, images.length]);
+
+  const handleDelete = async (e: React.MouseEvent, imageUrl: string) => {
+    e.stopPropagation();
+    
+    // Buscar la imagen en los metadatos para obtener su ID (comparando solo el nombre del archivo)
+    const imgData = detailedImages.find(img => {
+      const filename = img.url.split('/').pop();
+      return imageUrl.includes(filename || '---');
+    });
+
+    const proceedWithDeletion = async () => {
+      if (!imgData) {
+        // INTENTAR ELIMINACIÓN LEGACY (POR URL)
+        if (!entityId || !entityType) {
+          showAlert({ type: 'error', title: 'Error de Datos', message: 'No se puede eliminar: Faltan datos de la entidad.' });
+          return;
+        }
+        
+        setIsDeleting(-1);
+        try {
+          await deleteLegacyPhoto(entityType, entityId, imageUrl);
+          if (onImageDeleted) onImageDeleted(imageUrl);
+          showAlert({ type: 'success', title: 'Foto Eliminada', message: 'La imagen antigua ha sido eliminada correctamente.' });
+        } catch (error) {
+          console.error("Error deleting legacy image:", error);
+          showAlert({ type: 'error', title: 'Error al Eliminar', message: 'No se pudo eliminar la imagen antigua de los registros.' });
+        } finally {
+          setIsDeleting(null);
+        }
+        return;
+      }
+
+      setIsDeleting(imgData.id_imagen);
+      try {
+        await deletePhoto(imgData.id_imagen);
+        if (onImageDeleted) {
+          onImageDeleted(imageUrl);
+        }
+        setDetailedImages(prev => prev.filter(img => img.id_imagen !== imgData.id_imagen));
+        showAlert({ type: 'success', title: 'Foto Eliminada', message: 'La imagen se ha borrado permanentemente.' });
+      } catch (error) {
+        console.error("Error deleting image:", error);
+        showAlert({ type: 'error', title: 'Acceso Denegado', message: 'No tienes permisos suficientes para eliminar esta imagen o hubo un error en el servidor.' });
+      } finally {
+        setIsDeleting(null);
+      }
+    };
+
+    showAlert({
+      type: 'warning', 
+      title: '¿Eliminar fotografía?', 
+      message: 'Esta acción no se puede deshacer. La imagen desaparecerá de la galería para siempre.',
+      onConfirm: proceedWithDeletion,
+      confirmText: 'Eliminar'
+    });
+  };
+
+  const canDelete = (imageUrl: string) => {
+    if (!currentUser) return false;
+    if (currentUser.rol === 3) return true; // Admin
+    
+    // Si hay metadatos, verificar autoría
+    const imgData = detailedImages.find(img => {
+      const filename = img.url.split('/').pop();
+      return imageUrl.includes(filename || '---');
+    });
+
+    if (imgData && imgData.id_usuario === currentUser.id_usuario) return true;
+    
+    // Si es dueño del lugar/pyme, puede borrar cualquier cosa (incluso legacy)
+    if (isOwner) return true;
+
+    return false;
+  };
 
   const handleImageError = (index: number) => {
     setImageErrors(prev => ({ ...prev, [index]: true }));
@@ -62,6 +159,8 @@ export default function ImageGallery({
   };
 
   // Renderiza una imagen o un placeholder si hay error
+  const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
+
   const renderImage = (src: string, index: number, className: string) => {
     if (imageErrors[index] || !src) {
       return (
@@ -73,12 +172,36 @@ export default function ImageGallery({
     }
 
     return (
-      <img
-        src={src}
-        alt={`${placeName} - ${index + 1}`}
-        className={`${className} object-cover group-hover:brightness-90 transition-all duration-500`}
-        onError={() => handleImageError(index)}
-      />
+      <div className={`relative ${className} overflow-hidden bg-neutral-200 animate-pulse`}>
+        {!loadedImages[index] && (
+           <div className="absolute inset-0 skeleton flex items-center justify-center">
+              <ImageIcon className="w-6 h-6 text-neutral-300" />
+           </div>
+        )}
+        <img
+          src={src}
+          alt={`${placeName} - ${index + 1}`}
+          className={`${className} object-cover group-hover:brightness-90 transition-all duration-700 ${loadedImages[index] ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setLoadedImages(prev => ({ ...prev, [index]: true }))}
+          onError={() => handleImageError(index)}
+        />
+        
+        {/* Botón Eliminar - Solo si tiene permisos */}
+        {canDelete(src) && (
+          <button
+            onClick={(e) => handleDelete(e, src)}
+            disabled={isDeleting !== null}
+            className="absolute top-2 right-2 p-2 bg-black/50 hover:bg-red-600 text-white rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all z-10 hover:scale-110 active:scale-95 disabled:opacity-50"
+            title="Eliminar imagen"
+          >
+            {isDeleting === detailedImages.find(img => resolvePhotoUrl(img.url) === src)?.id_imagen ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
+          </button>
+        )}
+      </div>
     );
   };
 
@@ -96,16 +219,20 @@ export default function ImageGallery({
     setIsUploading(true);
     try {
       const result = await uploadPhoto(entityType, entityId, file);
-      if (onImageUploaded) {
-        onImageUploaded(result.url);
-      }
+      console.log('Upload success:', result);
+      if (onImageUploaded) onImageUploaded(result.url);
+      showAlert({ type: 'success', title: '¡Imagen subida!', message: 'La nueva foto ha sido añadida a la galería con éxito.' });
       setShowCamera(false);
       setCapturedImage(null);
     } catch (error) {
-      console.error('Error uploading photo:', error);
-      alert('Error al subir la foto. Asegúrate de estar autenticado y ser el dueño.');
+      console.error('Error al subir imagen:', error);
+      showAlert({ type: 'error', title: 'Error de Subida', message: 'No se pudo procesar la imagen. Asegúrate de que el formato sea válido (JPG/PNG/WEBP) y no pese más de 5MB.' });
     } finally {
       setIsUploading(false);
+      // Resetear el input para permitir subir la misma foto o varias seguidas
+      if (!(e instanceof File) && e.target) {
+        e.target.value = '';
+      }
     }
   };
 
@@ -122,7 +249,7 @@ export default function ImageGallery({
       setShowCamera(true);
     } catch (err) {
       console.error("Error accessing camera:", err);
-      alert("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
+      showAlert({ type: 'error', title: 'Acceso a cámara', message: 'No se pudo acceder a la cámara. Asegúrate de dar permisos.' });
       // Fallback a input file con capture
       fileInputRef.current?.setAttribute('capture', 'environment');
       fileInputRef.current?.click();
@@ -163,60 +290,59 @@ export default function ImageGallery({
     handleFileUpload(file);
   };
 
-  // Caso: No hay imágenes
-  if (validImages.length === 0) {
-    return (
-      <div className="relative rounded-2xl overflow-hidden border border-neutral-200 h-[400px] md:h-[460px] bg-gradient-to-br from-neutral-50 to-neutral-100 flex flex-col items-center justify-center gap-6 group">
-        <div className="w-24 h-24 rounded-full bg-white shadow-md flex items-center justify-center text-neutral-300 group-hover:scale-110 transition-transform duration-500 relative">
-          <ImageIcon className="w-10 h-10" />
-          {isUploading && (
-            <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
-              <Loader2 className="w-8 h-8 text-airbnb animate-spin" />
-            </div>
-          )}
-        </div>
-        <div className="text-center px-6">
-          <h3 className="text-neutral-800 font-bold text-xl mb-2">Aún no hay fotos</h3>
-          <p className="text-neutral-500 text-sm max-w-xs mx-auto mb-8">
-            El anfitrión no ha subido imágenes todavía. Si eres el dueño, puedes subir una ahora.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="hidden" 
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-            />
-            
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              className="flex items-center gap-3 bg-neutral-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-neutral-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
-            >
-              <Upload className="w-5 h-5" />
-              Subir Foto
-            </button>
-            
-            <button 
-              onClick={startCamera}
-              disabled={isUploading}
-              className="flex items-center gap-3 bg-white text-neutral-900 border border-neutral-200 px-8 py-4 rounded-2xl font-bold hover:bg-neutral-50 transition-all shadow-sm active:scale-95 disabled:opacity-50"
-            >
-              <Camera className="w-5 h-5" />
-              Tomar Foto
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
-      {/* Layout de Imágenes */}
-      <div className="relative rounded-2xl overflow-hidden group/gallery">
+      {/* Controles ocultos (Inputs y Canvas) - Siempre presentes */}
+      <input 
+        type="file" 
+        accept="image/*" 
+        className="hidden" 
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+      />
+      <canvas ref={canvasRef} className="hidden" />
+
+      {/* Caso: No hay imágenes */}
+      {validImages.length === 0 ? (
+        <div className="relative rounded-2xl overflow-hidden border border-neutral-200 h-[400px] md:h-[460px] bg-gradient-to-br from-neutral-50 to-neutral-100 flex flex-col items-center justify-center gap-6 group">
+          <div className="w-24 h-24 rounded-full bg-white shadow-md flex items-center justify-center text-neutral-300 group-hover:scale-110 transition-transform duration-500 relative">
+            <ImageIcon className="w-10 h-10" />
+            {isUploading && (
+              <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-airbnb animate-spin" />
+              </div>
+            )}
+          </div>
+          <div className="text-center px-6">
+            <h3 className="text-neutral-800 font-bold text-xl mb-2">Aún no hay fotos</h3>
+            <p className="text-neutral-500 text-sm max-w-xs mx-auto mb-8">
+              El anfitrión no ha subido imágenes todavía. Si eres el dueño, puedes subir una ahora.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="flex items-center gap-3 bg-neutral-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-neutral-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+              >
+                <Upload className="w-5 h-5" />
+                Subir Foto
+              </button>
+              
+              <button 
+                onClick={startCamera}
+                disabled={isUploading}
+                className="flex items-center gap-3 bg-white text-neutral-900 border border-neutral-200 px-8 py-4 rounded-2xl font-bold hover:bg-neutral-50 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+              >
+                <Camera className="w-5 h-5" />
+                Tomar Foto
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Layout de Imágenes */
+        <div className="relative rounded-2xl overflow-hidden group/gallery">
         
         {/* Mobile Slider (Solo visible en móviles) */}
         <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory scrollbar-hide h-[350px] gap-1">
@@ -232,27 +358,98 @@ export default function ImageGallery({
         </div>
 
         {/* Desktop Grid (Oculto en móviles) */}
-        <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-2 h-[460px]">
-          {/* Imagen principal - Foto grande */}
-          <div
-            className="col-span-2 row-span-2 cursor-pointer relative group overflow-hidden"
-            onClick={() => openModal(0)}
-          >
-            {renderImage(validImages[0], 0, "w-full h-full")}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
-          </div>
+        <div className={`hidden md:grid gap-2 h-[460px] ${
+          validImages.length === 1 ? 'grid-cols-1' : 
+          validImages.length === 2 ? 'grid-cols-2' : 
+          'grid-cols-4 grid-rows-2'
+        }`}>
+          {/* Layout para 1 imagen */}
+          {validImages.length === 1 && (
+            <div className="w-full h-full cursor-pointer overflow-hidden group bg-neutral-50 dark:bg-neutral-900/50 flex items-center justify-center" onClick={() => openModal(0)}>
+              {renderImage(validImages[0], 0, "max-w-full max-h-full object-contain")}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+            </div>
+          )}
 
-          {/* Imágenes secundarias */}
-          {[1, 2, 3, 4].map((idx) => (
-            <div
-              key={idx}
-              className="cursor-pointer relative group overflow-hidden"
-              onClick={() => openModal(idx)}
-            >
-              {renderImage(validImages[idx], idx, "w-full h-full")}
+          {/* Layout para 2 imágenes */}
+          {validImages.length === 2 && validImages.map((src, idx) => (
+            <div key={idx} className="w-full h-full cursor-pointer overflow-hidden group" onClick={() => openModal(idx)}>
+              {renderImage(src, idx, "w-full h-full")}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
             </div>
           ))}
+
+          {/* Layout para 3 imágenes */}
+          {validImages.length === 3 && (
+            <>
+              <div className="col-span-2 row-span-2 cursor-pointer overflow-hidden group" onClick={() => openModal(0)}>
+                {renderImage(validImages[0], 0, "w-full h-full")}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </div>
+              <div className="col-span-2 row-span-1 cursor-pointer overflow-hidden group" onClick={() => openModal(1)}>
+                {renderImage(validImages[1], 1, "w-full h-full")}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </div>
+              <div className="col-span-2 row-span-1 cursor-pointer overflow-hidden group" onClick={() => openModal(2)}>
+                {renderImage(validImages[2], 2, "w-full h-full")}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </div>
+            </>
+          )}
+
+          {/* Layout para 4 imágenes */}
+          {validImages.length === 4 && (
+            <>
+              <div className="col-span-2 row-span-2 cursor-pointer overflow-hidden group" onClick={() => openModal(0)}>
+                {renderImage(validImages[0], 0, "w-full h-full")}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </div>
+              <div className="col-span-2 row-span-1 cursor-pointer overflow-hidden group" onClick={() => openModal(1)}>
+                {renderImage(validImages[1], 1, "w-full h-full")}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </div>
+              <div className="col-span-1 row-span-1 cursor-pointer overflow-hidden group" onClick={() => openModal(2)}>
+                {renderImage(validImages[2], 2, "w-full h-full")}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </div>
+              <div className="col-span-1 row-span-1 cursor-pointer overflow-hidden group" onClick={() => openModal(3)}>
+                {renderImage(validImages[3], 3, "w-full h-full")}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </div>
+            </>
+          )}
+
+          {/* Layout para 5 o más imágenes (Standard Airbnb) */}
+          {validImages.length >= 5 && (
+            <>
+              <div className="col-span-2 row-span-2 cursor-pointer overflow-hidden group" onClick={() => openModal(0)}>
+                {renderImage(validImages[0], 0, "w-full h-full")}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+              </div>
+              {validImages.slice(1, 5).map((src, idx) => {
+                const isLast = idx === 3; // El índice 3 del slice es la 5ta imagen total
+                const hasMore = validImages.length > 5;
+                
+                return (
+                  <div 
+                    key={idx + 1} 
+                    className="cursor-pointer overflow-hidden group relative" 
+                    onClick={() => openModal(isLast && hasMore ? 5 : idx + 1)}
+                  >
+                    {renderImage(src, idx + 1, "w-full h-full")}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                    
+                    {isLast && hasMore && (
+                      <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white backdrop-blur-[2px]">
+                        <span className="text-2xl font-black">+{validImages.length - 5}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest mt-1">Ver fotos</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          )}
         </div>
 
         {/* Botón ver todas las fotos - Estilo Premium Glassmorphism */}
@@ -284,6 +481,7 @@ export default function ImageGallery({
           </button>
         </div>
       </div>
+    )}
 
       {/* Modal fullscreen - Estilo Cinema */}
       {showModal && (
@@ -309,6 +507,36 @@ export default function ImageGallery({
               alt={`${placeName} - ${modalIndex + 1}`}
               className="max-w-full max-h-full object-contain select-none shadow-2xl transition-all duration-500"
             />
+
+            {/* Botón eliminar en modal */}
+            {canDelete(validImages[modalIndex]) && (
+              <button
+                onClick={(e) => {
+                  const isLastImage = validImages.length <= 1;
+                  const isLastIndex = modalIndex === validImages.length - 1;
+                  
+                  handleDelete(e, validImages[modalIndex]);
+                  
+                  if (isLastImage) {
+                    closeModal();
+                  } else if (isLastIndex) {
+                    setModalIndex(prev => prev - 1);
+                  }
+                }}
+                disabled={isDeleting !== null}
+                className="absolute bottom-10 right-10 flex items-center gap-2 bg-red-600/80 hover:bg-red-600 text-white px-6 py-3 rounded-2xl font-bold backdrop-blur-md transition-all shadow-2xl active:scale-95 disabled:opacity-50 z-[110]"
+              >
+                {isDeleting && (
+                  isDeleting === -1 || 
+                  detailedImages.find(img => validImages[modalIndex].includes(img.url.split('/').pop() || ''))?.id_imagen === isDeleting
+                ) ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Trash2 className="w-5 h-5" />
+                )}
+                Eliminar Foto
+              </button>
+            )}
           </div>
 
           {/* Flechas Navegación Premium */}

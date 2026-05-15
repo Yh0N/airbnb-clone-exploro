@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-export default function AuthCallback() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { refreshUser } = useAuth();
@@ -44,5 +44,17 @@ export default function AuthCallback() {
       <LoadingSpinner size="lg" text="Autenticando con Exploro..." />
       <p className="mt-4 text-neutral-500 animate-pulse">Finalizando inicio de sesión seguro...</p>
     </div>
+  );
+}
+
+export default function AuthCallback() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col items-center justify-center bg-bg-primary">
+        <LoadingSpinner size="lg" text="Preparando..." />
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }

@@ -14,7 +14,7 @@ import {
 import ImageGallery from '@/components/ImageGallery';
 import PlaceCard from '@/components/PlaceCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { getPlace, getPlaces, toggleFavorite, getPlaceReviews } from '@/services/api';
+import { getPlace, getPlaces, toggleFavorite, getPlaceReviews, resolvePhotoUrl } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import CreateReviewModal from '@/components/exploro/CreateReviewModal';
 import CreatePlaceModal from '@/components/exploro/CreatePlaceModal';
@@ -310,11 +310,19 @@ export default function PlaceDetailPage() {
           entityId={place.id}
           entityType="place"
           isOwner={isAuthenticated && user?.id === place.id_usuario}
+          currentUser={user}
           onImageUploaded={(newUrl) => {
+            const fullUrl = resolvePhotoUrl(newUrl);
             setPlace(prev => prev ? {
               ...prev,
-              images: [...(prev.images || []), newUrl],
-              image: prev.image || newUrl
+              images: [...(prev.images || []), fullUrl],
+              image: prev.image || fullUrl
+            } : null);
+          }}
+          onImageDeleted={(deletedUrl) => {
+            setPlace(prev => prev ? {
+              ...prev,
+              images: (prev.images || []).filter(url => url !== deletedUrl)
             } : null);
           }}
         />

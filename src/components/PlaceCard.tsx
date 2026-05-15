@@ -98,10 +98,10 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           />
         </button>
 
-        {/* Badge "Favorito de viajeros" */}
+        {/* Badge "Favorito entre huéspedes" */}
         {isGuestFavorite && (
-          <div className="absolute top-3 left-3 bg-white px-3 py-1.5 rounded-full shadow-sm">
-            <span className="text-xs font-bold text-neutral-800">Favorito de viajeros</span>
+          <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-md shadow-sm border border-neutral-100">
+            <span className="text-[11px] font-bold text-neutral-800">Favorito entre huéspedes</span>
           </div>
         )}
 
@@ -151,15 +151,20 @@ export default function PlaceCard({ place }: PlaceCardProps) {
       {/* Info — Layout estilo Airbnb */}
       <div className="space-y-0.5">
         <div className="flex items-start justify-between gap-1">
-          <h3 className="font-semibold text-[15px] text-neutral-800 group-hover:underline decoration-neutral-300 decoration-1 underline-offset-2 transition-all">
+          <h3 className="font-bold text-[15px] text-neutral-800 group-hover:underline decoration-neutral-300 decoration-1 underline-offset-2 transition-all">
             {place.name}
           </h3>
           <div className="flex items-center gap-1 flex-shrink-0">
             <Star className="w-3 h-3 fill-neutral-800 text-neutral-800" />
-            <span className="text-sm font-medium">{place.rating?.toFixed(1) || '0.0'}</span>
+            <span className="text-sm font-medium">{place.rating?.toFixed(2) || '0.00'}</span>
           </div>
         </div>
-        <p className="text-sm text-neutral-500 line-clamp-1">{place.location}</p>
+        <p className="text-[14px] text-neutral-500 font-medium">
+          {place.price} <span className="font-normal">por 2 noches</span>
+        </p>
+        <p className="text-[14px] text-neutral-500 flex items-center gap-1">
+          <span className="text-neutral-400">★</span> {place.rating}
+        </p>
       </div>
     </Link>
   );

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, MapPin, Navigation, Loader2, Plus, Map, Hash, Edit } from 'lucide-react';
+import { X, MapPin, Navigation, Loader2, Plus, Map, Hash, Edit, Camera, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { resolvePhotoUrl } from '@/services/api';
 import * as api from '@/services/api';
+import { useAlert } from '@/context/AlertContext';
 import CustomSelect from './CustomSelect';
 import { CATEGORIAS_LUGAR } from '@/lib/taxonomy';
 import dynamic from 'next/dynamic';
@@ -20,7 +22,10 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
   const [loading, setLoading] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const { showAlert } = useAlert();
   const [locationMode, setLocationMode] = useState<'direccion' | 'coordenadas'>('direccion');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(resolvePhotoUrl(initialData?.foto_principal || initialData?.image) || null);
 
   const [form, setForm] = useState({
     nombre: initialData?.nombre || initialData?.name || '',
@@ -49,8 +54,11 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
       } else if (initialData.location || initialData.ubicacion_textual) {
         setLocationMode('direccion');
       }
+      setImagePreview(resolvePhotoUrl(initialData.foto_principal || initialData.image) || null);
     } else {
       setForm({ nombre: '', descripcion: '', categoria: '', subcategoria: '', direccion: '', latitud: '', longitud: '' });
+      setImagePreview(null);
+      setSelectedImage(null);
     }
   }, [initialData]);
 
@@ -72,7 +80,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
 
   const handleGeolocate = () => {
     if (!('geolocation' in navigator)) {
-      alert('Tu navegador no soporta geolocalización.');
+      showAlert({ type: 'error', title: 'Geolocalización', message: 'Tu navegador no soporta geolocalización.' });
       return;
     }
     setGeoLoading(true);
@@ -88,28 +96,40 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
       },
       (err) => {
         console.error('Geolocation error:', err);
-        alert('No se pudo obtener tu ubicación. Ingresa las coordenadas o dirección manualmente.');
+        showAlert({ type: 'warning', title: 'Ubicación', message: 'No se pudo obtener tu ubicación automáticamente. Por favor, ingresa las coordenadas o dirección manualmente.' });
         setGeoLoading(false);
       }
     );
+  };
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.categoria) {
-      alert('Selecciona una categoría.');
+      showAlert({ type: 'warning', title: 'Faltan datos', message: 'Selecciona una categoría para el lugar.' });
       return;
     }
     if (!form.subcategoria) {
-      alert('Selecciona una subcategoría.');
+      showAlert({ type: 'warning', title: 'Faltan datos', message: 'Selecciona una subcategoría específica.' });
       return;
     }
     if (locationMode === 'coordenadas' && (!form.latitud || !form.longitud)) {
-      alert('Las coordenadas son obligatorias en este modo.');
+      showAlert({ type: 'warning', title: 'Faltan datos', message: 'Las coordenadas son obligatorias en este modo.' });
       return;
     }
     if (locationMode === 'direccion' && !form.direccion) {
-      alert('La dirección es obligatoria en este modo.');
+      showAlert({ type: 'warning', title: 'Faltan datos', message: 'La dirección es obligatoria en este modo.' });
       return;
     }
 
@@ -129,10 +149,17 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
         payload.ubicacion_textual = form.direccion;
       }
 
+      let placeId = initialData?.id;
       if (initialData?.id) {
         await api.updatePlace(initialData.id, payload);
       } else {
-        await api.createPlace(payload);
+        const newPlace = await api.createPlace(payload);
+        placeId = newPlace.id_lugar;
+      }
+      
+      // Subir imagen si se seleccionó una nueva
+      if (selectedImage && placeId) {
+        await api.uploadPhoto('place', placeId, selectedImage);
       }
       
       onCreated();
@@ -143,7 +170,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
     } catch (error: any) {
       console.error('Error saving place:', error);
       const detail = error?.response?.data?.detail;
-      alert(detail || 'Error al guardar el lugar. Intenta de nuevo.');
+      showAlert({ type: 'error', title: 'Error al guardar', message: detail || 'No pudimos guardar los cambios. Por favor, verifica tu conexión e intenta de nuevo.' });
     } finally {
       setLoading(false);
     }
@@ -275,6 +302,54 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                 className="w-full px-4 py-3.5 bg-white dark:bg-bg-primary border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-airbnb/30 focus:border-airbnb transition-all dark:text-white resize-none font-medium text-sm"
               />
             </div>
+          </div>
+
+          {/* ── Carga de Imagen ── */}
+          <div className="space-y-4 bg-neutral-50/50 dark:bg-neutral-800/20 p-6 rounded-2xl border border-neutral-100 dark:border-border-color">
+            <label className="text-[13px] font-black text-neutral-400 uppercase tracking-wider block mb-2">Foto del Lugar</label>
+            
+            {imagePreview ? (
+              <div className="relative group aspect-video rounded-2xl overflow-hidden border-2 border-airbnb shadow-lg">
+                <img src={imagePreview} alt="Vista previa" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                  <button 
+                    type="button"
+                    onClick={() => document.getElementById('place-image-input')?.click()}
+                    className="p-3 bg-white text-neutral-900 rounded-full hover:scale-110 transition-transform shadow-xl"
+                  >
+                    <Upload className="w-5 h-5" />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => { setSelectedImage(null); setImagePreview(null); }}
+                    className="p-3 bg-white text-rose-500 rounded-full hover:scale-110 transition-transform shadow-xl"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => document.getElementById('place-image-input')?.click()}
+                className="w-full aspect-video rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 hover:border-airbnb dark:hover:border-airbnb hover:bg-airbnb/5 transition-all flex flex-col items-center justify-center gap-3 group"
+              >
+                <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:bg-airbnb/20 transition-all">
+                  <Camera className="w-6 h-6 text-neutral-400 group-hover:text-airbnb" />
+                </div>
+                <div className="text-center">
+                  <span className="text-sm font-bold text-neutral-600 dark:text-neutral-400 block group-hover:text-airbnb">Subir fotografía</span>
+                  <span className="text-[10px] font-medium text-neutral-400">JPG, PNG o WebP (Máx. 5MB)</span>
+                </div>
+              </button>
+            )}
+            <input 
+              id="place-image-input"
+              type="file" 
+              accept="image/*"
+              className="hidden" 
+              onChange={handleImageChange}
+            />
           </div>
 
           {/* ── Ubicación ── */}
