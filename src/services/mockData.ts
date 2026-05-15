@@ -7,6 +7,8 @@ export interface Place {
   name: string;
   nombre?: string; // Standardized alias for Dashboard
   category: string;
+  subcategoria?: string;
+  subcategory?: string;
   image: string; // legacy root image
   images: string[];
   price: string;
@@ -64,6 +66,7 @@ export interface User {
   biography?: string;
   descripcion?: string; // Standardized alias for Dashboard
   interests?: string[];
+  is_public?: boolean;
   rating?: number;
   reviews_count?: number;
 }
@@ -92,6 +95,7 @@ export const mockPlaces: Place[] = [
     location: 'El Encano, Nariño',
     description: 'Hermosa cabaña de madera estilo suizo ubicada a las orillas de la Laguna de la Cocha. Despierta con el canto de las aves y una majestuosa vista al lago cubierto de niebla. Ideal para parejas y familias que buscan una escapada romántica o un retiro de paz en la naturaleza. Cuenta con chimenea, muelle privado y kayak incluido.',
     category: 'naturaleza',
+    subcategoria: 'Laguna',
     rating: 4.95,
     reviews_count: 128,
     price_category: '$250,000 COP',

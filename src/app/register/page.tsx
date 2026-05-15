@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building, Info, Link as LinkIcon } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building, Info, Link as LinkIcon, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import * as api from '@/services/api';
 
@@ -135,7 +135,13 @@ export default function RegisterPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white border border-neutral-200 rounded-xl shadow-card overflow-hidden">
-          <div className="border-b border-neutral-200 p-6 text-center">
+          <div className="relative border-b border-neutral-200 px-6 py-5 flex items-center justify-center">
+            <button 
+              onClick={() => router.back()}
+              className="absolute left-6 p-2 hover:bg-neutral-100 rounded-full transition-colors text-neutral-600"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
             <h1 className="text-lg font-bold text-neutral-800">Regístrate en Exploro</h1>
           </div>
 

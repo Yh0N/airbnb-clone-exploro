@@ -89,7 +89,9 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
       const lat = selectedEntity.latitud || selectedEntity.latitude;
       const lng = selectedEntity.longitud || selectedEntity.longitude;
       if (lat && lng) {
-        setViewport({ center: [lng, lat], zoom: 16 });
+        // Offset positivo para que el marcador baje a la parte inferior de la pantalla
+        // y el popup quede perfectamente centrado y visible arriba
+        setViewport({ center: [lng, lat + 0.007], zoom: 16 });
       }
     } else if (userLocation) {
       setViewport(prev => ({ ...prev, center: [userLocation[1], userLocation[0]] }));
@@ -169,7 +171,11 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
                 </div>
               </MarkerContent>
               
-              <MarkerPopup className="p-0 overflow-hidden border-none shadow-2xl rounded-2xl max-w-[240px]">
+              <MarkerPopup
+                anchor="bottom"
+                offset={25}
+                className="p-0 overflow-hidden border-none shadow-2xl rounded-2xl max-w-[280px]"
+              >
                 <div className="flex flex-col">
                   {/* Imagen de cabecera */}
                   <div className="h-28 w-full relative">
@@ -215,16 +221,17 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
                     </p>
                     
                     <div className="flex gap-2 mt-3">
-                      <button 
+                      <button
                         onClick={() => handleViewDetail(item)}
-                        className="flex-1 flex items-center justify-center gap-1.5 bg-neutral-900 dark:bg-neutral-800 text-white px-3 py-2.5 rounded-xl text-[11px] font-black transition-all hover:scale-[1.02] shadow-md"
+                        className="flex-1 flex flex-col items-center justify-center bg-neutral-900 dark:bg-neutral-800 text-white px-3 py-3 rounded-xl text-[11px] font-black transition-all hover:scale-[1.02] shadow-md leading-tight"
                       >
-                        Ver Ficha <ArrowRight className="w-3.5 h-3.5" />
+                        <span>Ver</span>
+                        <span className="flex items-center gap-1">Ficha <ArrowRight className="w-3.5 h-3.5" /></span>
                       </button>
                       {onOpenReview && (
-                        <button 
+                        <button
                           onClick={() => onOpenReview(item)}
-                          className="flex-1 flex items-center justify-center gap-1.5 bg-airbnb/10 text-airbnb px-3 py-2.5 rounded-xl text-[11px] font-black transition-all hover:bg-airbnb hover:text-white shadow-md"
+                          className="flex-1 flex items-center justify-center gap-1.5 bg-airbnb/10 text-airbnb px-3 py-3 rounded-xl text-[11px] font-black transition-all hover:bg-airbnb hover:text-white shadow-md"
                         >
                           <Star className="w-3.5 h-3.5" /> Calificar
                         </button>
@@ -264,38 +271,37 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
         </button>
       </div>
       
-      {/* Legend */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden md:block transition-all duration-300">
-         <div className="bg-white/90 dark:bg-bg-secondary/90 backdrop-blur-md rounded-3xl shadow-2xl border border-neutral-200 dark:border-border-color overflow-hidden">
+      {/* Legend - Vertical Compact Box on the Left */}
+      <div className="absolute bottom-6 left-6 z-10 hidden md:block transition-all duration-300">
+         <div className="bg-white/95 dark:bg-bg-secondary/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-border-color overflow-hidden max-w-[200px]">
             <button 
               onClick={toggleLegend}
-              className="w-full flex items-center justify-center py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 transition-colors border-b border-neutral-200"
+              className="w-full flex items-center justify-between px-5 py-3 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 transition-colors border-b border-neutral-200"
             >
-              <div className="w-12 h-1 bg-neutral-300 rounded-full mb-1" />
-              {isLegendOpen ? <ChevronDown className="w-4 h-4 text-neutral-400 absolute right-4" /> : <ChevronUp className="w-4 h-4 text-neutral-400 absolute right-4" />}
-              {!isLegendOpen && <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mx-2">Leyenda</span>}
+              <span className="text-[11px] font-black text-neutral-500 uppercase tracking-widest">Leyenda</span>
+              {isLegendOpen ? <ChevronDown className="w-4 h-4 text-neutral-400" /> : <ChevronUp className="w-4 h-4 text-neutral-400" />}
             </button>
             
-            <div className={cn("transition-all duration-300 ease-in-out", isLegendOpen ? 'max-h-96 opacity-100 px-6 py-4' : 'max-h-0 opacity-0 px-6 py-0')}>
-              <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-center gap-4">
-                      <div className="flex items-center gap-1.5">
+            <div className={cn("transition-all duration-300 ease-in-out", isLegendOpen ? 'max-h-[450px] opacity-100 px-5 py-5' : 'max-h-0 opacity-0 px-5 py-0')}>
+              <div className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-2.5">
+                      <div className="flex items-center gap-3">
                           <div className="w-4 h-4 rounded-full bg-neutral-400 shadow-sm" style={{ border: '2px dashed white', boxSizing: 'border-box' }} />
-                          <span className="text-[10px] font-black text-neutral-600 uppercase tracking-tight">Pyme (Establecimiento)</span>
+                          <span className="text-[11px] font-bold text-neutral-600 uppercase tracking-tight">Pyme</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-3">
                           <div className="w-4 h-4 rounded-full bg-neutral-400 shadow-sm border-2 border-solid border-white" />
-                          <span className="text-[10px] font-black text-neutral-600 uppercase tracking-tight">Lugar (Punto de Interés)</span>
+                          <span className="text-[11px] font-bold text-neutral-600 uppercase tracking-tight">Lugar</span>
                       </div>
                   </div>
                   
-                  <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-2.5 border-t border-neutral-100 dark:border-neutral-800 w-full">
+                  <div className="flex flex-col gap-2.5 pt-4 border-t border-neutral-100 dark:border-neutral-800">
                       {Object.entries(CATEGORY_CONFIG)
                         .filter(([key]) => !['default', 'restaurante', 'cafeteria', 'parque', 'mirador', 'museo', 'iglesia', 'tienda', 'transporte', 'hospital'].includes(key))
                         .map(([key, config]) => (
-                          <div key={key} className="flex items-center gap-1.5">
+                          <div key={key} className="flex items-center gap-3">
                               <div className={cn("w-2.5 h-2.5 rounded-full", config.color)} />
-                              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-tight">{config.label}</span>
+                              <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-tight">{config.label}</span>
                           </div>
                         ))
                       }

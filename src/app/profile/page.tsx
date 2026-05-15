@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Heart, MapPin, Settings, Shield, Star, ChevronRight, Camera, Key, Upload, Image } from 'lucide-react';
+import { User, Heart, MapPin, Settings, Shield, Star, ChevronRight, Camera, Key, Upload, Image, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import PlaceGrid from '@/components/PlaceGrid';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -65,7 +65,8 @@ function ProfileContent() {
     name: '',
     photo: '',
     biography: '',
-    interests: [] as string[]
+    interests: [] as string[],
+    is_public: true
   });
 
   // Estado para el formulario de seguridad
@@ -100,7 +101,8 @@ function ProfileContent() {
         name: user.name || '',
         photo: user.avatar || '',
         biography: user.biography || '',
-        interests: user.interests || []
+        interests: user.interests || [],
+        is_public: user.is_public !== undefined ? user.is_public : true
       });
     }
   }, [user]);
@@ -118,15 +120,14 @@ function ProfileContent() {
       if (!user) return;
       setIsLoading(true);
       try {
-        if (activeTab === 'favorites') {
-          const allPlaces = await getPlaces();
-          const userFavorites = allPlaces.filter((p) =>
-            user.favorites?.includes(p.id)
-          );
-          setFavorites(userFavorites);
-        } else if (activeTab === 'recommendations') {
+        if (activeTab === 'recommendations') {
           const recs = await getRecommendations();
           setRecommendations(recs);
+        } else if (activeTab === 'favorites') {
+          const allPlaces = await getPlaces();
+          const favIds = user.favorites?.map((f: any) => typeof f === 'object' ? f.id : f) || [];
+          const favs = allPlaces.filter(p => favIds.includes(p.id));
+          setFavorites(favs);
         }
       } catch (error) {
         console.error('Error cargando datos:', error);
@@ -197,6 +198,14 @@ function ProfileContent() {
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+      {/* Botón Volver */}
+      <button 
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-sm font-bold text-neutral-500 hover:text-neutral-900 transition-all mb-6 group w-fit"
+      >
+        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        Volver
+      </button>
       {/* Header del perfil general */}
       <div className="flex flex-col md:flex-row gap-8 mb-10">
         
@@ -309,28 +318,21 @@ function ProfileContent() {
           {/* Tab: Favoritos */}
           {activeTab === 'favorites' && (
             <div className="animate-fade-in">
-              <h3 className="text-2xl font-black text-neutral-800 mb-6">
-                Tus lugares favoritos
+              <h3 className="text-2xl font-black text-neutral-800 mb-2">
+                Tus Lugares Favoritos
               </h3>
+              <p className="text-neutral-500 mb-6 font-medium">
+                Lugares que has guardado para visitar después.
+              </p>
               {isLoading ? (
                 <LoadingSpinner text="Cargando favoritos..." />
               ) : favorites.length > 0 ? (
                 <PlaceGrid places={favorites} />
               ) : (
-                <div className="text-center py-16 bg-neutral-50 rounded-3xl border border-neutral-100">
+                <div className="text-center py-20 bg-neutral-50 rounded-3xl border border-neutral-200">
                   <Heart className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                  <h4 className="text-lg font-bold text-neutral-800 mb-2">
-                    Aún no tienes favoritos
-                  </h4>
-                  <p className="text-neutral-500 mb-6">
-                    Explora destinos y guarda los que más te gusten.
-                  </p>
-                  <button
-                    onClick={() => router.push('/')}
-                    className="bg-airbnb text-white px-8 py-3.5 rounded-xl font-bold hover:bg-airbnb-dark transition-colors"
-                  >
-                    Explorar destinos
-                  </button>
+                  <h4 className="text-xl font-bold text-neutral-800 mb-2">Aún no tienes favoritos</h4>
+                  <p className="text-neutral-500 max-w-sm mx-auto">Explora el mapa y guarda los lugares que más te gusten haciendo clic en el corazón.</p>
                 </div>
               )}
             </div>
@@ -512,6 +514,23 @@ function ProfileContent() {
                               className="w-full px-5 py-4 bg-neutral-50 border border-neutral-200 focus:border-airbnb focus:bg-white rounded-2xl outline-none text-neutral-800 transition-all resize-none min-h-[120px]"
                               placeholder="Cuéntanos un poco sobre ti..."
                             />
+                          </div>
+                          
+                          {/* Toggle de Perfil Público */}
+                          <div className="flex items-center justify-between p-5 bg-neutral-50 border border-neutral-200 rounded-2xl mt-4">
+                            <div>
+                              <h4 className="font-bold text-neutral-800">Perfil Público</h4>
+                              <p className="text-xs text-neutral-500 mt-1">Permite que otros vean tu perfil y tus lugares favoritos.</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                className="sr-only peer" 
+                                checked={editForm.is_public}
+                                onChange={(e) => setEditForm({...editForm, is_public: e.target.checked})}
+                              />
+                              <div className="w-11 h-6 bg-neutral-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-airbnb/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-airbnb"></div>
+                            </label>
                           </div>
                         </div>
                       </div>

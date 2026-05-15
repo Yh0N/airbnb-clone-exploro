@@ -58,12 +58,13 @@ const mapUser = (b: any): any => ({
   name: b.nombre,
   descripcion: b.perfil?.biografia || 'Sin biografía',
   email: b.correo,
-  avatar: b.perfil?.foto || '',
+  avatar: b.perfil?.foto || b.foto_perfil || '',
   rol: b.rol,
   member_since: b.fecha_registro ? new Date(b.fecha_registro).getFullYear().toString() : '2024',
   favorites: b.favorites || [],
   biography: b.perfil?.biografia || '',
   interests: b.preferencias || [],
+  is_public: b.is_public,
   rating: b.calificacion_promedio || 0,
   reviews_count: b.numero_reseñas || 0
 });
@@ -72,7 +73,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const resolvePhotoUrl = (url: string): string => {
   if (!url) return '';
-  if (url.startsWith('http')) return url;
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
   return `${API_BASE}${url}`;
 };
 
@@ -134,8 +135,8 @@ const mapPyme = (b: any): any => ({
   tipo: b.tipo,
   categoria: b.tipo,
   ubicacion: b.ubicacion_textual || 'Sin ubicación',
-  latitud: b.latitud,
-  longitud: b.longitud,
+  latitud: b.latitud || 1.2136,
+  longitud: b.longitud || -77.2811,
   id_usuario: b.id_usuario,
   rating: b.calificacion_promedio || 0,
   reviews_count: b.numero_reseñas || 0,

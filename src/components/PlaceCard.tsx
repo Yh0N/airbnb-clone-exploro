@@ -100,10 +100,22 @@ export default function PlaceCard({ place }: PlaceCardProps) {
 
         {/* Badge "Favorito entre huéspedes" */}
         {isGuestFavorite && (
-          <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-md shadow-sm border border-neutral-100">
+          <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-md shadow-sm border border-neutral-100">
             <span className="text-[11px] font-bold text-neutral-800">Favorito entre huéspedes</span>
           </div>
         )}
+
+        {/* Badges de Categoría y Subcategoría (Estilo Mapa) */}
+        <div className={`absolute left-3 flex gap-1.5 z-10 transition-all duration-300 ${isGuestFavorite ? 'top-12' : 'top-3'}`}>
+          <span className="text-[9px] font-black bg-white/90 backdrop-blur-md text-neutral-800 px-2 py-1 rounded-lg shadow-sm uppercase tracking-wider border border-white/20">
+            {place.category || 'Destino'}
+          </span>
+          {(place.subcategoria || place.subcategory) && (
+            <span className="text-[9px] font-black bg-airbnb text-white px-2 py-1 rounded-lg shadow-sm uppercase tracking-wider border border-airbnb/20">
+              {place.subcategoria || place.subcategory}
+            </span>
+          )}
+        </div>
 
         {/* Flechas de navegación */}
         {place.images.length > 1 && (

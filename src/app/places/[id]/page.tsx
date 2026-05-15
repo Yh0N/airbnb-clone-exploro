@@ -9,7 +9,7 @@ import {
   Star, MapPin, Share, Heart, ChevronRight, Award, 
   Shield, Calendar, Flag, Mountain, TreePine, 
   Camera, Info, InfoIcon, ExternalLink,
-  Map, MessageCircle, Bookmark, AlertTriangle
+  Map, MessageCircle, Bookmark, AlertTriangle, ChevronLeft
 } from 'lucide-react';
 import ImageGallery from '@/components/ImageGallery';
 import PlaceCard from '@/components/PlaceCard';
@@ -171,7 +171,14 @@ export default function PlaceDetailPage() {
   return (
     <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       
-      {/* Título y Acciones con Estilo Premium */}
+      {/* Botón Volver */}
+      <button 
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-sm font-bold text-neutral-500 hover:text-neutral-900 transition-all mb-6 group w-fit"
+      >
+        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        Volver
+      </button>
       <div className="mb-8">
         <div className="flex flex-col gap-4">
           
@@ -180,6 +187,11 @@ export default function PlaceDetailPage() {
             <span className="bg-neutral-100 text-neutral-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-neutral-200">
               {place.category || 'Destino'}
             </span>
+            {(place.subcategoria || (place as any).subcategory) && (
+              <span className="bg-airbnb text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-airbnb/20 shadow-sm shadow-airbnb/20">
+                {place.subcategoria || (place as any).subcategory}
+              </span>
+            )}
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${
               isPyme 
                 ? 'bg-amber-50 text-amber-700 border-amber-200' 

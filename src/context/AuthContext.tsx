@@ -84,7 +84,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       correo: data.email,
       biografia: data.biography,
       foto: data.photo,
-      preferencias: data.interests
+      preferencias: data.interests,
+      is_public: (data as any).is_public
     };
     
     const updatedUser = await updateProfile(backendData);

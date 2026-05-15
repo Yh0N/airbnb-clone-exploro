@@ -34,7 +34,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isFavoritesActive = pathname === '/profile' && searchParams.get('tab') === 'favorites';
+  const isFavoritesActive = pathname === '/favorites';
 
   const handleTabClick = (tabId: Tab) => {
     setActiveTab(tabId);
@@ -374,6 +374,9 @@ export default function Navbar() {
                       <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-5 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm text-neutral-700 dark:text-neutral-300 transition-colors">
                         Mi perfil
                       </Link>
+                      <Link href="/favorites" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-5 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm text-neutral-700 dark:text-neutral-300 transition-colors">
+                        Favoritos
+                      </Link>
                       <button onClick={() => { logout(); setMenuOpen(false); router.push('/'); }} className="w-full flex items-center gap-3 px-5 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm text-neutral-700 dark:text-neutral-300 transition-colors border-t border-neutral-100 dark:border-border-color mt-1">
                         Cerrar sesión
                       </button>
@@ -419,7 +422,7 @@ export default function Navbar() {
           <span className="text-[10px] font-bold">Exploro</span>
         </button>
         <button 
-          onClick={() => router.push(isAuthenticated ? '/profile?tab=favorites' : '/login')}
+          onClick={() => router.push(isAuthenticated ? '/favorites' : '/login')}
           className={`flex flex-col items-center gap-1.5 transition-all ${isFavoritesActive ? 'text-airbnb' : 'text-neutral-400'}`}
         >
           <Heart className={`w-5 h-5 ${isFavoritesActive ? 'stroke-[2.5px]' : ''}`} />

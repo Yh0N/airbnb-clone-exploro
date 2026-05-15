@@ -133,27 +133,7 @@ export default function PublicProfilePage() {
                 </div>
             </div>
 
-            {/* Detalles de contacto/info */}
-            <div className="mt-8 space-y-4">
-                <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-sm font-medium">Miembro desde {profile.member_since}</span>
-                </div>
-                <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-sm font-medium">Pasto, Nariño</span>
-                </div>
-                <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
-                    <MessageSquare className="w-4 h-4" />
-                    <span className="text-sm font-medium">Habla Español</span>
-                </div>
-            </div>
-
             <div className="flex flex-col gap-3 mt-10">
-                <button className="w-full py-4 bg-neutral-900 dark:bg-white dark:text-neutral-900 text-white rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg">
-                    Enviar Mensaje
-                </button>
-                
                 {currentUser && currentUser.id !== userId && (
                     <button 
                         onClick={() => setIsReviewModalOpen(true)}
