@@ -38,7 +38,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       // Pedimos al backend la URL de autorización
-      const API_URL = 'http://localhost:8000';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(`${API_URL}/api/v1/auth/${provider}/login`);
       const data = await response.json();
       
