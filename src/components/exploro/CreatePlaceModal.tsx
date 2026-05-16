@@ -177,9 +177,9 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} />
-      <div className="relative w-full max-w-xl bg-white dark:bg-bg-secondary rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+      <div className="relative w-full sm:max-w-xl bg-white dark:bg-bg-secondary rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
 
         {/* Map Picker Overlay */}
         {showMapPicker && (
@@ -236,7 +236,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
         {/* Header */}
-        <div className="relative px-8 pt-8 pb-6 border-b border-neutral-100 dark:border-border-color flex justify-between items-start">
+        <div className="relative px-6 md:px-8 pt-6 md:pt-8 pb-5 md:pb-6 border-b border-neutral-100 dark:border-border-color flex justify-between items-start">
           <div>
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-airbnb/20 to-orange-500/20 text-airbnb mb-4">
               <MapPin className="w-6 h-6" />
@@ -254,7 +254,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="relative p-8 space-y-6 max-h-[65vh] overflow-y-auto custom-scrollbar">
+        <form onSubmit={handleSubmit} className="relative p-5 md:p-8 space-y-5 md:space-y-6 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto custom-scrollbar">
 
           {/* ── Info básica ── */}
           <div className="space-y-5 bg-neutral-50/50 dark:bg-neutral-800/20 p-6 rounded-2xl border border-neutral-100 dark:border-border-color">
@@ -440,22 +440,22 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
           </div>
 
           {/* ── Acciones ── */}
-          <div className="pt-2 flex items-center justify-between">
-            <p className="text-[11px] font-bold text-neutral-400">
+          <div className="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p className="text-[11px] font-bold text-neutral-400 text-center sm:text-left">
               {initialData ? 'Los cambios se verán reflejados al instante' : 'Pendiente de aprobación por admin'}
             </p>
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-3.5 text-sm font-bold text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition-colors"
+                className="flex-1 sm:flex-none px-5 py-3.5 text-sm font-bold text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition-colors rounded-xl border border-neutral-200 dark:border-border-color hover:bg-neutral-50 dark:hover:bg-neutral-800"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-gradient-to-r from-airbnb to-rose-500 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg shadow-airbnb/20 hover:shadow-airbnb/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-airbnb to-rose-500 text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-airbnb/20 hover:shadow-airbnb/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (initialData ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
                 {initialData ? 'Guardar Cambios' : 'Crear Lugar'}

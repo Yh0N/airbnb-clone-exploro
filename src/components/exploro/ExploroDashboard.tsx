@@ -455,11 +455,11 @@ export default function ExploroDashboard() {
   }, [data, activeTab, entityFilter, user?.id, user?.rol, reviewFilter]);
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-100px)] bg-neutral-50 dark:bg-bg-primary md:rounded-[40px] overflow-hidden shadow-2xl border border-neutral-200 dark:border-border-color mt-6 mb-10 mx-0 md:mx-10 xl:mx-16">
-      
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-100px)] md:h-[calc(100vh-100px)] bg-neutral-50 dark:bg-bg-primary md:rounded-[40px] overflow-hidden shadow-2xl border border-neutral-200 dark:border-border-color mt-6 mb-10 mx-0 md:mx-10 xl:mx-16">
+
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-white dark:bg-bg-secondary border-b md:border-r md:border-b-0 border-neutral-200 dark:border-border-color p-4 md:p-6 flex flex-col shrink-0">
-        <div className="flex-1 md:space-y-2 overflow-x-auto md:overflow-y-auto custom-scrollbar md:pr-1 pb-2 md:pb-0">
+      <aside className="w-full md:w-64 bg-white dark:bg-bg-secondary border-b md:border-r md:border-b-0 border-neutral-200 dark:border-border-color p-3 md:p-6 flex flex-col shrink-0">
+        <div className="flex-1 md:space-y-2 overflow-x-auto md:overflow-y-auto custom-scrollbar md:pr-1 pb-1 md:pb-0">
           <div className="hidden md:block mb-8 pl-2">
             <h2 className="text-xl font-bold text-airbnb tracking-tight flex items-center gap-2">
               <Zap className="w-5 h-5" />
@@ -468,52 +468,58 @@ export default function ExploroDashboard() {
             <p className="text-xs text-neutral-500 font-medium">Panel de gestión integral</p>
           </div>
 
-          <nav className="flex flex-row md:flex-col gap-2 md:gap-0 md:space-y-1 w-max md:w-full">
-            <TabButton 
-              active={activeTab === 'places_pymes'} 
-              onClick={() => setActiveTab('places_pymes')} 
+          <nav className="flex flex-row md:flex-col gap-1.5 md:gap-0 md:space-y-1 w-max md:w-full">
+            <TabButton
+              active={activeTab === 'places_pymes'}
+              onClick={() => setActiveTab('places_pymes')}
               icon={
                 <span className="flex items-center gap-0.5">
                   <MapPin className="w-3.5 h-3.5" />
                   <Store className="w-3.5 h-3.5" />
                 </span>
-              } 
-              label={isAdmin ? "Todos los Lugares y Pymes" : "Explorar Lugares y Pymes"} 
+              }
+              label={isAdmin ? "Todos los Lugares" : "Explorar Lugares"}
+              mobileLabel={isAdmin ? "Todos" : "Explorar"}
             />
-            <TabButton 
-              active={activeTab === 'my_places'} 
-              onClick={() => setActiveTab('my_places')} 
-              icon={<MapPin className="w-4 h-4" />} 
-              label={isPyme ? "Mis Lugares y Pymes" : "Mis Lugares"} 
+            <TabButton
+              active={activeTab === 'my_places'}
+              onClick={() => setActiveTab('my_places')}
+              icon={<MapPin className="w-4 h-4" />}
+              label={isPyme ? "Mis Lugares y Pymes" : "Mis Lugares"}
+              mobileLabel="Mis Lugares"
             />
             {isAdmin && (
-              <TabButton 
-                  active={activeTab === 'users'} 
-                  onClick={() => setActiveTab('users')} 
-                  icon={<Users className="w-4 h-4" />} 
-                  label="Usuarios" 
+              <TabButton
+                  active={activeTab === 'users'}
+                  onClick={() => setActiveTab('users')}
+                  icon={<Users className="w-4 h-4" />}
+                  label="Usuarios"
+                  mobileLabel="Usuarios"
               />
             )}
             {isAdmin && (
-              <TabButton 
-                  active={activeTab === 'approvals'} 
-                  onClick={() => setActiveTab('approvals')} 
-                  icon={<CheckCircle className="w-4 h-4" />} 
-                  label="Solicitudes Pyme" 
+              <TabButton
+                  active={activeTab === 'approvals'}
+                  onClick={() => setActiveTab('approvals')}
+                  icon={<CheckCircle className="w-4 h-4" />}
+                  label="Solicitudes Pyme"
+                  mobileLabel="Solicitudes"
               />
             )}
 
-            <TabButton 
-              active={activeTab === 'recommendations'} 
-              onClick={() => setActiveTab('recommendations')} 
-              icon={<Zap className="w-4 h-4" />} 
-              label="IA Recomendaciones" 
+            <TabButton
+              active={activeTab === 'recommendations'}
+              onClick={() => setActiveTab('recommendations')}
+              icon={<Zap className="w-4 h-4" />}
+              label="IA Recomendaciones"
+              mobileLabel="IA"
             />
-            <TabButton 
-              active={activeTab === 'nearby'} 
-              onClick={() => setActiveTab('nearby')} 
-              icon={<Navigation className="w-4 h-4" />} 
-              label="Cercanos (1km)" 
+            <TabButton
+              active={activeTab === 'nearby'}
+              onClick={() => setActiveTab('nearby')}
+              icon={<Navigation className="w-4 h-4" />}
+              label="Cercanos (1km)"
+              mobileLabel="Cercanos"
             />
           </nav>
         </div>
@@ -533,37 +539,96 @@ export default function ExploroDashboard() {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-bg-primary">
-        
+
         {/* Header content area */}
-        <header className="px-4 md:px-8 py-4 md:py-6 border-b border-neutral-200 dark:border-border-color flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white dark:bg-bg-secondary">
-          <div>
-            <h1 className="text-2xl font-bold text-neutral-800 dark:text-white flex items-center gap-3">
-              {activeTab === 'places_pymes' ? (isAdmin ? 'Todos los Lugares y Pymes' : 'Explorar Lugares y Pymes') : 
-               activeTab === 'my_places' ? (isPyme ? 'Mis Lugares y Pymes' : 'Mis Lugares') : 
-               activeTab === 'users' ? 'Usuarios' : 
-               activeTab === 'nearby' ? 'Lugares Cercanos (1km)' :
-               activeTab === 'reviews' ? (reviewFilter ? `Reseñas de ${reviewFilter.name}` : 'Reseñas') : 'IA Recomendaciones'}
-              {viewMode === 'map' && (
-                <div className="whitespace-nowrap inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-800/30 shadow-sm animate-pulse ml-2 w-fit min-w-max">
-                  <div className="relative flex h-2 w-2 flex-shrink-0">
-                    <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></div>
-                    <div className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></div>
-                  </div>
-                  <span className="text-[9px] font-black uppercase tracking-wider leading-none">En Vivo</span>
-                </div>
-              )}
-            </h1>
-            <p className="text-sm text-neutral-500">Gestión y control de datos en tiempo real</p>
+        <header className="px-4 md:px-8 py-3 md:py-5 border-b border-neutral-200 dark:border-border-color bg-white dark:bg-bg-secondary">
+          {/* Top row: title + refresh */}
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg md:text-2xl font-bold text-neutral-800 dark:text-white flex items-center gap-2 flex-wrap">
+                <span className="truncate">
+                  {activeTab === 'places_pymes' ? (isAdmin ? 'Todos los Lugares y Pymes' : 'Explorar Lugares y Pymes') :
+                   activeTab === 'my_places' ? (isPyme ? 'Mis Lugares y Pymes' : 'Mis Lugares') :
+                   activeTab === 'users' ? 'Usuarios' :
+                   activeTab === 'nearby' ? 'Lugares Cercanos' :
+                   activeTab === 'reviews' ? (reviewFilter ? `Reseñas de ${reviewFilter.name}` : 'Reseñas') : 'IA Recomendaciones'}
+                </span>
+                {viewMode === 'map' && (
+                  <span className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/30 text-[9px] font-black uppercase tracking-wider flex-shrink-0">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
+                    </span>
+                    En Vivo
+                  </span>
+                )}
+              </h1>
+              <p className="text-xs md:text-sm text-neutral-500 mt-0.5">Gestión en tiempo real</p>
+            </div>
+            <button
+                onClick={fetchData}
+                className="p-2 border border-neutral-200 dark:border-border-color rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors flex-shrink-0"
+                title="Refrescar datos"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Settings className="w-4 h-4 text-neutral-500" />}
+            </button>
+          </div>
+
+          {/* Controls row: view toggle + filters + CTAs */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* View Toggle */}
+            {activeTab !== 'users' && (
+              <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color">
+                  <button
+                    onClick={() => setViewMode('table')}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'table' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                  >
+                      <LayoutList className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Tabla</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('map')}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'map' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                  >
+                      <MapIcon className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Mapa</span>
+                  </button>
+              </div>
+            )}
+
+            {activeTab === 'recommendations' && (
+              <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color">
+                <button
+                  onClick={() => setRecommendationType('personalized')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'personalized' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                >
+                  Para ti
+                </button>
+                <button
+                  onClick={() => setRecommendationType('popular')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'popular' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                >
+                  Populares
+                </button>
+                <button
+                  onClick={() => setRecommendationType('nearby')}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'nearby' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                >
+                  Cercanos
+                </button>
+              </div>
+            )}
+
             {activeTab === 'nearby' && (
-              <div className="flex items-center gap-2 mt-4 bg-white dark:bg-neutral-900 p-1.5 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm w-fit">
-                <span className="text-[10px] font-black text-neutral-400 uppercase pl-3 pr-2 flex items-center gap-1.5">
-                  <Navigation className="w-3 h-3" /> Radio:
+              <div className="flex items-center gap-1 bg-white dark:bg-neutral-900 p-1 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
+                <span className="text-[10px] font-black text-neutral-400 uppercase pl-2 pr-1 flex items-center gap-1">
+                  <Navigation className="w-2.5 h-2.5" /> Radio:
                 </span>
                 {[0.4, 0.7, 1, 1.4].map((r) => (
                   <button
                     key={r}
                     onClick={() => setNearbyRadius(r)}
-                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all ${
+                    className={`px-2.5 py-1 rounded-xl text-[10px] font-black transition-all ${
                       nearbyRadius === r
                         ? 'bg-airbnb text-white shadow-md shadow-airbnb/20'
                         : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800'
@@ -574,106 +639,52 @@ export default function ExploroDashboard() {
                 ))}
               </div>
             )}
-          </div>
-          
-          <div className="flex gap-4 items-center">
-            {/* View Toggle */}
-            {activeTab !== 'users' && (
-              <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color">
-                  <button 
-                    onClick={() => setViewMode('table')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'table' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700'}`}
-                  >
-                      <LayoutList className="w-4 h-4" />
-                      Tabla
-                  </button>
-                  <button 
-                    onClick={() => setViewMode('map')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'map' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700'}`}
-                  >
-                      <MapIcon className="w-4 h-4" />
-                      Mapa
-                  </button>
-              </div>
-            )}
 
-            {activeTab !== 'users' && (
-              <div className="h-8 w-[1px] bg-neutral-200 dark:bg-neutral-700" />
-            )}
-
-            
-            {activeTab === 'recommendations' && (
-              <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color mr-2">
-                <button 
-                  onClick={() => setRecommendationType('personalized')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'personalized' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700'}`}
-                >
-                  Para ti
-                </button>
-                <button 
-                  onClick={() => setRecommendationType('popular')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'popular' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700'}`}
-                >
-                  Populares
-                </button>
-                <button 
-                  onClick={() => setRecommendationType('nearby')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'nearby' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700'}`}
-                >
-                  Cercanos
-                </button>
-              </div>
-            )}
+            {/* Spacer to push CTAs right on larger screens */}
+            <div className="flex-1 hidden sm:block" />
 
             {(activeTab === 'places_pymes' || activeTab === 'my_places') && (user?.rol === 1 || isPyme || isAdmin) && (
               <>
-                <button onClick={() => setIsCreatePlaceOpen(true)} className="flex items-center gap-2 bg-airbnb hover:bg-airbnb-dark text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md active:scale-95">
-                  <Plus className="w-4 h-4" />
-                  Agregar Lugar
+                <button onClick={() => setIsCreatePlaceOpen(true)} className="flex items-center gap-1.5 bg-airbnb hover:bg-airbnb-dark text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95">
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Agregar Lugar</span>
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     if (isAdmin) {
                       setIsCreatePymeOpen(true);
                     } else {
                       router.push('/pyme-onboarding');
                     }
-                  }} 
-                  className="flex items-center gap-2 bg-neutral-800 dark:bg-neutral-700 hover:bg-neutral-900 dark:hover:bg-neutral-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md active:scale-95"
+                  }}
+                  className="flex items-center gap-1.5 bg-neutral-800 dark:bg-neutral-700 hover:bg-neutral-900 dark:hover:bg-neutral-600 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
                 >
-                  <Plus className="w-4 h-4" />
-                  {user?.rol === 1 ? 'Quiero ser pyme' : 'Agregar Pyme'}
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{user?.rol === 1 ? 'Ser Pyme' : 'Agregar Pyme'}</span>
                 </button>
               </>
             )}
             {activeTab === 'reviews' && (user?.rol === 1 || isPyme || isAdmin) && (
-              <button onClick={() => setIsCreateReviewOpen(true)} className="flex items-center gap-2 bg-airbnb hover:bg-airbnb-dark text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md active:scale-95">
-                <Plus className="w-4 h-4" />
+              <button onClick={() => setIsCreateReviewOpen(true)} className="flex items-center gap-1.5 bg-airbnb hover:bg-airbnb-dark text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95">
+                <Plus className="w-3.5 h-3.5" />
                 Agregar reseña
               </button>
             )}
-            <button 
-                onClick={fetchData} 
-                className="p-2 border border-neutral-200 dark:border-border-color rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                title="Refrescar datos"
-            >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Settings className="w-5 h-5 text-neutral-500" />}
-            </button>
           </div>
         </header>
 
         {/* Message Banner */}
         {message && (
-          <div className={`mx-8 mt-4 p-4 rounded-xl flex items-center gap-3 animate-slide-in ${
-            message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+          <div className={`mx-4 md:mx-8 mt-3 p-3 rounded-xl flex items-center gap-3 animate-slide-in ${
+            message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30' : 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30'
           }`}>
-            {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            {message.type === 'success' ? <CheckCircle className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
             <span className="text-sm font-medium">{message.text}</span>
           </div>
         )}
 
         {/* Dynamic Table/List View OR Map View */}
-        <div className={`flex-1 ${viewMode === 'map' ? 'overflow-hidden' : 'overflow-auto'} p-8 h-full`}>
+        <div className={`flex-1 ${viewMode === 'map' ? 'overflow-hidden' : 'overflow-auto'} p-4 md:p-8 h-full`}>
             {viewMode === 'map' ? (
                 <div className="w-full h-full animate-fade-in">
                     <ExploroMap 
@@ -1006,18 +1017,19 @@ export default function ExploroDashboard() {
   );
 }
 
-function TabButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) {
+function TabButton({ active, onClick, icon, label, mobileLabel }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, mobileLabel?: string }) {
   return (
-    <button 
+    <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
-        active 
-          ? 'bg-airbnb text-white shadow-md shadow-airbnb/20' 
+      className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl text-xs md:text-sm font-semibold transition-all duration-200 whitespace-nowrap md:w-full ${
+        active
+          ? 'bg-airbnb text-white shadow-md shadow-airbnb/20'
           : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-800 dark:hover:text-white'
       }`}
     >
-      <span className={active ? 'text-white' : 'text-neutral-400'}>{icon}</span>
-      {label}
+      <span className={`flex-shrink-0 ${active ? 'text-white' : 'text-neutral-400'}`}>{icon}</span>
+      <span className="hidden md:inline">{label}</span>
+      <span className="md:hidden">{mobileLabel || label}</span>
     </button>
   );
 }

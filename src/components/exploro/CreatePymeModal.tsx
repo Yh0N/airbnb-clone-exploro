@@ -645,9 +645,9 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:px-4 sm:py-6 bg-black/60 backdrop-blur-sm">
       <div className="absolute inset-0" onClick={handleClose} />
-      <div className="relative w-full max-w-lg h-auto max-h-[90vh] bg-white dark:bg-bg-secondary rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden flex flex-col">
+      <div className="relative w-full sm:max-w-lg h-auto max-h-[92vh] sm:max-h-[90vh] bg-white dark:bg-bg-secondary rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 overflow-hidden flex flex-col">
 
         {registrationType === null ? (
           <div className="flex flex-col h-full overflow-hidden">

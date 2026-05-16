@@ -110,11 +110,11 @@ export default function CreateReviewModal({ isOpen, onClose, onCreated, initialT
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
-      
-      <div className="relative bg-white dark:bg-bg-secondary w-full max-w-lg rounded-3xl shadow-2xl animate-scale-in border border-neutral-200 dark:border-border-color overflow-hidden">
-        <header className="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-800/50">
+
+      <div className="relative bg-white dark:bg-bg-secondary w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 border border-neutral-200 dark:border-border-color overflow-hidden max-h-[92vh] flex flex-col">
+        <header className="px-6 md:px-8 py-5 md:py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-800/50 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-airbnb/10 rounded-xl flex items-center justify-center">
               <MessageSquare className="w-6 h-6 text-airbnb" />
@@ -129,7 +129,7 @@ export default function CreateReviewModal({ isOpen, onClose, onCreated, initialT
           </button>
         </header>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="p-5 md:p-8 space-y-5 md:space-y-6 overflow-y-auto custom-scrollbar flex-1">
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 p-4 rounded-2xl flex items-center gap-3 animate-shake">
               <div className="w-8 h-8 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center shrink-0">
