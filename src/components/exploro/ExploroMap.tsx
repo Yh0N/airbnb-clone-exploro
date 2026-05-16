@@ -82,6 +82,7 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
     zoom: 14
   });
   const [isLegendOpen, setIsLegendOpen] = useState(true);
+  const [isMobileLegendOpen, setIsMobileLegendOpen] = useState(false);
 
   // Centrar mapa si hay un selectedEntity o si llega el userLocation inicial
   useEffect(() => {
@@ -141,7 +142,11 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
 
           const isPyme = !!item.id_pyme;
           const entityId = item.id_pyme || item.id_lugar || item.id || idx;
-          const isSelected = selectedEntity?.id === entityId;
+          // Comparar usando el mismo campo de ID que puede venir como id_pyme, id_lugar o id
+          const selectedId = selectedEntity
+            ? (selectedEntity.id_pyme || selectedEntity.id_lugar || selectedEntity.id)
+            : null;
+          const isSelected = selectedId != null && String(selectedId) === String(entityId);
           const catConfig = getCategoryConfig(item);
 
           return (
@@ -271,6 +276,54 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
         </button>
       </div>
       
+      {/* Mobile Legend Button */}
+      <button
+        onClick={() => setIsMobileLegendOpen(true)}
+        className="md:hidden absolute bottom-6 left-4 z-10 flex items-center gap-2 bg-white/95 dark:bg-bg-secondary/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-neutral-200 dark:border-border-color text-xs font-bold text-neutral-700 dark:text-neutral-200"
+      >
+        <span className="flex gap-0.5">
+          {['bg-airbnb','bg-green-500','bg-purple-500','bg-orange-500'].map(c => (
+            <span key={c} className={`w-2 h-2 rounded-full ${c}`} />
+          ))}
+        </span>
+        Leyenda
+      </button>
+
+      {/* Mobile Legend Sheet */}
+      {isMobileLegendOpen && (
+        <div className="md:hidden absolute inset-x-0 bottom-0 z-20 animate-in slide-in-from-bottom duration-300">
+          <div className="bg-white/98 dark:bg-bg-secondary backdrop-blur-xl rounded-t-3xl shadow-2xl border-t border-neutral-200 dark:border-border-color p-5 pb-8">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-black text-neutral-700 dark:text-white uppercase tracking-widest">Leyenda</span>
+              <button
+                onClick={() => setIsMobileLegendOpen(false)}
+                className="p-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
+              >
+                <ChevronDown className="w-4 h-4 text-neutral-400" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              <div className="flex items-center gap-2 col-span-2">
+                <div className="w-4 h-4 rounded-full bg-neutral-400 flex-shrink-0" style={{ border: '2px dashed white', boxSizing: 'border-box' }} />
+                <span className="text-[11px] font-bold text-neutral-600 dark:text-neutral-400 uppercase">Pyme (borde punteado)</span>
+              </div>
+              {Object.entries(CATEGORY_CONFIG)
+                .filter(([key]) => !['default','restaurante','cafeteria','parque','mirador','museo','iglesia','tienda','transporte','hospital'].includes(key))
+                .map(([key, config]) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", config.color)} />
+                    <span className="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase">{config.label}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Tap outside to close mobile legend */}
+      {isMobileLegendOpen && (
+        <div className="md:hidden absolute inset-0 z-[19]" onClick={() => setIsMobileLegendOpen(false)} />
+      )}
+
       {/* Legend - Vertical Compact Box on the Left */}
       <div className="absolute bottom-6 left-6 z-10 hidden md:block transition-all duration-300">
          <div className="bg-white/95 dark:bg-bg-secondary/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-border-color overflow-hidden max-w-[200px]">

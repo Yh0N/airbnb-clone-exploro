@@ -77,80 +77,99 @@ export default function PublicProfilePage() {
   }
 
   return (
-    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-12 animate-fade-in">
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 md:py-12 animate-fade-in">
       {/* Botón de volver */}
-      <button 
+      <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-neutral-500 hover:text-neutral-800 font-bold mb-8 transition-colors group"
+        className="flex items-center gap-2 text-neutral-500 hover:text-neutral-800 dark:hover:text-white font-bold mb-6 md:mb-8 transition-colors group"
       >
         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
         Volver al Dashboard
       </button>
 
-      <div className="flex flex-col md:flex-row gap-10">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-10">
         {/* Lado Izquierdo: Tarjeta de Perfil */}
-        <aside className="w-full md:w-[350px] shrink-0">
-          <div className="bg-white dark:bg-neutral-900 rounded-[40px] border border-neutral-200 dark:border-neutral-800 p-8 shadow-xl shadow-neutral-100 dark:shadow-none sticky top-24">
-            {/* Avatar Section */}
-            <div className="relative mb-6">
-                <div className="w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-neutral-50 dark:ring-neutral-800 shadow-lg">
-                    {profile.avatar ? (
-                        <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-airbnb to-airbnb-dark flex items-center justify-center">
-                            <User className="text-white w-12 h-12" />
-                        </div>
-                    )}
+        <aside className="w-full md:w-[320px] lg:w-[350px] shrink-0">
+          {/* En móvil: layout horizontal compacto. En desktop: tarjeta sticky vertical */}
+          <div className="bg-white dark:bg-neutral-900 rounded-3xl md:rounded-[40px] border border-neutral-200 dark:border-neutral-800 p-5 md:p-8 shadow-lg shadow-neutral-100 dark:shadow-none md:sticky md:top-24 md:max-h-[calc(100vh-120px)] md:overflow-y-auto">
+
+            {/* Mobile: fila horizontal avatar + info + botón */}
+            <div className="flex md:flex-col items-center gap-4 md:gap-0">
+              {/* Avatar */}
+              <div className="relative flex-shrink-0 md:mb-6">
+                <div className="w-20 h-20 md:w-32 md:h-32 md:mx-auto rounded-full overflow-hidden ring-4 ring-neutral-50 dark:ring-neutral-800 shadow-lg">
+                  {profile.avatar ? (
+                    <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-airbnb to-airbnb-dark flex items-center justify-center">
+                      <User className="text-white w-8 h-8 md:w-12 md:h-12" />
+                    </div>
+                  )}
                 </div>
                 {profile.rol === 3 && (
-                    <div className="absolute bottom-1 right-1/2 translate-x-10 bg-purple-500 text-white p-1.5 rounded-full shadow-md border-2 border-white">
-                        <Award className="w-4 h-4" />
-                    </div>
+                  <div className="absolute -bottom-1 -right-1 bg-purple-500 text-white p-1 md:p-1.5 rounded-full shadow-md border-2 border-white">
+                    <Award className="w-3 h-3 md:w-4 md:h-4" />
+                  </div>
                 )}
-            </div>
+              </div>
 
-            <div className="text-center">
-                <h1 className="text-3xl font-black text-neutral-800 dark:text-white tracking-tight">{profile.name}</h1>
-                <div className="flex items-center justify-center gap-2 mt-2">
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${
-                        profile.rol === 3 ? 'bg-purple-100 text-purple-600' : 
-                        profile.rol === 2 ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'
-                    }`}>
-                        {profile.rol === 3 ? 'Administrador' : profile.rol === 2 ? 'Empresario' : 'Explorador'}
-                    </span>
+              {/* Nombre + badge + calificar (en móvil alineado a la izquierda) */}
+              <div className="flex-1 md:text-center md:w-full">
+                <h1 className="text-xl md:text-3xl font-black text-neutral-800 dark:text-white tracking-tight leading-tight">{profile.name}</h1>
+                <div className="flex items-center gap-2 mt-1 md:justify-center">
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${
+                    profile.rol === 3 ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' :
+                    profile.rol === 2 ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                    'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+                  }`}>
+                    {profile.rol === 3 ? 'Administrador' : profile.rol === 2 ? 'Empresario' : 'Explorador'}
+                  </span>
                 </div>
-            </div>
 
-            {/* Stats Rápidos */}
-            <div className="grid grid-cols-2 gap-4 mt-8 py-6 border-y border-neutral-100 dark:border-neutral-800">
-                <div className="text-center">
-                    <p className="text-xl font-black text-neutral-800 dark:text-white">{userPlaces.length}</p>
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase">Lugares</p>
-                </div>
-                <div className="text-center">
-                    <p className="text-xl font-black text-neutral-800 dark:text-white">{profile.rating?.toFixed(1) || '0.0'}</p>
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase">Rating</p>
-                </div>
-            </div>
-
-            <div className="flex flex-col gap-3 mt-10">
+                {/* Botón calificar — visible en móvil junto al nombre */}
                 {currentUser && currentUser.id !== userId && (
-                    <button 
-                        onClick={() => setIsReviewModalOpen(true)}
-                        className="w-full py-4 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border-2 border-neutral-100 dark:border-neutral-700 rounded-2xl font-bold hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all flex items-center justify-center gap-2"
-                    >
-                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                        Calificar Usuario
-                    </button>
+                  <button
+                    onClick={() => setIsReviewModalOpen(true)}
+                    className="mt-3 md:hidden flex items-center gap-2 px-4 py-2.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30 rounded-2xl font-bold text-sm hover:bg-amber-100 transition-all active:scale-95"
+                  >
+                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    Calificar Usuario
+                  </button>
                 )}
+              </div>
             </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4 mt-5 md:mt-8 py-4 md:py-6 border-y border-neutral-100 dark:border-neutral-800">
+              <div className="text-center">
+                <p className="text-lg md:text-xl font-black text-neutral-800 dark:text-white">{userPlaces.length}</p>
+                <p className="text-[10px] font-bold text-neutral-400 uppercase">Lugares</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg md:text-xl font-black text-neutral-800 dark:text-white">{profile.rating?.toFixed(1) || '0.0'}</p>
+                <p className="text-[10px] font-bold text-neutral-400 uppercase">Rating</p>
+              </div>
+            </div>
+
+            {/* Botón calificar — solo en desktop */}
+            {currentUser && currentUser.id !== userId && (
+              <div className="hidden md:flex flex-col gap-3 mt-6">
+                <button
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="w-full py-4 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-2 border-amber-100 dark:border-amber-900/30 rounded-2xl font-bold hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all flex items-center justify-center gap-2 active:scale-95"
+                >
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  Calificar Usuario
+                </button>
+              </div>
+            )}
           </div>
         </aside>
 
         {/* Lado Derecho: Biografía e Intereses */}
-        <main className="flex-1 space-y-10">
+        <main className="flex-1 space-y-6 md:space-y-10">
             {/* Biografía Section */}
-            <section className="bg-white dark:bg-neutral-900 p-10 rounded-[40px] border border-neutral-200 dark:border-neutral-800 shadow-sm">
+            <section className="bg-white dark:bg-neutral-900 p-6 md:p-10 rounded-3xl md:rounded-[40px] border border-neutral-200 dark:border-neutral-800 shadow-sm">
                 <h2 className="text-2xl font-black text-neutral-800 dark:text-white mb-6">Sobre mí</h2>
                 <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed text-lg italic">
                     {profile.biography || `${profile.name} aún no ha añadido una biografía pública.`}

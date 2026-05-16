@@ -179,7 +179,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} />
-      <div className="relative w-full sm:max-w-xl bg-white dark:bg-bg-secondary rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+      <div className="relative w-full sm:max-w-xl bg-white dark:bg-bg-secondary rounded-t-[32px] sm:rounded-[32px] shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
 
         {/* Map Picker Overlay */}
         {showMapPicker && (

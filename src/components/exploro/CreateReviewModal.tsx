@@ -107,13 +107,22 @@ export default function CreateReviewModal({ isOpen, onClose, onCreated, initialT
     }
   };
 
+  // Resetear formulario al cerrar sin guardar
+  const handleClose = () => {
+    setComentarios('');
+    setPuntuacion(5);
+    if (!initialTargetId) setTargetId('');
+    setError(null);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={handleClose} />
 
-      <div className="relative bg-white dark:bg-bg-secondary w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 border border-neutral-200 dark:border-border-color overflow-hidden max-h-[92vh] flex flex-col">
+      <div className="relative bg-white dark:bg-bg-secondary w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 border border-neutral-200 dark:border-border-color max-h-[92vh] flex flex-col">
         <header className="px-6 md:px-8 py-5 md:py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-800/50 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-airbnb/10 rounded-xl flex items-center justify-center">
@@ -124,7 +133,7 @@ export default function CreateReviewModal({ isOpen, onClose, onCreated, initialT
               <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">{initialData ? 'Actualiza tus comentarios' : 'Comparte tu experiencia'}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors group">
+          <button onClick={handleClose} className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors group">
             <X className="w-6 h-6 text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-white" />
           </button>
         </header>

@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { 
-  Users, 
-  MapPin, 
-  Store, 
-  MessageSquare, 
-  Zap, 
-  Settings, 
-  Plus, 
-  Trash2, 
-  Edit, 
+import {
+  Users,
+  MapPin,
+  Store,
+  MessageSquare,
+  Zap,
+  Settings,
+  Plus,
+  Trash2,
+  Edit,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -22,6 +22,10 @@ import {
   User,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  X,
   Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -226,6 +230,10 @@ export default function ExploroDashboard() {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [nearbyRadius, setNearbyRadius] = useState<number>(1);
   const [recommendationType, setRecommendationType] = useState<RecommendationType>('personalized');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 15;
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{ 
     isOpen: boolean, 
     title: string, 
@@ -414,12 +422,16 @@ export default function ExploroDashboard() {
   };
 
   const handleApprove = async (id: number) => {
+    const key = `approve-${id}`;
+    setActionLoadingId(key);
     try {
       await api.approvePyme(id);
-      showMsg('Pyme aprobada exitosamente', 'success');
+      showMsg('Pyme aprobada exitosamente ✓', 'success');
       fetchData();
     } catch (error) {
       showMsg('Error al aprobar', 'error');
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -454,8 +466,31 @@ export default function ExploroDashboard() {
     return baseData;
   }, [data, activeTab, entityFilter, user?.id, user?.rol, reviewFilter]);
 
+  // Búsqueda en tiempo real sobre filteredData
+  const searchedData = React.useMemo(() => {
+    if (!searchQuery.trim()) return filteredData;
+    const q = searchQuery.toLowerCase();
+    return filteredData.filter(item =>
+      (item.nombre || item.name || '').toLowerCase().includes(q) ||
+      (item.categoria || item.tipo || '').toLowerCase().includes(q) ||
+      (item.descripcion || item.biography || '').toLowerCase().includes(q) ||
+      (item.ubicacion_textual || item.location || '').toLowerCase().includes(q)
+    );
+  }, [filteredData, searchQuery]);
+
+  // Paginación
+  const totalPages = Math.max(1, Math.ceil(searchedData.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedData = React.useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE;
+    return searchedData.slice(start, start + PAGE_SIZE);
+  }, [searchedData, safePage, PAGE_SIZE]);
+
+  // Resetear página al cambiar tab, filtro o búsqueda
+  React.useEffect(() => { setCurrentPage(1); }, [activeTab, entityFilter, searchQuery, reviewFilter]);
+
   return (
-    <div className="flex flex-col md:flex-row min-h-[calc(100vh-100px)] md:h-[calc(100vh-100px)] bg-neutral-50 dark:bg-bg-primary md:rounded-[40px] overflow-hidden shadow-2xl border border-neutral-200 dark:border-border-color mt-6 mb-10 mx-0 md:mx-10 xl:mx-16">
+    <div className={`flex flex-col md:flex-row ${viewMode === 'map' ? 'h-[calc(100vh-100px)]' : 'min-h-[calc(100vh-100px)] md:h-[calc(100vh-100px)]'} bg-neutral-50 dark:bg-bg-primary md:rounded-[40px] overflow-hidden shadow-2xl border border-neutral-200 dark:border-border-color mt-6 mb-10 mx-0 md:mx-10 xl:mx-16`}>
 
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-white dark:bg-bg-secondary border-b md:border-r md:border-b-0 border-neutral-200 dark:border-border-color p-3 md:p-6 flex flex-col shrink-0">
@@ -507,6 +542,13 @@ export default function ExploroDashboard() {
               />
             )}
 
+            <TabButton
+              active={activeTab === 'reviews'}
+              onClick={() => { setActiveTab('reviews'); setReviewFilter(null); }}
+              icon={<MessageSquare className="w-4 h-4" />}
+              label="Reseñas"
+              mobileLabel="Reseñas"
+            />
             <TabButton
               active={activeTab === 'recommendations'}
               onClick={() => setActiveTab('recommendations')}
@@ -576,6 +618,33 @@ export default function ExploroDashboard() {
 
           {/* Controls row: view toggle + filters + CTAs */}
           <div className="flex flex-wrap items-center gap-2">
+
+            {/* Entity filter: All / Lugares / Pymes */}
+            {(activeTab === 'places_pymes' || activeTab === 'my_places') && (
+              <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color">
+                {(['all', 'places', 'pymes'] as EntityFilter[]).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setEntityFilter(f)}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${entityFilter === f ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                  >
+                    {f === 'all' ? 'Todos' : f === 'places' ? '📍 Lugares' : '🏢 Pymes'}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* reviewFilter clear button */}
+            {activeTab === 'reviews' && reviewFilter && (
+              <button
+                onClick={() => setReviewFilter(null)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-airbnb/10 text-airbnb border border-airbnb/20 rounded-xl text-xs font-bold hover:bg-airbnb/20 transition-all"
+              >
+                <XCircle className="w-3.5 h-3.5" />
+                Limpiar filtro
+              </button>
+            )}
+
             {/* View Toggle */}
             {activeTab !== 'users' && (
               <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color">
@@ -671,6 +740,34 @@ export default function ExploroDashboard() {
               </button>
             )}
           </div>
+
+          {/* Search bar */}
+          {activeTab !== 'recommendations' && viewMode === 'table' && (
+            <div className="relative mt-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={`Buscar en ${
+                  activeTab === 'places_pymes' ? 'lugares y pymes' :
+                  activeTab === 'my_places' ? 'mis lugares' :
+                  activeTab === 'users' ? 'usuarios' :
+                  activeTab === 'reviews' ? 'reseñas' :
+                  activeTab === 'nearby' ? 'lugares cercanos' : 'solicitudes'
+                }...`}
+                className="w-full pl-9 pr-9 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-border-color rounded-xl text-sm outline-none focus:ring-2 focus:ring-airbnb/30 focus:border-airbnb transition-all dark:text-white placeholder:text-neutral-400 font-medium"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"
+                >
+                  <X className="w-3.5 h-3.5 text-neutral-400" />
+                </button>
+              )}
+            </div>
+          )}
         </header>
 
         {/* Message Banner */}
@@ -705,15 +802,31 @@ export default function ExploroDashboard() {
                     <Loader2 className="w-10 h-10 animate-spin" />
                     <p className="font-medium">Sincronizando con Exploro API...</p>
                 </div>
-            ) : filteredData.length === 0 ? (
+            ) : searchedData.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 text-neutral-400 py-20">
                     <Navigation className="w-16 h-16 opacity-10 animate-pulse" />
                     <div className="text-center">
-                        <p className="font-bold text-xl text-neutral-800 dark:text-white">No hay lugares en este radio</p>
-                        <p className="text-sm font-medium max-w-xs mx-auto mt-1">Prueba aumentando el radio de búsqueda o asegúrate de que el GPS esté activo.</p>
+                        <p className="font-bold text-xl text-neutral-800 dark:text-white">
+                          {searchQuery ? `Sin resultados para "${searchQuery}"` : 'No hay datos en esta sección'}
+                        </p>
+                        <p className="text-sm font-medium max-w-xs mx-auto mt-1">
+                          {searchQuery
+                            ? 'Intenta con otro término de búsqueda.'
+                            : activeTab === 'nearby'
+                              ? 'Prueba aumentando el radio de búsqueda o asegúrate de que el GPS esté activo.'
+                              : 'Aún no hay contenido registrado aquí.'}
+                        </p>
                     </div>
-                    {activeTab === 'nearby' && (
-                        <button 
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            className="mt-2 px-6 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 rounded-xl font-bold text-xs hover:bg-neutral-200 transition-all flex items-center gap-2"
+                        >
+                            <X className="w-3.5 h-3.5" /> Limpiar búsqueda
+                        </button>
+                    )}
+                    {!searchQuery && activeTab === 'nearby' && (
+                        <button
                             onClick={() => setNearbyRadius(1.4)}
                             className="mt-4 px-6 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 rounded-xl font-bold text-xs hover:bg-neutral-200 transition-all"
                         >
@@ -723,6 +836,19 @@ export default function ExploroDashboard() {
                 </div>
             ) : (
                 <div className="space-y-4 animate-fade-in overflow-x-auto pb-4 w-full">
+                    {/* Contador de resultados */}
+                    <div className="flex items-center justify-between px-1 min-w-[800px]">
+                        <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">
+                            {searchedData.length} resultado{searchedData.length !== 1 ? 's' : ''}
+                            {searchQuery && <span className="text-airbnb"> · "{searchQuery}"</span>}
+                        </span>
+                        {totalPages > 1 && (
+                          <span className="text-xs font-semibold text-neutral-400">
+                            Página {safePage} de {totalPages}
+                          </span>
+                        )}
+                    </div>
+
                     {/* ... Table UI ... */}
                     <table className="w-full text-left border-separate border-spacing-y-3 min-w-[800px]">
                         <thead>
@@ -734,7 +860,7 @@ export default function ExploroDashboard() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredData.map((item, idx) => {
+                            {paginatedData.map((item, idx) => {
                                 const itemId = String(item.id || item.id_usuario || item.id_lugar || item.id_pyme || item.id_resena || idx);
                                 const isExpanded = expandedRowId === itemId;
                                 return (
@@ -819,12 +945,15 @@ export default function ExploroDashboard() {
                                         <div className="flex justify-end gap-2">
                                             {(activeTab === 'places_pymes' || activeTab === 'my_places' || activeTab === 'approvals') && !item.aprobado && isAdmin && (
                                                 <div className="flex gap-1">
-                                                    <button 
-                                                      onClick={() => handleApprove(item.id_pyme || item.id)} 
-                                                      className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors" 
+                                                    <button
+                                                      onClick={() => handleApprove(item.id_pyme || item.id)}
+                                                      disabled={actionLoadingId === `approve-${item.id_pyme || item.id}`}
+                                                      className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors disabled:opacity-50"
                                                       title="Aprobar"
                                                     >
-                                                        <CheckCircle className="w-4 h-4" />
+                                                      {actionLoadingId === `approve-${item.id_pyme || item.id}`
+                                                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                        : <CheckCircle className="w-4 h-4" />}
                                                     </button>
                                                     <button 
                                                       onClick={() => {
@@ -882,12 +1011,15 @@ export default function ExploroDashboard() {
                                               <>
                                                 {activeTab === 'approvals' && !item.aprobado && (
                                                   <>
-                                                    <button 
+                                                    <button
                                                       onClick={() => handleApprove(item.id)}
-                                                      className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                                                      disabled={actionLoadingId === `approve-${item.id}`}
+                                                      className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors disabled:opacity-50"
                                                       title="Aprobar"
                                                     >
-                                                        <CheckCircle className="w-4 h-4" />
+                                                      {actionLoadingId === `approve-${item.id}`
+                                                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                        : <CheckCircle className="w-4 h-4" />}
                                                     </button>
                                                     <button 
                                                       onClick={() => {
@@ -958,6 +1090,54 @@ export default function ExploroDashboard() {
                             })}
                         </tbody>
                     </table>
+
+                    {/* Paginación */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 pt-4 pb-2 min-w-[800px]">
+                        <button
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={safePage === 1}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-neutral-200 dark:border-border-color text-sm font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                          <ChevronLeft className="w-4 h-4" /> Anterior
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                            .reduce<(number | '...')[]>((acc, p, idx, arr) => {
+                              if (idx > 0 && (p as number) - (arr[idx - 1] as number) > 1) acc.push('...');
+                              acc.push(p);
+                              return acc;
+                            }, [])
+                            .map((p, i) =>
+                              p === '...' ? (
+                                <span key={`ellipsis-${i}`} className="px-2 text-neutral-400 text-sm">…</span>
+                              ) : (
+                                <button
+                                  key={p}
+                                  onClick={() => setCurrentPage(p as number)}
+                                  className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${
+                                    safePage === p
+                                      ? 'bg-airbnb text-white shadow-md shadow-airbnb/20'
+                                      : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-800 dark:hover:text-white'
+                                  }`}
+                                >
+                                  {p}
+                                </button>
+                              )
+                            )}
+                        </div>
+
+                        <button
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={safePage === totalPages}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-neutral-200 dark:border-border-color text-sm font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                          Siguiente <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                 </div>
             )}
         </div>
