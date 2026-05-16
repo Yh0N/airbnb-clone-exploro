@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import {
@@ -26,7 +26,8 @@ import {
   ChevronRight,
   Search,
   X,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import * as api from '@/services/api';
@@ -209,6 +210,99 @@ const ExpandedRowContent = ({ item, isAdmin, router, itemId, onOpenReview }: { i
         </tr>
     );
 };
+
+// Mini-card for the map split-view entity list
+function MapMiniCard({ item, isSelected, entityId, onClick, onOpenReview, router }: {
+  item: any;
+  isSelected: boolean;
+  entityId: string;
+  onClick: () => void;
+  onOpenReview: () => void;
+  router: any;
+}) {
+  const name = item.nombre || item.name || 'Sin nombre';
+  const image = item.image || item.images?.[0] || item.avatar;
+  const rating = item.rating;
+  const location = item.ubicacion_textual || item.location || '';
+  const isPyme = !!item.id_pyme;
+  const catLabel = (item.categoria || item.tipo || 'Lugar').toLowerCase();
+
+  const CAT_COLORS: Record<string, string> = {
+    gastronomia: 'bg-orange-500', naturaleza: 'bg-green-500',
+    cultura: 'bg-purple-500', comercio: 'bg-pink-500',
+    recreacion: 'bg-amber-500', servicios: 'bg-slate-500',
+    turismo: 'bg-blue-500', hospedaje: 'bg-emerald-500',
+  };
+  const catBg = Object.keys(CAT_COLORS).find(k => catLabel.includes(k));
+  const pillColor = catBg ? CAT_COLORS[catBg] : 'bg-airbnb';
+
+  return (
+    <div
+      data-entity-id={entityId}
+      className={`group flex gap-3 px-4 py-3.5 cursor-pointer border-b border-neutral-100 dark:border-neutral-800 transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 ${
+        isSelected
+          ? 'bg-airbnb/5 dark:bg-airbnb/10 border-l-[3px] border-l-airbnb pl-[13px]'
+          : 'border-l-[3px] border-l-transparent'
+      }`}
+      onClick={onClick}
+    >
+      {/* Thumbnail */}
+      <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 shadow-sm">
+        {image ? (
+          <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <MapPin className="w-5 h-5 text-neutral-300 dark:text-neutral-600" />
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+        <div className="flex items-center gap-1.5">
+          <p className="font-bold text-sm text-neutral-800 dark:text-white truncate leading-tight">{name}</p>
+          {isPyme && (
+            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400 uppercase shrink-0">Pyme</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${pillColor} capitalize`}>
+            {catLabel}
+          </span>
+          {rating > 0 && (
+            <div className="flex items-center gap-0.5">
+              <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+              <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400">{Number(rating).toFixed(1)}</span>
+            </div>
+          )}
+        </div>
+
+        {location && (
+          <p className="text-[11px] text-neutral-400 truncate leading-tight">{location}</p>
+        )}
+      </div>
+
+      {/* Quick actions */}
+      <div className="flex flex-col gap-1 justify-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <button
+          onClick={(e) => { e.stopPropagation(); const id = item.id_lugar || item.id_pyme || item.id; isPyme ? router.push(`/pymes/${id}`) : router.push(`/places/${id}`); }}
+          title="Ver ficha"
+          className="p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+        >
+          <ArrowRight className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-300" />
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onOpenReview(); }}
+          title="Calificar"
+          className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+        >
+          <Star className="w-3.5 h-3.5 text-amber-500" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function ExploroDashboard() {
   const router = useRouter();
@@ -489,6 +583,16 @@ export default function ExploroDashboard() {
   // Resetear página al cambiar tab, filtro o búsqueda
   React.useEffect(() => { setCurrentPage(1); }, [activeTab, entityFilter, searchQuery, reviewFilter]);
 
+  // Ref para el panel de lista en modo mapa — permite hacer scroll al elemento seleccionado
+  const mapListRef = useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (selectedEntity && mapListRef.current) {
+      const selectedId = selectedEntity.id_pyme || selectedEntity.id_lugar || selectedEntity.id;
+      const el = mapListRef.current.querySelector(`[data-entity-id="${selectedId}"]`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selectedEntity]);
+
   return (
     <div className={`flex flex-col md:flex-row ${viewMode === 'map' ? 'h-[calc(100vh-100px)]' : 'min-h-[calc(100vh-100px)] md:h-[calc(100vh-100px)]'} bg-neutral-50 dark:bg-bg-primary md:rounded-[40px] overflow-hidden shadow-2xl border border-neutral-200 dark:border-border-color mt-6 mb-10 mx-0 md:mx-10 xl:mx-16`}>
 
@@ -714,8 +818,8 @@ export default function ExploroDashboard() {
 
             {(activeTab === 'places_pymes' || activeTab === 'my_places') && (user?.rol === 1 || isPyme || isAdmin) && (
               <>
-                <button onClick={() => setIsCreatePlaceOpen(true)} className="flex items-center gap-1.5 bg-airbnb hover:bg-airbnb-dark text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95">
-                  <Plus className="w-3.5 h-3.5" />
+                <button onClick={() => setIsCreatePlaceOpen(true)} className="flex items-center gap-1.5 bg-airbnb hover:bg-airbnb-dark text-white px-3 md:px-5 py-2 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shadow-md active:scale-95">
+                  <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   <span>Agregar Lugar</span>
                 </button>
                 <button
@@ -726,9 +830,9 @@ export default function ExploroDashboard() {
                       router.push('/pyme-onboarding');
                     }
                   }}
-                  className="flex items-center gap-1.5 bg-neutral-800 dark:bg-neutral-700 hover:bg-neutral-900 dark:hover:bg-neutral-600 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
+                  className="flex items-center gap-1.5 bg-neutral-800 dark:bg-neutral-700 hover:bg-neutral-900 dark:hover:bg-neutral-600 text-white px-3 md:px-5 py-2 md:py-3 rounded-xl text-xs md:text-sm font-bold transition-all shadow-md active:scale-95"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   <span>{user?.rol === 1 ? 'Ser Pyme' : 'Agregar Pyme'}</span>
                 </button>
               </>
@@ -781,12 +885,16 @@ export default function ExploroDashboard() {
         )}
 
         {/* Dynamic Table/List View OR Map View */}
-        <div className={`flex-1 ${viewMode === 'map' ? 'overflow-hidden' : 'overflow-auto'} p-4 md:p-8 h-full`}>
+        <div className={`flex-1 h-full ${viewMode === 'map' ? 'overflow-hidden p-0' : 'overflow-auto p-4 md:p-8'}`}>
             {viewMode === 'map' ? (
-                <div className="w-full h-full animate-fade-in">
-                    <ExploroMap 
-                        entities={filteredData} 
-                        userLocation={userLocation} 
+                <div
+                  className="w-full h-full animate-fade-in"
+                  onWheel={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                >
+                    <ExploroMap
+                        entities={filteredData}
+                        userLocation={userLocation}
                         selectedEntity={selectedEntity}
                         onSelectEntity={setSelectedEntity}
                         onOpenReview={(item) => {

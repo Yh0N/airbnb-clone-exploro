@@ -174,27 +174,6 @@ function HomeContent() {
         <ExploroDashboard />
       )}
 
-      {/* Floating Map Toggle Button (Solo en stays y mobile) */}
-      {activeTab === 'stays' && !isLoading && places.length > 0 && (
-        <div className="fixed bottom-28 md:bottom-12 left-1/2 -translate-x-1/2 z-40 animate-fade-in drop-shadow-2xl">
-          <button
-            onClick={() => setShowMapView(!showMapView)}
-            className="flex items-center gap-2 bg-neutral-900 dark:bg-neutral-800 hover:bg-black dark:hover:bg-neutral-700 hover:scale-105 transition-all text-white px-5 py-3.5 rounded-full font-bold shadow-lg border border-neutral-700"
-          >
-            {showMapView ? (
-              <>
-                <span>Mostrar lista</span>
-                <List className="w-4 h-4" />
-              </>
-            ) : (
-              <>
-                <span>Mostrar mapa</span>
-                <Map className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

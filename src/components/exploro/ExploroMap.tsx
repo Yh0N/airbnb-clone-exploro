@@ -8,10 +8,10 @@ import {
   MarkerPopup, 
   MapControls 
 } from '@/components/ui/map';
-import { 
+import {
   Loader2, MapPin, Target, ArrowRight, Star, ChevronDown, ChevronUp,
-  Utensils, Bed, TreePine, Church, ShoppingBag, PartyPopper, Wrench, Compass, 
-  Coffee, Telescope, Store, Bus, LucideIcon
+  Utensils, Bed, TreePine, Church, ShoppingBag, PartyPopper, Wrench, Compass,
+  Coffee, Telescope, Store, Bus, LucideIcon, Maximize2, Minimize2, X
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -83,6 +83,12 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
   });
   const [isLegendOpen, setIsLegendOpen] = useState(true);
   const [isMobileLegendOpen, setIsMobileLegendOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Al seleccionar entidad en móvil, cerrar leyenda
+  useEffect(() => {
+    if (selectedEntity) setIsMobileLegendOpen(false);
+  }, [selectedEntity]);
 
   // Centrar mapa si hay un selectedEntity o si llega el userLocation inicial
   useEffect(() => {
@@ -90,9 +96,7 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
       const lat = selectedEntity.latitud || selectedEntity.latitude;
       const lng = selectedEntity.longitud || selectedEntity.longitude;
       if (lat && lng) {
-        // Offset positivo para que el marcador baje a la parte inferior de la pantalla
-        // y el popup quede perfectamente centrado y visible arriba
-        setViewport({ center: [lng, lat + 0.007], zoom: 16 });
+        setViewport({ center: [lng, lat], zoom: 16 });
       }
     } else if (userLocation) {
       setViewport(prev => ({ ...prev, center: [userLocation[1], userLocation[0]] }));
@@ -110,7 +114,16 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
   }, [router]);
 
   return (
-    <div className="w-full h-full relative rounded-3xl overflow-hidden shadow-2xl border border-neutral-200 dark:border-border-color bg-neutral-100">
+    <div
+      className={cn(
+        "relative overflow-hidden bg-neutral-100 transition-all duration-300",
+        isExpanded
+          ? "fixed inset-0 z-[200]"
+          : "w-full h-full rounded-none md:rounded-3xl shadow-2xl border-0 md:border border-neutral-200 dark:border-border-color"
+      )}
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+    >
       <Map
         viewport={viewport}
         onViewportChange={setViewport}
@@ -250,6 +263,29 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
         })}
       </Map>
 
+      {/* ── BARRA FLOTANTE SUPERIOR (solo móvil) ── */}
+      <div className="md:hidden absolute top-0 inset-x-0 z-10 pointer-events-none">
+        <div className="bg-gradient-to-b from-black/50 via-black/15 to-transparent px-4 pt-4 pb-12 flex items-center justify-between pointer-events-auto">
+          {/* Contador de lugares */}
+          <div className="bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md rounded-full px-3 py-1.5 shadow-lg flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-airbnb" />
+            <span className="text-xs font-black text-neutral-800 dark:text-white">
+              {entities.filter(i => !!(i.latitud || i.latitude)).length} lugares
+            </span>
+          </div>
+          {/* Botón expandir / reducir */}
+          <button
+            onClick={() => setIsExpanded(v => !v)}
+            className="bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md rounded-full px-3 py-1.5 shadow-lg flex items-center gap-1.5 text-xs font-black text-neutral-800 dark:text-white active:scale-95 transition-transform"
+          >
+            {isExpanded
+              ? <><Minimize2 className="w-3.5 h-3.5" /> Reducir</>
+              : <><Maximize2 className="w-3.5 h-3.5" /> Expandir</>
+            }
+          </button>
+        </div>
+      </div>
+
       {/* Geolocator Overlay UI */}
       {!userLocation && (
         <div className="absolute top-6 left-6 z-10 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -276,7 +312,8 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
         </button>
       </div>
       
-      {/* Mobile Legend Button */}
+      {/* Mobile Legend Button — se oculta si hay bottom sheet de entidad abierto */}
+      {!selectedEntity && (
       <button
         onClick={() => setIsMobileLegendOpen(true)}
         className="md:hidden absolute bottom-6 left-4 z-10 flex items-center gap-2 bg-white dark:bg-neutral-800 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700 text-xs font-bold text-neutral-700 dark:text-neutral-200"
@@ -288,6 +325,85 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
         </span>
         Leyenda
       </button>
+      )}
+
+      {/* ── BOTTOM SHEET DE ENTIDAD (solo móvil) ── */}
+      {selectedEntity && (
+        <div className="md:hidden absolute inset-x-0 bottom-0 z-20 animate-in slide-in-from-bottom duration-300">
+          <div className="bg-white dark:bg-neutral-900 rounded-t-[28px] shadow-2xl border-t border-neutral-100 dark:border-neutral-800 overflow-hidden">
+
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-10 h-1 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+            </div>
+
+            {/* Imagen */}
+            {(selectedEntity.image || selectedEntity.images?.[0] || selectedEntity.avatar) && (
+              <div className="mx-4 mb-3 h-36 rounded-2xl overflow-hidden shadow-sm">
+                <img
+                  src={selectedEntity.image || selectedEntity.images?.[0] || selectedEntity.avatar}
+                  alt={selectedEntity.nombre || selectedEntity.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Info */}
+            <div className="px-5 pb-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-black text-lg text-neutral-900 dark:text-white leading-tight">
+                    {selectedEntity.nombre || selectedEntity.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-airbnb/10 text-airbnb capitalize">
+                      {selectedEntity.categoria || selectedEntity.tipo || 'Lugar'}
+                    </span>
+                    {selectedEntity.rating > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                        <span className="text-sm font-black text-neutral-700 dark:text-neutral-300">
+                          {Number(selectedEntity.rating).toFixed(1)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {(selectedEntity.ubicacion_textual || selectedEntity.location) && (
+                    <p className="text-xs text-neutral-400 mt-1.5 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{selectedEntity.ubicacion_textual || selectedEntity.location}</span>
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => onSelectEntity?.(null)}
+                  className="p-2 -mt-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors shrink-0"
+                >
+                  <X className="w-4 h-4 text-neutral-400" />
+                </button>
+              </div>
+            </div>
+
+            {/* Botones de acción */}
+            <div className="flex gap-3 px-5 pt-3 pb-7">
+              <button
+                onClick={() => handleViewDetail(selectedEntity)}
+                className="flex-1 flex items-center justify-center gap-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 py-3.5 rounded-2xl text-sm font-black shadow-md active:scale-95 transition-transform"
+              >
+                Ver ficha <ArrowRight className="w-4 h-4" />
+              </button>
+              {onOpenReview && (
+                <button
+                  onClick={() => { onOpenReview(selectedEntity); onSelectEntity?.(null); }}
+                  className="flex-1 flex items-center justify-center gap-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 py-3.5 rounded-2xl text-sm font-black active:scale-95 transition-transform"
+                >
+                  <Star className="w-4 h-4" /> Calificar
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Legend Sheet */}
       {isMobileLegendOpen && (
@@ -303,10 +419,18 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
               </button>
             </div>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-              <div className="flex items-center gap-2 col-span-2">
-                <div className="w-4 h-4 rounded-full bg-neutral-400 flex-shrink-0" style={{ border: '2px dashed white', boxSizing: 'border-box' }} />
-                <span className="text-[11px] font-bold text-neutral-600 dark:text-neutral-400 uppercase">Pyme (borde punteado)</span>
+              {/* Tipos de marcador */}
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-neutral-400 flex-shrink-0 border-2 border-solid border-white" />
+                <span className="text-[11px] font-bold text-neutral-600 dark:text-neutral-400 uppercase">Lugar</span>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-neutral-400 flex-shrink-0" style={{ border: '2px dashed white', boxSizing: 'border-box' }} />
+                <span className="text-[11px] font-bold text-neutral-600 dark:text-neutral-400 uppercase">Pyme</span>
+              </div>
+              {/* Separador */}
+              <div className="col-span-2 border-t border-neutral-100 dark:border-neutral-800 mt-1 mb-1" />
+              {/* Categorías */}
               {Object.entries(CATEGORY_CONFIG)
                 .filter(([key]) => !['default','restaurante','cafeteria','parque','mirador','museo','iglesia','tienda','transporte','hospital'].includes(key))
                 .map(([key, config]) => (
