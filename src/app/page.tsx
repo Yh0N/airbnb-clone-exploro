@@ -84,7 +84,12 @@ function HomeContent() {
       {/* Tab: Alojamientos */}
       {activeTab === 'stays' && (
         <>
-          <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 mt-6 md:mt-10">
+          {/* Barra de categorías — solo en stays */}
+          <CategoryBar
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+          />
+          <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 mt-4 md:mt-8">
             {showMapView ? (
               <div className="h-[calc(100vh-250px)] w-full rounded-2xl overflow-hidden shadow-card border border-neutral-200 dark:border-border-color animate-fade-in relative z-0">
                 <ExploroMap />

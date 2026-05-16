@@ -14,6 +14,12 @@ module.exports = {
           dark: '#D70466',
           light: '#FF697A',
         },
+        // CSS variable tokens — generan clases como bg-bg-primary, border-border-color, etc.
+        'bg-primary':    'var(--bg-primary)',
+        'bg-secondary':  'var(--bg-secondary)',
+        'text-primary':  'var(--text-primary)',
+        'text-secondary':'var(--text-secondary)',
+        'border-color':  'var(--border-color)',
         neutral: {
           50: '#FAFAFA',
           100: '#F5F5F5',
@@ -80,6 +86,7 @@ module.exports = {
         'nav': '0 1px 0 rgba(0,0,0,0.08)',
         'search': '0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05)',
         'search-hover': '0 2px 4px rgba(0,0,0,0.18)',
+        'search-mobile': '0 3px 12px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.08)',
         'modal': '0 4px 32px rgba(0,0,0,0.15)',
       },
       animation: {

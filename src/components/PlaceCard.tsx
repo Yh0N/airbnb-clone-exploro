@@ -161,21 +161,23 @@ export default function PlaceCard({ place }: PlaceCardProps) {
       </div>
 
       {/* Info — Layout estilo Airbnb */}
-      <div className="space-y-0.5">
+      <div className="space-y-0.5 mt-1">
         <div className="flex items-start justify-between gap-1">
-          <h3 className="font-bold text-[15px] text-neutral-800 group-hover:underline decoration-neutral-300 decoration-1 underline-offset-2 transition-all">
+          <h3 className="font-bold text-[15px] text-neutral-800 dark:text-white group-hover:underline decoration-neutral-300 decoration-1 underline-offset-2 transition-all line-clamp-1">
             {place.name}
           </h3>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Star className="w-3 h-3 fill-neutral-800 text-neutral-800" />
-            <span className="text-sm font-medium">{place.rating?.toFixed(2) || '0.00'}</span>
+          <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
+            <Star className="w-3 h-3 fill-neutral-800 dark:fill-white text-neutral-800 dark:text-white" />
+            <span className="text-sm font-semibold text-neutral-800 dark:text-white">{place.rating?.toFixed(1) || '0.0'}</span>
           </div>
         </div>
-        <p className="text-[14px] text-neutral-500 font-medium">
-          {place.price} <span className="font-normal">por 2 noches</span>
-        </p>
-        <p className="text-[14px] text-neutral-500 flex items-center gap-1">
-          <span className="text-neutral-400">★</span> {place.rating}
+        {place.location && (
+          <p className="text-[13px] text-neutral-500 dark:text-neutral-400 font-medium truncate">
+            {place.location}
+          </p>
+        )}
+        <p className="text-[14px] text-neutral-800 dark:text-white font-semibold pt-0.5">
+          {place.price} <span className="font-normal text-neutral-500 dark:text-neutral-400">/ noche</span>
         </p>
       </div>
     </Link>

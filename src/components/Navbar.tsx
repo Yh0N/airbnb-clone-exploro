@@ -6,7 +6,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Search, Globe, Menu, User, LogOut, Heart, MapPin, SlidersHorizontal, Moon, Sun, Map, Compass, LayoutDashboard } from 'lucide-react';
+import { Search, Globe, Menu, User, Heart, MapPin, Moon, Sun, LayoutDashboard, X, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useAppStore, type Tab } from '@/store/useAppStore';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -26,11 +26,13 @@ export default function Navbar() {
   // Local State
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -439,15 +441,19 @@ export default function Navbar() {
 
       {/* Búsqueda y Tabs móviles (Estilo Airbnb 2025) */}
       <div className="md:hidden pt-3 px-4 pb-1 space-y-4 bg-white dark:bg-bg-primary shadow-sm border-b border-neutral-100 dark:border-border-color">
-        {/* Barra de búsqueda estilo 'Pill' */}
-        <button 
-          onClick={() => router.push('/search')}
-          className="w-full flex items-center gap-4 bg-white dark:bg-bg-secondary border border-neutral-200 dark:border-border-color rounded-full px-5 py-3 shadow-search-mobile hover:shadow-md transition-shadow active:scale-95 duration-200"
+        {/* Barra de búsqueda estilo 'Pill' — abre overlay */}
+        <button
+          onClick={() => setMobileSearchOpen(true)}
+          className="w-full flex items-center gap-4 bg-white dark:bg-bg-secondary border border-neutral-200 dark:border-border-color rounded-full px-5 py-3 shadow-search-mobile hover:shadow-md transition-all active:scale-95 duration-200"
         >
-          <Search className="w-4 h-4 text-neutral-800 dark:text-white stroke-[3px]" />
-          <div className="flex flex-col items-start">
-            <span className="text-[13px] font-bold text-neutral-800 dark:text-white">Empieza la búsqueda</span>
-            <span className="text-[11px] text-neutral-500">Cualquier lugar • Cualquier semana • Añade huéspedes</span>
+          <Search className="w-4 h-4 text-neutral-800 dark:text-white stroke-[3px] flex-shrink-0" />
+          <div className="flex flex-col items-start overflow-hidden">
+            <span className="text-[13px] font-bold text-neutral-800 dark:text-white">
+              {localSearch || 'Empieza la búsqueda'}
+            </span>
+            <span className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate w-full">
+              {activeTab === 'experiences' ? 'Experiencias · Cualquier lugar' : activeTab === 'services' ? 'Servicios · Encuentra profesionales' : 'Cualquier lugar · Añade huéspedes'}
+            </span>
           </div>
         </button>
 
@@ -493,6 +499,113 @@ export default function Navbar() {
           </button>
         </div>
       </div>
+
+      {/* ===== OVERLAY DE BÚSQUEDA MÓVIL ===== */}
+      {mobileSearchOpen && (
+        <div className="md:hidden fixed inset-0 z-[200] bg-white dark:bg-bg-primary flex flex-col animate-in slide-in-from-top-2 duration-200">
+          {/* Header del overlay */}
+          <div className="flex items-center gap-3 px-4 pt-5 pb-3 border-b border-neutral-100 dark:border-border-color">
+            <button
+              onClick={() => { setMobileSearchOpen(false); setSelectedIndex(-1); }}
+              className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors flex-shrink-0"
+              aria-label="Cerrar búsqueda"
+            >
+              <ArrowLeft className="w-5 h-5 text-neutral-700 dark:text-neutral-300" />
+            </button>
+            <div className="flex-1 flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 rounded-full px-4 py-2.5">
+              <Search className="w-4 h-4 text-neutral-500 flex-shrink-0" />
+              <input
+                ref={mobileInputRef}
+                type="text"
+                value={localSearch}
+                onChange={(e) => { setLocalSearch(e.target.value); setSelectedIndex(-1); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    executeSearch(localSearch);
+                    setMobileSearchOpen(false);
+                  } else if (e.key === 'Escape') {
+                    setMobileSearchOpen(false);
+                  }
+                }}
+                placeholder={activeTab === 'experiences' ? 'Busca experiencias...' : activeTab === 'services' ? 'Busca servicios...' : 'Busca destinos...'}
+                className="flex-1 bg-transparent outline-none text-[15px] font-semibold text-neutral-800 dark:text-white placeholder:text-neutral-400 placeholder:font-normal"
+                autoFocus
+              />
+              {localSearch && (
+                <button onClick={() => setLocalSearch('')} className="flex-shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Sugerencias */}
+          <div className="flex-1 overflow-y-auto">
+            {suggestions.length > 0 ? (
+              <>
+                <p className="px-6 pt-5 pb-2 text-xs font-black text-neutral-400 uppercase tracking-widest">
+                  Sugerencias
+                </p>
+                {suggestions.map((sug: any, idx: number) => (
+                  <button
+                    key={idx}
+                    onClick={() => { executeSearch(sug.label); setMobileSearchOpen(false); }}
+                    className={`w-full flex items-center gap-4 px-6 py-4 transition-colors active:bg-neutral-100 dark:active:bg-neutral-800 ${
+                      idx === selectedIndex ? 'bg-neutral-50 dark:bg-neutral-800' : ''
+                    }`}
+                  >
+                    <div className="w-10 h-10 bg-neutral-100 dark:bg-neutral-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
+                    </div>
+                    <div className="flex flex-col items-start text-left">
+                      <span className="text-[15px] font-semibold text-neutral-800 dark:text-white">
+                        {highlightMatch(sug.label, localSearch)}
+                      </span>
+                      <span className="text-sm text-neutral-500 dark:text-neutral-400">{sug.sub}</span>
+                    </div>
+                  </button>
+                ))}
+              </>
+            ) : localSearch.length < 2 ? (
+              <div className="px-6 pt-8">
+                <p className="text-xs font-black text-neutral-400 uppercase tracking-widest mb-5">Busca por</p>
+                <div className="space-y-1">
+                  {['Pasto', 'Laguna de la Cocha', 'Las Lajas', 'Volcán Galeras', 'Ipiales'].map((sugg) => (
+                    <button
+                      key={sugg}
+                      onClick={() => { executeSearch(sugg); setMobileSearchOpen(false); }}
+                      className="w-full flex items-center gap-4 py-3.5 border-b border-neutral-100 dark:border-border-color text-left active:bg-neutral-50 dark:active:bg-neutral-800 transition-colors rounded-xl px-2"
+                    >
+                      <div className="w-9 h-9 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Search className="w-4 h-4 text-neutral-500" />
+                      </div>
+                      <span className="text-[15px] font-medium text-neutral-700 dark:text-neutral-300">{sugg}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center pt-20 px-8 text-center">
+                <div className="text-4xl mb-4">🔍</div>
+                <p className="text-neutral-500 dark:text-neutral-400 font-medium">No encontramos resultados para «{localSearch}»</p>
+                <p className="text-sm text-neutral-400 mt-2">Intenta con otro nombre o ciudad</p>
+              </div>
+            )}
+          </div>
+
+          {/* Botón buscar fijo */}
+          <div className="p-4 border-t border-neutral-100 dark:border-border-color bg-white dark:bg-bg-primary">
+            <button
+              onClick={() => { executeSearch(localSearch); setMobileSearchOpen(false); }}
+              disabled={!localSearch.trim()}
+              className="w-full bg-airbnb hover:bg-airbnb-dark disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-black text-[15px] flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+            >
+              <Search className="w-4 h-4" />
+              Buscar
+            </button>
+          </div>
+        </div>
+      )}
 
     </nav>
   );

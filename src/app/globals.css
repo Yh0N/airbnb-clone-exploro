@@ -154,6 +154,12 @@ body {
   border-radius: 8px;
 }
 
+/* Dark mode skeleton */
+.dark .skeleton {
+  background: linear-gradient(90deg, #2a2a2a 25%, #333333 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+}
+
 /* Search bar expand animation */
 @keyframes searchExpand {
   0% {

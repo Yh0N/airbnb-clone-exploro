@@ -20,9 +20,9 @@ export default function LoadingSpinner({ size = 'md', text }: LoadingSpinnerProp
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-12">
       <div
-        className={`${sizeClasses[size]} border-2 border-neutral-200 border-t-airbnb rounded-full animate-spin`}
+        className={`${sizeClasses[size]} border-2 border-neutral-200 dark:border-neutral-700 border-t-airbnb rounded-full animate-spin`}
       />
-      {text && <p className="text-sm text-neutral-500">{text}</p>}
+      {text && <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium">{text}</p>}
     </div>
   );
 }
