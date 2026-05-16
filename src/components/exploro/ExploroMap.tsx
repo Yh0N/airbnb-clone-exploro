@@ -253,7 +253,7 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
       {/* Geolocator Overlay UI */}
       {!userLocation && (
         <div className="absolute top-6 left-6 z-10 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="bg-white/90 dark:bg-bg-secondary/90 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-lg border border-neutral-200 dark:border-border-color flex items-center gap-3">
+            <div className="bg-white dark:bg-neutral-800 px-4 py-2.5 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700 flex items-center gap-3">
                 <div className="relative">
                     <Loader2 className="w-4 h-4 text-airbnb animate-spin" />
                 </div>
@@ -269,7 +269,7 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
                     setViewport({ center: [userLocation[1], userLocation[0]], zoom: 16 });
                 }
             }}
-            className="bg-white/90 dark:bg-bg-secondary/90 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-neutral-200 dark:border-border-color text-airbnb hover:scale-105 transition-all"
+            className="bg-white dark:bg-neutral-800 p-3 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700 text-airbnb hover:scale-105 transition-all"
             title="Mi ubicación"
         >
             <Target className="w-5 h-5" />
@@ -279,7 +279,7 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
       {/* Mobile Legend Button */}
       <button
         onClick={() => setIsMobileLegendOpen(true)}
-        className="md:hidden absolute bottom-6 left-4 z-10 flex items-center gap-2 bg-white/95 dark:bg-bg-secondary/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-neutral-200 dark:border-border-color text-xs font-bold text-neutral-700 dark:text-neutral-200"
+        className="md:hidden absolute bottom-6 left-4 z-10 flex items-center gap-2 bg-white dark:bg-neutral-800 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700 text-xs font-bold text-neutral-700 dark:text-neutral-200"
       >
         <span className="flex gap-0.5">
           {['bg-airbnb','bg-green-500','bg-purple-500','bg-orange-500'].map(c => (
@@ -292,7 +292,7 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
       {/* Mobile Legend Sheet */}
       {isMobileLegendOpen && (
         <div className="md:hidden absolute inset-x-0 bottom-0 z-20 animate-in slide-in-from-bottom duration-300">
-          <div className="bg-white/98 dark:bg-bg-secondary backdrop-blur-xl rounded-t-3xl shadow-2xl border-t border-neutral-200 dark:border-border-color p-5 pb-8">
+          <div className="bg-white dark:bg-neutral-900 rounded-t-3xl shadow-2xl border-t border-neutral-200 dark:border-neutral-800 p-5 pb-8">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-black text-neutral-700 dark:text-white uppercase tracking-widest">Leyenda</span>
               <button
@@ -326,7 +326,7 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
 
       {/* Legend - Vertical Compact Box on the Left */}
       <div className="absolute bottom-6 left-6 z-10 hidden md:block transition-all duration-300">
-         <div className="bg-white/95 dark:bg-bg-secondary/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-border-color overflow-hidden max-w-[200px]">
+         <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden max-w-[200px]">
             <button 
               onClick={toggleLegend}
               className="w-full flex items-center justify-between px-5 py-3 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 transition-colors border-b border-neutral-200"
