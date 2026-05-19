@@ -191,14 +191,14 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                 </div>
                 <div>
                   <h3 className="font-black text-neutral-900 dark:text-white">Explorar Mapa</h3>
-                  <p className="text-xs text-neutral-500">Toca para fijar el punto exacto</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Toca para fijar el punto exacto</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowMapPicker(false)}
                 className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-neutral-500" />
+                <X className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
               </button>
             </div>
             
@@ -244,7 +244,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
             <h2 className="text-2xl font-black tracking-tight text-neutral-900 dark:text-white">
               {initialData ? 'Editar Información' : 'Nuevo Lugar'}
             </h2>
-            <p className="text-sm font-medium text-neutral-500 mt-1">
+            <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mt-1">
               {initialData ? 'Actualiza los detalles de este destino' : 'Comparte un lugar increíble en el mapa'}
             </p>
           </div>

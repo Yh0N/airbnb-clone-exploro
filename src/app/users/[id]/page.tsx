@@ -53,7 +53,7 @@ export default function PublicProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Loader2 className="w-12 h-12 animate-spin text-airbnb mb-4" />
-        <p className="text-neutral-500 font-bold italic uppercase tracking-widest">Consultando Ecosistema Exploro...</p>
+        <p className="text-neutral-500 dark:text-neutral-400 font-bold italic uppercase tracking-widest">Consultando Ecosistema Exploro...</p>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function PublicProfilePage() {
   if (error || !profile) {
     return (
       <div className="max-w-[1200px] mx-auto px-4 py-20 text-center">
-        <div className="bg-red-50 text-red-600 p-8 rounded-3xl border border-red-100 inline-block">
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-8 rounded-3xl border border-red-100 dark:border-red-900/30 inline-block">
           <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <h2 className="text-2xl font-black mb-2">¡Ups! Algo salió mal</h2>
           <p className="font-medium mb-6">{error || "El usuario solicitado no existe."}</p>
@@ -81,7 +81,7 @@ export default function PublicProfilePage() {
       {/* Botón de volver */}
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-neutral-500 hover:text-neutral-800 dark:hover:text-white font-bold mb-6 md:mb-8 transition-colors group"
+        className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white font-bold mb-6 md:mb-8 transition-colors group"
       >
         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
         Volver al Dashboard

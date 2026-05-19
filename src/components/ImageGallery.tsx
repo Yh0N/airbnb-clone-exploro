@@ -304,18 +304,18 @@ export default function ImageGallery({
 
       {/* Caso: No hay imágenes */}
       {validImages.length === 0 ? (
-        <div className="relative rounded-2xl overflow-hidden border border-neutral-200 h-[400px] md:h-[460px] bg-gradient-to-br from-neutral-50 to-neutral-100 flex flex-col items-center justify-center gap-6 group">
-          <div className="w-24 h-24 rounded-full bg-white shadow-md flex items-center justify-center text-neutral-300 group-hover:scale-110 transition-transform duration-500 relative">
+        <div className="relative rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-700 h-[400px] md:h-[460px] bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800 flex flex-col items-center justify-center gap-6 group">
+          <div className="w-24 h-24 rounded-full bg-white dark:bg-neutral-800 shadow-md flex items-center justify-center text-neutral-300 dark:text-neutral-600 group-hover:scale-110 transition-transform duration-500 relative">
             <ImageIcon className="w-10 h-10" />
             {isUploading && (
-              <div className="absolute inset-0 bg-white/80 rounded-full flex items-center justify-center">
+              <div className="absolute inset-0 bg-white/80 dark:bg-neutral-800/80 rounded-full flex items-center justify-center">
                 <Loader2 className="w-8 h-8 text-airbnb animate-spin" />
               </div>
             )}
           </div>
           <div className="text-center px-6">
-            <h3 className="text-neutral-800 font-bold text-xl mb-2">Aún no hay fotos</h3>
-            <p className="text-neutral-500 text-sm max-w-xs mx-auto mb-8">
+            <h3 className="text-neutral-800 dark:text-white font-bold text-xl mb-2">Aún no hay fotos</h3>
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm max-w-xs mx-auto mb-8">
               El anfitrión no ha subido imágenes todavía. Si eres el dueño, puedes subir una ahora.
             </p>
             
@@ -332,7 +332,7 @@ export default function ImageGallery({
               <button 
                 onClick={startCamera}
                 disabled={isUploading}
-                className="flex items-center gap-3 bg-white text-neutral-900 border border-neutral-200 px-8 py-4 rounded-2xl font-bold hover:bg-neutral-50 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                className="flex items-center gap-3 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-700 px-8 py-4 rounded-2xl font-bold hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all shadow-sm active:scale-95 disabled:opacity-50"
               >
                 <Camera className="w-5 h-5" />
                 Tomar Foto

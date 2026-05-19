@@ -45,10 +45,10 @@ export default function PlaceGrid({ places, isLoading }: PlaceGridProps) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="text-6xl mb-4">🔍</div>
-        <h3 className="text-xl font-semibold text-neutral-800 mb-2">
+        <h3 className="text-xl font-semibold text-neutral-800 dark:text-white mb-2">
           No se encontraron lugares
         </h3>
-        <p className="text-neutral-500 text-center max-w-md">
+        <p className="text-neutral-500 dark:text-neutral-400 text-center max-w-md">
           Intenta buscar con otros términos o explora diferentes categorías para descubrir
           los increíbles destinos turísticos de Pasto y Nariño.
         </p>

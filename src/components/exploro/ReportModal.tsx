@@ -62,7 +62,7 @@ export default function ReportModal({ isOpen, onClose, entityName }: ReportModal
               <CheckCircle2 className="w-12 h-12 text-emerald-600" />
             </div>
             <h3 className="text-3xl font-black text-neutral-900 dark:text-white mb-4 tracking-tighter">¡Gracias por tu reporte!</h3>
-            <p className="text-neutral-500 font-medium leading-relaxed max-w-sm mx-auto">
+            <p className="text-neutral-500 dark:text-neutral-400 font-medium leading-relaxed max-w-sm mx-auto">
               Hemos recibido tus comentarios sobre <span className="text-neutral-900 dark:text-white font-bold">"{entityName}"</span>. Nuestro equipo de moderación lo revisará pronto.
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function ReportModal({ isOpen, onClose, entityName }: ReportModal
                             reason.color === 'orange' ? 'bg-orange-100 text-orange-600' :
                             reason.color === 'red' ? 'bg-red-100 text-red-600' :
                             reason.color === 'purple' ? 'bg-purple-100 text-purple-600' :
-                            'bg-neutral-200 text-neutral-600'
+                            'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300'
                           }`}>
                             {reason.id === 'incorrect_info' && <Info className="w-4 h-4" />}
                             {reason.id === 'non_existent' && <AlertTriangle className="w-4 h-4" />}

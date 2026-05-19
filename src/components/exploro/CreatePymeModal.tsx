@@ -204,7 +204,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
     <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
       <div className="text-center space-y-2">
         <h3 className="text-xl font-black text-neutral-800 dark:text-white tracking-tight">¿Cómo deseas registrarte?</h3>
-        <p className="text-sm text-neutral-500 max-w-sm mx-auto">Elige el tipo de registro que mejor se ajuste a tu actividad</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">Elige el tipo de registro que mejor se ajuste a tu actividad</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -326,7 +326,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
                 </div>
                 <div>
                   <h3 className="font-black text-neutral-900 dark:text-white">Ubicación en Mapa</h3>
-                  <p className="text-xs text-neutral-500">Marca el punto exacto de tu negocio</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Marca el punto exacto de tu negocio</p>
                 </div>
               </div>
               <button 
@@ -334,7 +334,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
                 onClick={() => setShowMapPicker(false)}
                 className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-neutral-500" />
+                <X className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
               </button>
             </div>
             
@@ -378,7 +378,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
               className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors"
               title="Volver"
             >
-              <ArrowLeft className="w-4 h-4 text-neutral-500" />
+              <ArrowLeft className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
             </button>
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg`}
                  style={{ backgroundColor: isPymeType ? '#2563EB' : '#F59E0B' }}>
@@ -386,11 +386,11 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
             </div>
             <div>
               <h2 className="text-lg font-bold text-neutral-800 dark:text-white">{headerTitle}</h2>
-              <p className="text-xs text-neutral-500">{headerSubtitle}</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">{headerSubtitle}</p>
             </div>
           </div>
           <button onClick={handleClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors">
-            <X className="w-5 h-5 text-neutral-500" />
+            <X className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
           </button>
         </div>
 
@@ -659,11 +659,11 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-neutral-800 dark:text-white">Nuevo Registro</h2>
-                  <p className="text-xs text-neutral-500">Únete al ecosistema turístico de Pasto</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Únete al ecosistema turístico de Pasto</p>
                 </div>
               </div>
               <button onClick={handleClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors">
-                <X className="w-5 h-5 text-neutral-500" />
+                <X className="w-5 h-5 text-neutral-500 dark:text-neutral-400" />
               </button>
             </div>
             {renderTypeSelection()}
