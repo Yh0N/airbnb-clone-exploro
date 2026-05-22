@@ -31,10 +31,19 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import * as api from '@/services/api';
-import { getCategoriaConfig } from '@/lib/taxonomy';
+import { getCategoriaConfig, getItemEmoji as getItemEmojiShared } from '@/lib/taxonomy';
 import CreatePlaceModal from './CreatePlaceModal';
 import CreatePymeModal from './CreatePymeModal';
 import CreateReviewModal from './CreateReviewModal';
+
+export const isImageValid = (url: any): boolean => {
+  if (!url) return false;
+  if (typeof url !== 'string') return false;
+  const lower = url.trim().toLowerCase();
+  if (lower === '' || lower === 'null' || lower === 'undefined') return false;
+  if (lower.endsWith('/null') || lower.endsWith('/undefined')) return false;
+  return true;
+};
 
 // Cargar el mapa dinámicamente para evitar errores de SSR con Leaflet
 const ExploroMap = dynamic(() => import('./ExploroMap'), { 
@@ -52,9 +61,10 @@ type ViewMode = 'table' | 'map';
 type EntityFilter = 'all' | 'places' | 'pymes';
 type RecommendationType = 'personalized' | 'popular' | 'nearby';
 
-const ExpandedRowContent = ({ item, isAdmin, router, itemId, onOpenReview }: { item: any, isAdmin: boolean, router: any, itemId: string, onOpenReview: (item: any) => void }) => {
+const ExpandedRowContent = ({ item, isAdmin, router, itemId, getItemEmoji, onOpenReview }: { item: any, isAdmin: boolean, router: any, itemId: string, getItemEmoji: (item: any) => string, onOpenReview: (item: any) => void }) => {
     const [reviews, setReviews] = useState<any[]>([]);
     const [loadingReviews, setLoadingReviews] = useState(true);
+    const [imageError, setImageError] = useState(false);
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -75,22 +85,26 @@ const ExpandedRowContent = ({ item, isAdmin, router, itemId, onOpenReview }: { i
         fetchReviews();
     }, [item]);
 
+    const imageUrl = item.avatar || item.image || item.images?.[0];
+    const hasValidImage = imageUrl && isImageValid(imageUrl) && !imageError;
+
     return (
         <tr className="bg-white dark:bg-neutral-900 shadow-sm border-t border-neutral-100 dark:border-neutral-800 rounded-b-2xl">
             <td colSpan={4} className="p-6 rounded-b-2xl border-x border-b border-neutral-100 dark:border-neutral-800">
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Image Section */}
-                    {(item.avatar || item.image || (item.images && item.images.length > 0)) ? (
+                    {hasValidImage ? (
                         <div className="w-full md:w-1/3 h-48 rounded-xl overflow-hidden shadow-sm border border-neutral-100 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800">
                             <img 
-                                src={item.avatar || item.image || item.images?.[0]} 
+                                src={imageUrl} 
                                 alt={item.nombre || item.name} 
                                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" 
+                                onError={() => setImageError(true)}
                             />
                         </div>
                     ) : (
-                        <div className="w-full md:w-1/3 h-48 rounded-xl overflow-hidden shadow-sm border border-neutral-100 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
-                            <ImageIcon className="w-10 h-10 text-neutral-300 dark:text-neutral-600" />
+                        <div className="w-full md:w-1/3 h-48 rounded-xl overflow-hidden shadow-sm border border-neutral-100 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-6xl">
+                            {getItemEmoji(item)}
                         </div>
                     )}
                     
@@ -226,6 +240,8 @@ function MapMiniCard({ item, isSelected, entityId, onClick, onOpenReview, router
   const location = item.ubicacion_textual || item.location || '';
   const isPyme = !!item.id_pyme;
   const catLabel = (item.categoria || item.tipo || 'Lugar').toLowerCase();
+  const [imgError, setImgError] = React.useState(false);
+  const hasValidImg = image && isImageValid(image) && !imgError;
 
   const CAT_COLORS: Record<string, string> = {
     gastronomia: 'bg-orange-500', naturaleza: 'bg-green-500',
@@ -247,13 +263,16 @@ function MapMiniCard({ item, isSelected, entityId, onClick, onOpenReview, router
       onClick={onClick}
     >
       {/* Thumbnail */}
-      <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 shadow-sm">
-        {image ? (
-          <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+      <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 shadow-sm flex items-center justify-center">
+        {hasValidImg ? (
+          <img 
+            src={image} 
+            alt={name} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+            onError={() => setImgError(true)}
+          />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <MapPin className="w-5 h-5 text-neutral-300 dark:text-neutral-600" />
-          </div>
+          <span className="text-2xl">{getItemEmojiShared(item)}</span>
         )}
       </div>
 
@@ -328,6 +347,7 @@ export default function ExploroDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 15;
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [confirmModal, setConfirmModal] = useState<{ 
     isOpen: boolean, 
     title: string, 
@@ -475,44 +495,7 @@ export default function ExploroDashboard() {
   };
 
   const getItemEmoji = (item: any) => {
-    if (activeTab === 'users') return '👤';
-    if (activeTab === 'reviews') return '💬';
-    
-    const catValue = (item.categoria || item.tipo || '').toLowerCase();
-    const isPymeItem = !!item.id_pyme;
-    
-    const config = getCategoriaConfig(catValue, isPymeItem ? 'pyme' : 'lugar');
-    
-    if (config) {
-      if (item.subcategoria) {
-        const subConfig = config.subcategorias.find(s => s.value === item.subcategoria);
-        if (subConfig) {
-          return subConfig.label.split(' ')[0]; // Extrae el emoji que está al inicio del label
-        }
-      }
-      return config.emoji;
-    }
-    
-    // Fallback si la categoría no está en la taxonomía
-    const cat = catValue;
-    if (isPymeItem) {
-      if (cat.includes('hotel') || cat.includes('alojamiento')) return '🏨';
-      if (cat.includes('restaurante') || cat.includes('gastronomia') || cat.includes('comida')) return '🍴';
-      if (cat.includes('agencia') || cat.includes('tour') || cat.includes('guia')) return '🧭';
-      if (cat.includes('artesania') || cat.includes('tienda')) return '🎨';
-      if (cat.includes('transporte')) return '🚐';
-      if (cat.includes('cultura') || cat.includes('museo')) return '🏛️';
-      return '🏢';
-    }
-    
-    if (cat.includes('naturaleza') || cat.includes('parque') || cat.includes('volcan')) return '🌋';
-    if (cat.includes('iglesia') || cat.includes('catedral')) return '⛪';
-    if (cat.includes('mirador')) return '🔭';
-    if (cat.includes('cascada') || cat.includes('rio')) return '🌊';
-    if (cat.includes('restaurante')) return '🍕';
-    if (cat.includes('plaza') || cat.includes('parque')) return '🌳';
-    
-    return '📍';
+    return getItemEmojiShared(item, activeTab);
   };
 
   const handleApprove = async (id: number) => {
@@ -997,13 +980,23 @@ export default function ExploroDashboard() {
                                                 }}
                                                 className="w-14 h-14 bg-white dark:bg-bg-primary rounded-xl flex items-center justify-center shadow-sm text-2xl overflow-hidden shrink-0 border border-neutral-100 dark:border-neutral-800 hover:opacity-80 transition-opacity active:scale-95"
                                             >
-                                                {item.avatar || item.image || (item.images && item.images.length > 0) ? (
-                                                    <img src={item.avatar || item.image || item.images[0]} alt={item.nombre || item.name || 'Imagen'} className="w-full h-full object-cover" />
-                                                ) : activeTab === 'users' && item.avatar ? (
-                                                    <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    getItemEmoji(item)
-                                                )}
+                                                {(() => {
+                                                    const imgUrl = item.avatar || item.image || (item.images && item.images.length > 0 ? item.images[0] : null);
+                                                    const hasImage = imgUrl && isImageValid(imgUrl) && !failedImages[imgUrl];
+                                                    if (hasImage) {
+                                                        return (
+                                                            <img 
+                                                                src={imgUrl} 
+                                                                alt={item.nombre || item.name || 'Imagen'} 
+                                                                className="w-full h-full object-cover" 
+                                                                onError={() => {
+                                                                    setFailedImages(prev => ({ ...prev, [imgUrl]: true }));
+                                                                }}
+                                                            />
+                                                        );
+                                                    }
+                                                    return getItemEmoji(item);
+                                                })()}
                                             </button>
                                             <div className="flex flex-col gap-1">
                                                 <button 
@@ -1185,6 +1178,7 @@ export default function ExploroDashboard() {
                                         isAdmin={isAdmin} 
                                         router={router} 
                                         itemId={itemId} 
+                                        getItemEmoji={getItemEmoji}
                                         onOpenReview={(item) => {
                                             const type = item.id_pyme ? 'pyme' : item.id_lugar ? 'place' : (item.id_usuario ? 'user' : 'place');
                                             const id = item.id_pyme || item.id_lugar || item.id_usuario || item.id;

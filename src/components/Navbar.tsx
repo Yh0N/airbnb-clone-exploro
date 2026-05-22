@@ -29,6 +29,7 @@ export default function Navbar() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [avatarError, setAvatarError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -91,6 +92,11 @@ export default function Navbar() {
   useEffect(() => {
     setSearchQuery(debouncedSearch);
   }, [debouncedSearch, setSearchQuery]);
+
+  // Reset avatar error when user changes
+  useEffect(() => {
+    setAvatarError(false);
+  }, [user]);
 
   // Click outside handlers
   useEffect(() => {
@@ -358,8 +364,13 @@ export default function Navbar() {
               >
                 <Menu className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
                 <div className="w-8 h-8 rounded-full bg-neutral-400 dark:bg-neutral-600 flex items-center justify-center overflow-hidden text-white">
-                  {isAuthenticated && user?.avatar ? (
-                    <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  {isAuthenticated && user?.avatar && !avatarError ? (
+                    <img 
+                      src={user.avatar} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover" 
+                      onError={() => setAvatarError(true)}
+                    />
                   ) : (
                     <User className="w-[18px] h-[18px]" />
                   )}

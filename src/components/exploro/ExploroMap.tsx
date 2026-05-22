@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { isImageValid } from './ExploroDashboard';
 import { 
   Map, 
   MapMarker, 
@@ -84,6 +85,7 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
   const [isLegendOpen, setIsLegendOpen] = useState(true);
   const [isMobileLegendOpen, setIsMobileLegendOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   // Al seleccionar entidad en móvil, cerrar leyenda
   useEffect(() => {
@@ -197,17 +199,25 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
                 <div className="flex flex-col">
                   {/* Imagen de cabecera */}
                   <div className="h-28 w-full relative">
-                    {(item.image || item.images?.[0] || item.avatar) ? (
-                      <img 
-                        src={item.image || item.images?.[0] || item.avatar} 
-                        alt={item.nombre || item.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-airbnb/20 to-blue-600/20 flex items-center justify-center">
-                        <MapPin className="w-8 h-8 text-airbnb/40" />
-                      </div>
-                    )}
+                    {(() => {
+                      const popupImg = item.image || item.images?.[0] || item.avatar;
+                      const hasValidImg = popupImg && isImageValid(popupImg) && !failedImages[popupImg];
+                      if (hasValidImg) {
+                        return (
+                          <img 
+                            src={popupImg} 
+                            alt={item.nombre || item.name} 
+                            className="w-full h-full object-cover"
+                            onError={() => setFailedImages(prev => ({ ...prev, [popupImg]: true }))}
+                          />
+                        );
+                      }
+                      return (
+                        <div className="w-full h-full bg-gradient-to-br from-airbnb/20 to-blue-600/20 flex items-center justify-center">
+                          <MapPin className="w-8 h-8 text-airbnb/40" />
+                        </div>
+                      );
+                    })()}
                     <div className="absolute top-2 left-2 flex gap-1.5">
                        <span className="text-[9px] font-black bg-white/90 backdrop-blur-md text-neutral-800 px-2 py-1 rounded-lg shadow-sm uppercase tracking-wider border border-white/20">
                           {item.categoria || item.tipo || 'Lugar'}
@@ -338,15 +348,27 @@ export default function ExploroMap({ entities, userLocation, selectedEntity, onS
             </div>
 
             {/* Imagen */}
-            {(selectedEntity.image || selectedEntity.images?.[0] || selectedEntity.avatar) && (
-              <div className="mx-4 mb-3 h-36 rounded-2xl overflow-hidden shadow-sm">
-                <img
-                  src={selectedEntity.image || selectedEntity.images?.[0] || selectedEntity.avatar}
-                  alt={selectedEntity.nombre || selectedEntity.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
+            {(() => {
+              const sheetImg = selectedEntity.image || selectedEntity.images?.[0] || selectedEntity.avatar;
+              const hasValidSheetImg = sheetImg && isImageValid(sheetImg) && !failedImages[sheetImg];
+              if (hasValidSheetImg) {
+                return (
+                  <div className="mx-4 mb-3 h-36 rounded-2xl overflow-hidden shadow-sm">
+                    <img
+                      src={sheetImg}
+                      alt={selectedEntity.nombre || selectedEntity.name}
+                      className="w-full h-full object-cover"
+                      onError={() => setFailedImages(prev => ({ ...prev, [sheetImg]: true }))}
+                    />
+                  </div>
+                );
+              }
+              return (
+                <div className="mx-4 mb-3 h-36 rounded-2xl overflow-hidden shadow-sm bg-gradient-to-br from-airbnb/20 to-blue-600/20 flex items-center justify-center">
+                  <MapPin className="w-8 h-8 text-airbnb/40" />
+                </div>
+              );
+            })()}
 
             {/* Info */}
             <div className="px-5 pb-2">

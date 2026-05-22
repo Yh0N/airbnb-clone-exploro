@@ -173,3 +173,46 @@ export const getSubcategoriaLabel = (
   if (!cat) return subcategoria;
   return cat.subcategorias.find((s) => s.value === subcategoria)?.label ?? subcategoria;
 };
+
+/** Devuelve el emoji representativo de un elemento */
+export const getItemEmoji = (item: any, activeTab?: string): string => {
+  if (activeTab === 'users' || item.rol !== undefined) return '👤';
+  if (activeTab === 'reviews' || item.comentario !== undefined) return '💬';
+  
+  const catValue = (item.categoria || item.tipo || '').toLowerCase();
+  const isPymeItem = !!item.id_pyme;
+  
+  const config = getCategoriaConfig(catValue, isPymeItem ? 'pyme' : 'lugar');
+  
+  if (config) {
+    if (item.subcategoria) {
+      const subConfig = config.subcategorias.find(s => s.value === item.subcategoria);
+      if (subConfig) {
+        return subConfig.label.split(' ')[0]; // Extrae el emoji que está al inicio del label
+      }
+    }
+    return config.emoji;
+  }
+  
+  // Fallback si la categoría no está en la taxonomía
+  const cat = catValue;
+  if (isPymeItem) {
+    if (cat.includes('hotel') || cat.includes('alojamiento')) return '🏨';
+    if (cat.includes('restaurante') || cat.includes('gastronomia') || cat.includes('comida')) return '🍴';
+    if (cat.includes('agencia') || cat.includes('tour') || cat.includes('guia')) return '🧭';
+    if (cat.includes('artesania') || cat.includes('tienda')) return '🎨';
+    if (cat.includes('transporte')) return '🚐';
+    if (cat.includes('cultura') || cat.includes('museo')) return '🏛️';
+    return '🏢';
+  }
+  
+  if (cat.includes('naturaleza') || cat.includes('parque') || cat.includes('volcan')) return '🌋';
+  if (cat.includes('iglesia') || cat.includes('catedral')) return '⛪';
+  if (cat.includes('mirador')) return '🔭';
+  if (cat.includes('cascada') || cat.includes('rio')) return '🌊';
+  if (cat.includes('restaurante')) return '🍕';
+  if (cat.includes('plaza') || cat.includes('parque')) return '🌳';
+  
+  return '📍';
+};
+

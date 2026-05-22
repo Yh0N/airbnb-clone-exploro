@@ -50,6 +50,14 @@ api.interceptors.response.use(
   }
 );
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+export const resolvePhotoUrl = (url: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  return `${API_BASE}${url}`;
+};
+
 // ===== MAPPERS (Transformación Backend -> Frontend) =====
 
 const mapUser = (b: any): any => ({
@@ -58,7 +66,7 @@ const mapUser = (b: any): any => ({
   name: b.nombre,
   descripcion: b.perfil?.biografia || 'Sin biografía',
   email: b.correo,
-  avatar: b.perfil?.foto || b.foto_perfil || '',
+  avatar: resolvePhotoUrl(b.perfil?.foto || b.foto_perfil || ''),
   rol: b.rol,
   member_since: b.fecha_registro ? new Date(b.fecha_registro).getFullYear().toString() : '2024',
   favorites: b.favorites || [],
@@ -69,38 +77,33 @@ const mapUser = (b: any): any => ({
   reviews_count: b.numero_reseñas || 0
 });
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-export const resolvePhotoUrl = (url: string): string => {
-  if (!url) return '';
-  if (url.startsWith('http') || url.startsWith('data:')) return url;
-  return `${API_BASE}${url}`;
+const mapPlace = (b: any): any => {
+  const fotosArray = typeof b.fotos === 'string' ? b.fotos.split(',').filter(Boolean) : (Array.isArray(b.fotos) ? b.fotos : []);
+  return {
+    id: b.id_lugar,
+    nombre: b.nombre,
+    name: b.nombre,
+    descripcion: b.descripcion || '',
+    description: b.descripcion || '',
+    category: b.categoria || 'naturaleza',
+    categoria: b.categoria,
+    subcategoria: b.subcategoria,
+    image: resolvePhotoUrl(b.foto_principal || ''),
+    images: fotosArray.map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f),
+    price: b.precio ? `$${b.precio.toLocaleString()} COP` : 'Acceso gratuito',
+    price_category: b.precio ? `$${b.precio.toLocaleString()} COP` : 'Acceso gratuito',
+    rating: b.calificacion_promedio || 0,
+    reviews_count: b.numero_reseñas || 0,
+    location: b.ubicacion_textual || b.ubicacion || 'Pasto, Nariño',
+    latitude: b.latitud || 1.2136,
+    longitude: b.longitud || -77.2811,
+    id_usuario: b.id_usuario,
+    aprobado: b.aprobado,
+    features: b.servicios || [],
+    host_name: b.host_name || b.pyme?.nombre || 'Anfitrión de Exploro',
+    host_since: b.host_since || '2024'
+  };
 };
-
-const mapPlace = (b: any): any => ({
-  id: b.id_lugar,
-  nombre: b.nombre,
-  name: b.nombre,
-  descripcion: b.descripcion || '',
-  description: b.descripcion || '',
-  category: b.categoria || 'naturaleza',
-  categoria: b.categoria,
-  subcategoria: b.subcategoria,
-  image: resolvePhotoUrl(b.foto_principal || ''),
-  images: (b.fotos || []).map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f),
-  price: b.precio ? `$${b.precio.toLocaleString()} COP` : 'Acceso gratuito',
-  price_category: b.precio ? `$${b.precio.toLocaleString()} COP` : 'Acceso gratuito',
-  rating: b.calificacion_promedio || 0,
-  reviews_count: b.numero_reseñas || 0,
-  location: b.ubicacion_textual || b.ubicacion || 'Pasto, Nariño',
-  latitude: b.latitud || 1.2136,
-  longitude: b.longitud || -77.2811,
-  id_usuario: b.id_usuario,
-  aprobado: b.aprobado,
-  features: b.servicios || [],
-  host_name: b.host_name || b.pyme?.nombre || 'Anfitrión de Exploro',
-  host_since: b.host_since || '2024'
-});
 
 const mapExperience = (b: any): Experience => ({
   id: b.id_experiencia || b.id,
@@ -127,24 +130,27 @@ const mapService = (b: any): Service => ({
   reviews_count: b.numero_reseñas || b.reviews_count
 });
 
-const mapPyme = (b: any): any => ({
-  id: b.id_pyme,
-  id_pyme: b.id_pyme,
-  nombre: b.nombre,
-  descripcion: `Empresa de tipo: ${b.tipo || 'General'}`,
-  tipo: b.tipo,
-  categoria: b.tipo,
-  ubicacion: b.ubicacion_textual || 'Sin ubicación',
-  latitud: b.latitud || 1.2136,
-  longitud: b.longitud || -77.2811,
-  id_usuario: b.id_usuario,
-  rating: b.calificacion_promedio || 0,
-  reviews_count: b.numero_reseñas || 0,
-  aprobado: b.aprobado,
-  subcategoria: b.subcategoria,
-  image: resolvePhotoUrl(b.foto_principal || ''),
-  images: (b.fotos || []).map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f),
-});
+const mapPyme = (b: any): any => {
+  const fotosArray = typeof b.fotos === 'string' ? b.fotos.split(',').filter(Boolean) : (Array.isArray(b.fotos) ? b.fotos : []);
+  return {
+    id: b.id_pyme,
+    id_pyme: b.id_pyme,
+    nombre: b.nombre,
+    descripcion: `Empresa de tipo: ${b.tipo || 'General'}`,
+    tipo: b.tipo,
+    categoria: b.tipo,
+    ubicacion: b.ubicacion_textual || 'Sin ubicación',
+    latitud: b.latitud || 1.2136,
+    longitud: b.longitud || -77.2811,
+    id_usuario: b.id_usuario,
+    rating: b.calificacion_promedio || 0,
+    reviews_count: b.numero_reseñas || 0,
+    aprobado: b.aprobado,
+    subcategoria: b.subcategoria,
+    image: resolvePhotoUrl(b.foto_principal || ''),
+    images: fotosArray.map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f),
+  };
+};
 
 const mapReview = (b: any): any => ({
   id: b.id_reseña || b.id_resena || b.id_review,
@@ -350,27 +356,133 @@ export const getPlace = async (id: number): Promise<Place | null> => {
 };
 
 export const getExperiences = async (category?: string): Promise<Experience[]> => {
+  // 1. Obtener datos quemados (mock) locales del frontend
+  let results = [...experiences];
+  if (category && category !== 'all') {
+    results = results.filter(exp => exp.category.toLowerCase() === category.toLowerCase());
+  }
+
   if (USE_MOCK) {
     await delay(600);
-    if (category && category !== 'all') {
-      return experiences.filter(exp => exp.category.toLowerCase() === category.toLowerCase());
-    }
-    return experiences;
+    return results;
   }
-  const response = await api.get('/experiences', { params: { category } });
-  return (response.data as any[]).map(mapExperience);
+
+  // 2. Obtener datos reales de la base de datos (Lugares con categoría 'experiencia' o similar)
+  try {
+    const response = await api.get('/places');
+    const dbExperiences = response.data
+      .filter((p: any) => {
+        const cat = (p.categoria || '').toLowerCase();
+        return cat === 'experiencia' || cat === 'experiencias' || cat === 'aventura' || cat === 'cultura';
+      })
+      .map((p: any) => {
+        const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
+        return {
+          id: p.id_lugar,
+          title: p.nombre,
+          category: p.categoria || 'Experiencia',
+          host: p.host_name || p.pyme?.nombre || 'Anfitrión Local',
+          image: resolvePhotoUrl(p.foto_principal || (fotosArray[0] || '')),
+          price: p.precio ? `$${p.precio.toLocaleString()} COP` : 'Acceso gratuito',
+          rating: p.calificacion_promedio || 0.0,
+          reviews_count: p.numero_reseñas || 0,
+          duration: '3 horas',
+          isOriginal: false
+        };
+      });
+
+    // Filtrar los de la BD por categoría si se requiere
+    let filteredDb = dbExperiences;
+    if (category && category !== 'all') {
+      const catLower = category.toLowerCase();
+      const normalize = (s: string) => s.toLowerCase().replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u");
+      filteredDb = dbExperiences.filter((e: any) => normalize(e.category) === normalize(catLower));
+    }
+
+    results = [...results, ...filteredDb];
+  } catch (error) {
+    console.error('Error fetching real experiences from API:', error);
+  }
+
+  return results;
 };
 
 export const getServices = async (category?: string): Promise<Service[]> => {
+  // 1. Obtener datos quemados (mock) locales del frontend
+  let results = [...services];
+  if (category && category !== 'all') {
+    results = results.filter(srv => srv.category.toLowerCase() === category.toLowerCase());
+  }
+
   if (USE_MOCK) {
     await delay(600);
-    if (category && category !== 'all') {
-      return services.filter(srv => srv.category.toLowerCase() === category.toLowerCase());
-    }
-    return services;
+    return results;
   }
-  const response = await api.get('/services', { params: { category } });
-  return (response.data as any[]).map(mapService);
+
+  // 2. Obtener datos reales de la base de datos (Lugares de categoría servicio o Pymes de tipo servicio)
+  try {
+    // Consultamos lugares y pymes para ver si hay servicios reales en la BD
+    const [placesRes, pymesRes] = await Promise.all([
+      api.get('/places').catch(() => ({ data: [] })),
+      api.get('/pymes').catch(() => ({ data: [] }))
+    ]);
+
+    const dbServicesFromPlaces = placesRes.data
+      .filter((p: any) => {
+        const cat = (p.categoria || '').toLowerCase();
+        return cat === 'servicio' || cat === 'servicios';
+      })
+      .map((p: any) => {
+        const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
+        return {
+          id: p.id_lugar,
+          title: p.nombre,
+          provider: p.host_name || p.pyme?.nombre || 'Proveedor Local',
+          category: p.categoria || 'Servicio',
+          image: resolvePhotoUrl(p.foto_principal || (fotosArray[0] || '')),
+          price: p.precio ? `$${p.precio.toLocaleString()} COP` : '$50,000 COP',
+          pricingType: 'per_hour' as const,
+          rating: p.calificacion_promedio || 0.0,
+          reviews_count: p.numero_reseñas || 0
+        };
+      });
+
+    const dbServicesFromPymes = pymesRes.data
+      .filter((p: any) => {
+        const tipo = (p.tipo || '').toLowerCase();
+        return tipo === 'servicio' || tipo === 'servicios' || tipo === 'agencia';
+      })
+      .map((p: any) => {
+        const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
+        return {
+          id: p.id_pyme + 1000, // Evitar colisión de IDs con lugares
+          title: p.nombre,
+          provider: p.nombre || 'Pyme local',
+          category: p.tipo || 'Servicio',
+          image: resolvePhotoUrl(p.foto_principal || (fotosArray[0] || '')),
+          price: '$60,000 COP',
+          pricingType: 'per_hour' as const,
+          rating: p.calificacion_promedio || 0.0,
+          reviews_count: p.numero_reseñas || 0
+        };
+      });
+
+    const dbServices = [...dbServicesFromPlaces, ...dbServicesFromPymes];
+
+    // Filtrar los de la BD por categoría si se requiere
+    let filteredDb = dbServices;
+    if (category && category !== 'all') {
+      const catLower = category.toLowerCase();
+      const normalize = (s: string) => s.toLowerCase().replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u");
+      filteredDb = dbServices.filter((s: any) => normalize(s.category) === normalize(catLower));
+    }
+
+    results = [...results, ...filteredDb];
+  } catch (error) {
+    console.error('Error fetching real services from API:', error);
+  }
+
+  return results;
 };
 
 export const loginSocial = async (provider: 'google' | 'facebook', rol: number = 1) => {

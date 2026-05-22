@@ -8,6 +8,7 @@ import PlaceGrid from '@/components/PlaceGrid';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CreateReviewModal from '@/components/exploro/CreateReviewModal';
 import { useAuth } from '@/context/AuthContext';
+import { isImageValid } from '@/components/exploro/ExploroDashboard';
 
 export default function PublicProfilePage() {
   const params = useParams();
@@ -20,6 +21,7 @@ export default function PublicProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const { user: currentUser } = useAuth();
+  const [avatarError, setAvatarError] = useState(false);
 
   useEffect(() => {
     const fetchPublicData = async () => {
@@ -98,8 +100,8 @@ export default function PublicProfilePage() {
               {/* Avatar */}
               <div className="relative flex-shrink-0 md:mb-6">
                 <div className="w-20 h-20 md:w-32 md:h-32 md:mx-auto rounded-full overflow-hidden ring-4 ring-neutral-50 dark:ring-neutral-800 shadow-lg">
-                  {profile.avatar ? (
-                    <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
+                  {profile.avatar && isImageValid(profile.avatar) && !avatarError ? (
+                    <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" onError={() => setAvatarError(true)} />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-airbnb to-airbnb-dark flex items-center justify-center">
                       <User className="text-white w-8 h-8 md:w-12 md:h-12" />
