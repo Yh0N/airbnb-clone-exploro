@@ -149,8 +149,9 @@ export default function PlaceDetailPage() {
   };
 
   const handleWhatsApp = () => {
-    // Simulamos un número de WhatsApp o usamos uno del lugar si existiera
-    const phone = "573000000000"; 
+    const numero = place.whatsapp || place.telefono;
+    if (!numero) return;
+    const phone = numero.startsWith('57') ? numero : `57${numero}`;
     const message = encodeURIComponent(`Hola, vi tu negocio "${place.name}" en Exploro y me gustaría obtener más información.`);
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
@@ -251,14 +252,23 @@ export default function PlaceDetailPage() {
                   Cómo llegar
                 </button>
 
-                {isPyme && (
+                {isPyme && (place.whatsapp || place.telefono) && (
                   <button
                     onClick={handleWhatsApp}
-                    className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-neutral-50 hover:bg-white border border-neutral-200 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
+                    className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
                   >
                     <MessageCircle className="w-4 h-4 text-emerald-600" />
                     WhatsApp
                   </button>
+                )}
+                {isPyme && place.telefono && (
+                  <a
+                    href={`tel:${place.telefono}`}
+                    className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-neutral-50 hover:bg-white border border-neutral-200 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
+                  >
+                    <span className="text-blue-500">📞</span>
+                    {place.telefono}
+                  </a>
                 )}
 
                 <button

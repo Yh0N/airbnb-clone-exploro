@@ -167,6 +167,30 @@ const ExpandedRowContent = ({ item, isAdmin, router, itemId, getItemEmoji, onOpe
                             </div>
                         )}
                         
+                        {/* Contacto: teléfono y WhatsApp (solo pymes) */}
+                        {(item.telefono || item.whatsapp) && (
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {item.telefono && (
+                              <a
+                                href={`tel:${item.telefono}`}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-xl border border-blue-100 dark:border-blue-800 hover:bg-blue-100 transition-colors"
+                              >
+                                📞 {item.telefono}
+                              </a>
+                            )}
+                            {item.whatsapp && (
+                              <a
+                                href={`https://wa.me/57${item.whatsapp}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-xl border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-100 transition-colors"
+                              >
+                                💬 WhatsApp {item.whatsapp}
+                              </a>
+                            )}
+                          </div>
+                        )}
+
                         {/* Quick Actions / More Info */}
                         <div className="flex flex-wrap gap-3 mt-auto pt-2 border-t border-neutral-100 dark:border-neutral-800">
                             <button 

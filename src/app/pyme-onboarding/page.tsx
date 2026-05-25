@@ -66,6 +66,8 @@ export default function PymeOnboarding() {
     ciudad: 'Pasto',
     latitud: '',
     longitud: '',
+    telefono: '',
+    whatsapp: '',
   });
 
   // Verificación de auth y rol
@@ -120,6 +122,8 @@ export default function PymeOnboarding() {
         nombre: form.nombre,
         tipo: form.tipo,
         ubicacion_textual: fullDireccion,
+        telefono: form.telefono || undefined,
+        whatsapp: form.whatsapp || undefined,
       };
 
       // Solo añadir coordenadas si son números válidos
@@ -403,12 +407,37 @@ export default function PymeOnboarding() {
                         />
                       </div>
                       
-                      <CustomSelect 
+                      <CustomSelect
                         label="Categoría del Negocio"
                         options={TIPOS_PYME}
                         value={form.tipo}
                         onChange={val => setForm({...form, tipo: val})}
                       />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-black text-neutral-500 uppercase tracking-widest ml-1">📞 Teléfono</label>
+                          <input
+                            type="tel"
+                            value={form.telefono}
+                            onChange={e => setForm({...form, telefono: e.target.value})}
+                            placeholder="3001234567"
+                            maxLength={15}
+                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-800 border-2 border-transparent focus:border-blue-400/40 focus:bg-white dark:focus:bg-neutral-900 rounded-2xl outline-none transition-all text-neutral-900 dark:text-white font-bold placeholder:text-neutral-400"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-black text-neutral-500 uppercase tracking-widest ml-1">💬 WhatsApp</label>
+                          <input
+                            type="tel"
+                            value={form.whatsapp}
+                            onChange={e => setForm({...form, whatsapp: e.target.value})}
+                            placeholder="3001234567"
+                            maxLength={15}
+                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-800 border-2 border-transparent focus:border-emerald-400/40 focus:bg-white dark:focus:bg-neutral-900 rounded-2xl outline-none transition-all text-neutral-900 dark:text-white font-bold placeholder:text-neutral-400"
+                          />
+                        </div>
+                      </div>
 
                       <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-3xl border border-blue-100 dark:border-blue-900/30 flex gap-4">
                         <CheckCircle2 className="w-6 h-6 text-blue-500 shrink-0" />

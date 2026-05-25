@@ -46,6 +46,8 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
     ciudad: 'Pasto',
     latitud: '',
     longitud: '',
+    telefono: '',
+    whatsapp: '',
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(resolvePhotoUrl(initialData?.foto_principal || initialData?.image) || null);
@@ -79,6 +81,8 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
         ciudad: 'Pasto',
         latitud: initialData.latitud?.toString() || '',
         longitud: initialData.longitud?.toString() || '',
+        telefono: initialData.telefono || '',
+        whatsapp: initialData.whatsapp || '',
       });
 
       if (initialData.latitud && initialData.longitud) {
@@ -89,7 +93,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
       setImagePreview(resolvePhotoUrl(initialData.foto_principal || initialData.image) || null);
     } else {
       setRegistrationType(null);
-      setForm({ nombre: '', categoria: '', subcategoria: '', prefijo_direccion: 'Calle', direccion_detalle: '', ciudad: 'Pasto', latitud: '', longitud: '' });
+      setForm({ nombre: '', categoria: '', subcategoria: '', prefijo_direccion: 'Calle', direccion_detalle: '', ciudad: 'Pasto', latitud: '', longitud: '', telefono: '', whatsapp: '' });
       setImagePreview(null);
       setSelectedImage(null);
     }
@@ -100,7 +104,7 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
   const handleClose = () => {
     if (!initialData) {
       setRegistrationType(null);
-      setForm({ nombre: '', categoria: '', subcategoria: '', prefijo_direccion: 'Calle', direccion_detalle: '', ciudad: 'Pasto', latitud: '', longitud: '' });
+      setForm({ nombre: '', categoria: '', subcategoria: '', prefijo_direccion: 'Calle', direccion_detalle: '', ciudad: 'Pasto', latitud: '', longitud: '', telefono: '', whatsapp: '' });
       setLocationMode('address');
     }
     onClose();
@@ -165,6 +169,8 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
         ubicacion_textual: fullDireccion,
         latitud: form.latitud ? parseFloat(form.latitud) : undefined,
         longitud: form.longitud ? parseFloat(form.longitud) : undefined,
+        telefono: form.telefono || undefined,
+        whatsapp: form.whatsapp || undefined,
       };
 
       let pymeId = initialData?.id_pyme;
@@ -419,6 +425,32 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
               placeholder={namePlaceholder}
               className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white placeholder:text-neutral-400"
             />
+          </div>
+
+          {/* Contacto: Teléfono y WhatsApp */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-neutral-700 dark:text-neutral-300">📞 Teléfono</label>
+              <input
+                type="tel"
+                value={form.telefono}
+                onChange={e => setForm({ ...form, telefono: e.target.value })}
+                placeholder="3001234567"
+                maxLength={15}
+                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-blue-500/50 transition-all dark:text-white placeholder:text-neutral-400 text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-neutral-700 dark:text-neutral-300">💬 WhatsApp</label>
+              <input
+                type="tel"
+                value={form.whatsapp}
+                onChange={e => setForm({ ...form, whatsapp: e.target.value })}
+                placeholder="3001234567"
+                maxLength={15}
+                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all dark:text-white placeholder:text-neutral-400 text-sm"
+              />
+            </div>
           </div>
 
           {/* Categoría principal */}

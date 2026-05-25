@@ -23,6 +23,8 @@ export interface Place {
   id_usuario?: number;
   servicios?: string[];
   features?: string[];
+  telefono?: string;
+  whatsapp?: string;
 }
 
 export type Category = 'Todos' | 'Gastronomía' | 'Cultura' | 'Naturaleza' | 'Religioso';

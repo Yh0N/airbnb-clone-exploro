@@ -149,6 +149,8 @@ const mapPyme = (b: any): any => {
     subcategoria: b.subcategoria,
     image: resolvePhotoUrl(b.foto_principal || ''),
     images: fotosArray.map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f),
+    telefono: b.telefono || null,
+    whatsapp: b.whatsapp || null,
   };
 };
 
