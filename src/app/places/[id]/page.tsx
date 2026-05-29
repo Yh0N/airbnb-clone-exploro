@@ -327,7 +327,7 @@ export default function PlaceDetailPage() {
       <div className="mb-12 shadow-2xl rounded-2xl overflow-hidden">
         <ImageGallery 
           images={place.images || []} 
-          placeName={place.name} 
+          placeName={place.name || 'Lugar'} 
           entityId={place.id}
           entityType="place"
           isOwner={isAuthenticated && user?.id === place.id_usuario}
@@ -447,9 +447,9 @@ export default function PlaceDetailPage() {
             <p className="text-neutral-500 mb-8 font-medium">{place.location}, Nariño</p>
             <div className="h-[450px] rounded-3xl overflow-hidden border border-neutral-200 shadow-inner group">
               <MapComponent
-                latitude={place.latitude}
-                longitude={place.longitude}
-                name={place.name}
+                latitude={place.latitude || 0}
+                longitude={place.longitude || 0}
+                name={place.name || 'Lugar'}
               />
             </div>
           </div>
