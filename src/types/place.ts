@@ -25,6 +25,12 @@ export interface Place {
   features?: string[];
   telefono?: string;
   whatsapp?: string;
+  location?: string;
+  id_pyme?: number;
+  subcategoria?: string;
+  subcategory?: string;
+  host_name?: string;
+  host_since?: string;
 }
 
 export type Category = 'Todos' | 'Gastronomía' | 'Cultura' | 'Naturaleza' | 'Religioso';

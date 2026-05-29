@@ -122,7 +122,7 @@ export default function PlaceDetailPage() {
   const canEdit = isAdmin || isOwner;
 
   // Determinar si es PyME o Lugar Turístico (Si tiene id_pyme o si la categoría indica negocio)
-  const isPyme = !!place.id_pyme || ['hotel', 'restaurante', 'café', 'tienda', 'agencia'].includes(place.category?.toLowerCase());
+  const isPyme = !!(place as any).id_pyme || ['hotel', 'restaurante', 'café', 'tienda', 'agencia'].includes(place.category?.toLowerCase() || '');
 
   const handleShare = async () => {
     const shareData = {
@@ -188,9 +188,9 @@ export default function PlaceDetailPage() {
             <span className="bg-neutral-100 text-neutral-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-neutral-200">
               {place.category || 'Destino'}
             </span>
-            {(place.subcategoria || (place as any).subcategory) && (
+            {((place as any).subcategoria || (place as any).subcategory) && (
               <span className="bg-airbnb text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-airbnb/20 shadow-sm shadow-airbnb/20">
-                {place.subcategoria || (place as any).subcategory}
+                {(place as any).subcategoria || (place as any).subcategory}
               </span>
             )}
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${
