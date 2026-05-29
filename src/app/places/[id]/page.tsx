@@ -558,7 +558,7 @@ export default function PlaceDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {similarPlaces.map((p) => (
               <div key={p.id} className="hover:-translate-y-2 transition-transform duration-300">
-                <PlaceCard place={p} />
+                <PlaceCard place={p as any} />
               </div>
             ))}
           </div>
