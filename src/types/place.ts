@@ -31,6 +31,8 @@ export interface Place {
   subcategory?: string;
   host_name?: string;
   host_since?: string;
+  price?: number | string;
+  price_category?: string;
 }
 
 export type Category = 'Todos' | 'Gastronomía' | 'Cultura' | 'Naturaleza' | 'Religioso';
