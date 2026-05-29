@@ -19,7 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 import CreateReviewModal from '@/components/exploro/CreateReviewModal';
 import CreatePlaceModal from '@/components/exploro/CreatePlaceModal';
 import ReportModal from '@/components/exploro/ReportModal';
-import type { Place } from '@/services/mockData';
+import type { Place } from '@/types/place';
 
 // Componente de mapa dinámico
 import dynamic from 'next/dynamic';
@@ -116,7 +116,7 @@ export default function PlaceDetailPage() {
     );
   }
 
-  const isGuestFavorite = place.rating >= 4.8;
+  const isGuestFavorite = (place.rating ?? 0) >= 4.8;
   const isAdmin = user?.rol === 3;
   const isOwner = isAuthenticated && user?.id === place.id_usuario;
   const canEdit = isAdmin || isOwner;
