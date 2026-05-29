@@ -594,7 +594,7 @@ export default function PlaceDetailPage() {
       <ReportModal 
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
-        entityName={place.name}
+        entityName={place.name || 'Lugar'}
       />
     </div>
   );
