@@ -9,7 +9,7 @@ import {
   Star, MapPin, Share, Heart, ChevronRight, Award, 
   Shield, Calendar, Flag, Mountain, TreePine, 
   Camera, Info, InfoIcon, ExternalLink,
-  Map, MessageCircle, Bookmark, AlertTriangle, ChevronLeft
+  Map, MessageCircle, Bookmark, ChevronLeft
 } from 'lucide-react';
 import ImageGallery from '@/components/ImageGallery';
 import PlaceCard from '@/components/PlaceCard';
@@ -18,7 +18,6 @@ import { getPlace, getPlaces, toggleFavorite, getPlaceReviews, resolvePhotoUrl }
 import { useAuth } from '@/context/AuthContext';
 import CreateReviewModal from '@/components/exploro/CreateReviewModal';
 import CreatePlaceModal from '@/components/exploro/CreatePlaceModal';
-import ReportModal from '@/components/exploro/ReportModal';
 import type { Place } from '@/types/place';
 
 // Componente de mapa dinámico
@@ -43,7 +42,6 @@ export default function PlaceDetailPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
@@ -154,10 +152,6 @@ export default function PlaceDetailPage() {
     const phone = numero.startsWith('57') ? numero : `57${numero}`;
     const message = encodeURIComponent(`Hola, vi tu negocio "${place.name}" en Exploro y me gustaría obtener más información.`);
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-  };
-
-  const handleReport = () => {
-    setIsReportModalOpen(true);
   };
 
   const handleEditReview = (review: any) => {
@@ -287,13 +281,6 @@ export default function PlaceDetailPage() {
                   Compartir
                 </button>
 
-                <button
-                  onClick={handleReport}
-                  className="flex items-center gap-2 text-xs font-bold text-neutral-400 hover:text-red-500 bg-neutral-50 dark:bg-neutral-800 hover:bg-red-50 dark:hover:bg-red-900/20 border border-neutral-200 dark:border-neutral-700 hover:border-red-100 px-3 py-2.5 rounded-xl transition-all whitespace-nowrap flex-shrink-0"
-                  title="Reportar este lugar"
-                >
-                  <AlertTriangle className="w-4 h-4" />
-                </button>
               </div>
 
               {/* Fila 2: CTA principal (y editar si es owner) */}
@@ -591,11 +578,6 @@ export default function PlaceDetailPage() {
         initialData={place}
       />
 
-      <ReportModal 
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-        entityName={place.name || 'Lugar'}
-      />
     </div>
   );
 }
