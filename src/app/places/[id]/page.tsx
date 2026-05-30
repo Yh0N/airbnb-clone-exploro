@@ -98,12 +98,12 @@ export default function PlaceDetailPage() {
 
   if (!place) {
     return (
-      <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 py-32 text-center bg-neutral-50 min-h-screen">
-        <div className="w-24 h-24 bg-white rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-8">
+      <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 py-32 text-center bg-neutral-50 dark:bg-neutral-900 min-h-screen">
+        <div className="w-24 h-24 bg-white dark:bg-neutral-800 rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-8">
           <span className="text-5xl">🏔️</span>
         </div>
-        <h2 className="text-3xl font-bold text-neutral-800 mb-3 tracking-tight">Lugar no encontrado</h2>
-        <p className="text-neutral-500 mb-10 max-w-md mx-auto leading-relaxed">
+        <h2 className="text-3xl font-bold text-neutral-800 dark:text-white mb-3 tracking-tight">Lugar no encontrado</h2>
+        <p className="text-neutral-500 dark:text-neutral-400 mb-10 max-w-md mx-auto leading-relaxed">
           El destino que buscas parece haberse movido o no está disponible en este momento.
         </p>
         <button
@@ -170,12 +170,12 @@ export default function PlaceDetailPage() {
   };
 
   return (
-    <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       
       {/* Botón Volver */}
       <button 
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-sm font-bold text-neutral-500 hover:text-neutral-900 transition-all mb-6 group w-fit"
+        className="flex items-center gap-2 text-sm font-bold text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-all mb-6 group w-fit"
       >
         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
         Volver
@@ -185,7 +185,7 @@ export default function PlaceDetailPage() {
           
           {/* Categoría y Tipo Visual Badge */}
           <div className="flex items-center gap-3">
-            <span className="bg-neutral-100 text-neutral-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-neutral-200">
+            <span className="bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-neutral-200 dark:border-neutral-700">
               {place.category || 'Destino'}
             </span>
             {((place as any).subcategoria || (place as any).subcategory) && (
@@ -195,8 +195,8 @@ export default function PlaceDetailPage() {
             )}
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${
               isPyme 
-                ? 'bg-amber-50 text-amber-700 border-amber-200' 
-                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/30' 
+                : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/30'
             }`}>
               {isPyme ? (
                 <>
@@ -214,13 +214,13 @@ export default function PlaceDetailPage() {
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex-1">
-              <h1 className="text-4xl md:text-5xl font-black text-neutral-900 tracking-tighter mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-neutral-900 dark:text-white tracking-tighter mb-4">
                 {place.name}
               </h1>
               
-              <div className="flex items-center gap-4 text-[15px] text-neutral-600 flex-wrap font-medium">
-                <div className="flex items-center gap-1.5 text-neutral-900 font-bold">
-                  <Star className="w-4 h-4 fill-neutral-900" />
+              <div className="flex items-center gap-4 text-[15px] text-neutral-600 dark:text-neutral-400 flex-wrap font-medium">
+                <div className="flex items-center gap-1.5 text-neutral-900 dark:text-white font-bold">
+                  <Star className="w-4 h-4 fill-neutral-900 dark:fill-white" />
                   <span>{place.rating?.toFixed(1) || '0.0'}</span>
                   <span className="text-neutral-400 mx-1">·</span>
                   <button 
@@ -246,7 +246,7 @@ export default function PlaceDetailPage() {
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
                 <button
                   onClick={handleDirections}
-                  className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-neutral-50 hover:bg-white border border-neutral-200 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
+                  className="flex items-center gap-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 bg-neutral-50 dark:bg-neutral-800 hover:bg-white dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
                 >
                   <Map className="w-4 h-4 text-blue-600" />
                   Cómo llegar
@@ -255,7 +255,7 @@ export default function PlaceDetailPage() {
                 {isPyme && (place.whatsapp || place.telefono) && (
                   <button
                     onClick={handleWhatsApp}
-                    className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
+                    className="flex items-center gap-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 bg-neutral-50 dark:bg-neutral-800 hover:bg-white dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
                   >
                     <MessageCircle className="w-4 h-4 text-emerald-600" />
                     WhatsApp
@@ -273,7 +273,7 @@ export default function PlaceDetailPage() {
 
                 <button
                   onClick={handleFavorite}
-                  className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-neutral-50 hover:bg-white border border-neutral-200 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0 group"
+                  className="flex items-center gap-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 bg-neutral-50 dark:bg-neutral-800 hover:bg-white dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0 group"
                 >
                   <Bookmark className={`w-4 h-4 transition-all duration-300 ${isLiked ? 'fill-airbnb text-airbnb scale-110' : 'group-hover:scale-110'}`} />
                   {isLiked ? 'Guardado' : 'Guardar'}
@@ -281,7 +281,7 @@ export default function PlaceDetailPage() {
 
                 <button
                   onClick={handleShare}
-                  className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-neutral-50 hover:bg-white border border-neutral-200 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
+                  className="flex items-center gap-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 bg-neutral-50 dark:bg-neutral-800 hover:bg-white dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
                 >
                   <Share className="w-3.5 h-3.5" />
                   Compartir
@@ -289,7 +289,7 @@ export default function PlaceDetailPage() {
 
                 <button
                   onClick={handleReport}
-                  className="hidden flex items-center gap-2 text-xs font-bold text-neutral-400 hover:text-red-500 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-100 px-3 py-2.5 rounded-xl transition-all whitespace-nowrap flex-shrink-0"
+                  className="flex items-center gap-2 text-xs font-bold text-neutral-400 hover:text-red-500 bg-neutral-50 dark:bg-neutral-800 hover:bg-red-50 dark:hover:bg-red-900/20 border border-neutral-200 dark:border-neutral-700 hover:border-red-100 px-3 py-2.5 rounded-xl transition-all whitespace-nowrap flex-shrink-0"
                   title="Reportar este lugar"
                 >
                   <AlertTriangle className="w-4 h-4" />
@@ -303,7 +303,7 @@ export default function PlaceDetailPage() {
                     if (!isAuthenticated) { router.push('/login'); return; }
                     setIsReviewModalOpen(true);
                   }}
-                  className="flex-1 bg-neutral-900 text-white px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-neutral-800 transition-all shadow-xl active:scale-95 text-center"
+                  className="flex-1 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-all shadow-xl active:scale-95 text-center"
                 >
                   Calificar
                 </button>
@@ -353,12 +353,12 @@ export default function PlaceDetailPage() {
       <div className="max-w-4xl mx-auto space-y-12">
           
           {/* Info del Host con Tarjeta Premium */}
-          <div className="flex items-center justify-between pb-10 border-b border-neutral-100">
+          <div className="flex items-center justify-between pb-10 border-b border-neutral-100 dark:border-neutral-800">
             <div>
-              <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">
+              <h2 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">
                 Destino gestionado por {place.host_name || 'Anfitrión local'}
               </h2>
-              <div className="flex items-center gap-2 text-neutral-500 mt-2 font-medium">
+              <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400 mt-2 font-medium">
                 <span>Desde {place.host_since || '2024'}</span>
                 <span>·</span>
                 <span className="capitalize">{place.category}</span>
@@ -374,7 +374,7 @@ export default function PlaceDetailPage() {
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-airbnb to-airbnb-dark flex items-center justify-center text-white text-2xl font-black shadow-lg group-hover:rotate-6 transition-transform">
                 {(place.host_name || 'E').charAt(0)}
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full shadow-md">
+              <div className="absolute -bottom-1 -right-1 bg-white dark:bg-neutral-800 p-1 rounded-full shadow-md">
                 <Shield className="w-4 h-4 text-airbnb" fill="currentColor" fillOpacity={0.2} />
               </div>
             </div>
@@ -382,20 +382,20 @@ export default function PlaceDetailPage() {
 
           {/* Rating Destacado */}
           {isGuestFavorite && (
-            <div className="py-2 border-b border-neutral-100">
-              <div className="flex items-center gap-8 bg-neutral-50/50 p-6 rounded-3xl border border-neutral-100">
+            <div className="py-2 border-b border-neutral-100 dark:border-neutral-800">
+              <div className="flex items-center gap-8 bg-neutral-50/50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-100 dark:border-neutral-700">
                 <div className="flex flex-col items-center">
-                  <span className="text-5xl font-black text-neutral-900">{place.rating}</span>
-                  <div className="flex mt-1 text-neutral-900">
+                  <span className="text-5xl font-black text-neutral-900 dark:text-white">{place.rating}</span>
+                  <div className="flex mt-1 text-neutral-900 dark:text-white">
                     {[1,2,3,4,5].map(i => (
                       <Star key={i} className="w-3 h-3 fill-current" />
                     ))}
                   </div>
                 </div>
-                <div className="w-px h-16 bg-neutral-200" />
+                <div className="w-px h-16 bg-neutral-200 dark:bg-neutral-700" />
                 <div>
-                  <h3 className="font-bold text-lg text-neutral-900">Favorito de viajeros</h3>
-                  <p className="text-neutral-500 text-[15px] mt-1 leading-relaxed">
+                  <h3 className="font-bold text-lg text-neutral-900 dark:text-white">Favorito de viajeros</h3>
+                  <p className="text-neutral-500 dark:text-neutral-400 text-[15px] mt-1 leading-relaxed">
                     Uno de los destinos más queridos en Exploro según las opiniones reales de nuestra comunidad.
                   </p>
                 </div>
@@ -405,13 +405,13 @@ export default function PlaceDetailPage() {
 
 
           {/* Descripción con Mejor Legibilidad */}
-          <div className="pb-12 border-b border-neutral-100">
-            <h3 className="text-xl font-bold text-neutral-900 mb-6 tracking-tight">Sobre este lugar</h3>
-            <div className="text-neutral-600 leading-8 text-[17px] space-y-4">
+          <div className="pb-12 border-b border-neutral-100 dark:border-neutral-800">
+            <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-6 tracking-tight">Sobre este lugar</h3>
+            <div className="text-neutral-600 dark:text-neutral-300 leading-8 text-[17px] space-y-4">
               {place.description ? (
                 place.description.split('\n').map((para, i) => <p key={i}>{para}</p>)
               ) : (
-                <div className="bg-neutral-50 p-6 rounded-2xl border border-dashed border-neutral-200 flex items-center gap-4 text-neutral-400">
+                <div className="bg-neutral-50 dark:bg-neutral-800 p-6 rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-700 flex items-center gap-4 text-neutral-400 dark:text-neutral-500">
                   <InfoIcon className="w-5 h-5" />
                   <p>Aún no hay una descripción detallada para este destino.</p>
                 </div>
@@ -421,20 +421,20 @@ export default function PlaceDetailPage() {
 
           {/* Características / Amenidades */}
           {place.features && place.features.length > 0 && (
-            <div className="pb-12 border-b border-neutral-100">
-              <h3 className="text-xl font-bold text-neutral-900 mb-8 tracking-tight">Lo que ofrece este lugar</h3>
+            <div className="pb-12 border-b border-neutral-100 dark:border-neutral-800">
+              <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-8 tracking-tight">Lo que ofrece este lugar</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
                 {place.features.map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-4 group">
-                      <div className="text-neutral-700 group-hover:scale-110 transition-transform">
+                      <div className="text-neutral-700 dark:text-neutral-300 group-hover:scale-110 transition-transform">
                         {featureIcons[feature] || featureIcons['default']}
                       </div>
-                      <span className="text-neutral-700 font-medium text-[16px]">{feature}</span>
+                      <span className="text-neutral-700 dark:text-neutral-300 font-medium text-[16px]">{feature}</span>
                     </div>
                   ))}
               </div>
               {place.features.length > 5 && (
-                <button className="mt-10 px-6 py-3 border border-neutral-900 rounded-xl font-bold text-neutral-900 hover:bg-neutral-50 transition-all active:scale-95">
+                <button className="mt-10 px-6 py-3 border border-neutral-900 dark:border-white rounded-xl font-bold text-neutral-900 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all active:scale-95">
                   Mostrar las {place.features.length} actividades
                 </button>
               )}
@@ -443,9 +443,9 @@ export default function PlaceDetailPage() {
 
           {/* Ubicación y Mapa */}
           <div>
-            <h3 className="text-xl font-bold text-neutral-900 mb-2 tracking-tight">Dónde estarás</h3>
-            <p className="text-neutral-500 mb-8 font-medium">{place.location}, Nariño</p>
-            <div className="h-[450px] rounded-3xl overflow-hidden border border-neutral-200 shadow-inner group">
+            <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-2 tracking-tight">Dónde estarás</h3>
+            <p className="text-neutral-500 dark:text-neutral-400 mb-8 font-medium">{place.location}, Nariño</p>
+            <div className="h-[450px] rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-700 shadow-inner group">
               <MapComponent
                 latitude={place.latitude || 0}
                 longitude={place.longitude || 0}
@@ -456,14 +456,14 @@ export default function PlaceDetailPage() {
       </div>
 
       {/* Sección de Reseñas y Comentarios */}
-      <div id="reviews-section" className="mt-24 pt-16 border-t border-neutral-100">
-        <div className="flex items-center justify-between mb-12">
+      <div id="reviews-section" className="mt-24 pt-16 border-t border-neutral-100 dark:border-neutral-800">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tight flex items-center gap-3">
+            <h2 className="text-2xl md:text-3xl font-black text-neutral-900 dark:text-white tracking-tight flex items-center gap-3">
               <Star className="w-8 h-8 text-amber-400 fill-amber-400" />
               {place.rating?.toFixed(1) || '0.0'} · {reviews.length} reseñas
             </h2>
-            <p className="text-neutral-500 mt-2 font-medium">Lo que opinan otros viajeros sobre este destino</p>
+            <p className="text-neutral-500 dark:text-neutral-400 mt-2 font-medium">Lo que opinan otros viajeros sobre este destino</p>
           </div>
           
           <button 
@@ -474,7 +474,7 @@ export default function PlaceDetailPage() {
               }
               setIsReviewModalOpen(true);
             }}
-            className="bg-neutral-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-neutral-800 transition-all shadow-lg active:scale-95"
+            className="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-8 py-4 rounded-2xl font-bold hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-all shadow-lg active:scale-95"
           >
             Escribir una reseña
           </button>
@@ -493,47 +493,47 @@ export default function PlaceDetailPage() {
                     onClick={() => router.push(`/users/${review.id_usuario}`)}
                     className="flex items-center gap-4 hover:opacity-80 transition-opacity text-left"
                   >
-                    <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center text-lg font-black text-neutral-400">
+                    <div className="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-lg font-black text-neutral-400 dark:text-neutral-500">
                       {review.nombre_usuario?.charAt(0) || 'U'}
                     </div>
                     <div>
-                      <h4 className="font-bold text-neutral-900 hover:underline decoration-neutral-300 underline-offset-4">{review.nombre_usuario || 'Usuario de Exploro'}</h4>
-                      <p className="text-xs text-neutral-400 font-medium">{new Date(review.fecha).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
+                      <h4 className="font-bold text-neutral-900 dark:text-white hover:underline decoration-neutral-300 underline-offset-4">{review.nombre_usuario || 'Usuario de Exploro'}</h4>
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500 font-medium">{new Date(review.fecha).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
                     </div>
                   </button>
 
                   {user && review.id_usuario === user.id && (
                     <button 
                       onClick={() => handleEditReview(review)}
-                      className="ml-auto text-xs font-bold text-neutral-400 hover:text-neutral-900 underline underline-offset-4 decoration-neutral-200 hover:decoration-neutral-900 transition-all"
+                      className="ml-auto text-xs font-bold text-neutral-400 hover:text-neutral-900 dark:hover:text-white underline underline-offset-4 decoration-neutral-200 hover:decoration-neutral-900 transition-all"
                     >
                       Editar
                     </button>
                   )}
                 </div>
-                <div className="flex items-center gap-1 text-neutral-900 scale-90 origin-left">
+                <div className="flex items-center gap-1 text-neutral-900 dark:text-white scale-90 origin-left">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-3 h-3 ${i < review.puntuacion ? 'fill-current text-amber-400' : 'text-neutral-200'}`} />
+                    <Star key={i} className={`w-3 h-3 ${i < review.puntuacion ? 'fill-current text-amber-400' : 'text-neutral-200 dark:text-neutral-700'}`} />
                   ))}
                 </div>
-                <p className="text-neutral-600 leading-relaxed text-[15px]">
+                <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed text-[15px]">
                   {review.comentarios}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <div className="bg-neutral-50 rounded-[40px] p-16 text-center border-2 border-dashed border-neutral-200">
-            <div className="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-6 text-3xl">
+          <div className="bg-neutral-50 dark:bg-neutral-800/50 rounded-[40px] p-16 text-center border-2 border-dashed border-neutral-200 dark:border-neutral-700">
+            <div className="w-20 h-20 bg-white dark:bg-neutral-800 rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-6 text-3xl">
               ✨
             </div>
-            <h3 className="text-xl font-bold text-neutral-800 mb-2">Aún no hay reseñas</h3>
-            <p className="text-neutral-500 max-w-sm mx-auto mb-8 font-medium">
+            <h3 className="text-xl font-bold text-neutral-800 dark:text-white mb-2">Aún no hay reseñas</h3>
+            <p className="text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto mb-8 font-medium">
               Sé el primero en compartir tu experiencia en este lugar para ayudar a otros viajeros de la comunidad.
             </p>
             <button 
               onClick={() => setIsReviewModalOpen(true)}
-              className="font-bold text-neutral-900 underline underline-offset-8 decoration-2 hover:text-airbnb transition-colors"
+              className="font-bold text-neutral-900 dark:text-white underline underline-offset-8 decoration-2 hover:text-airbnb transition-colors"
             >
               Calificar ahora
             </button>
@@ -543,15 +543,15 @@ export default function PlaceDetailPage() {
 
       {/* Lugares Similares - Carrusel de Recomendaciones */}
       {similarPlaces.length > 0 && (
-        <div className="mt-24 pt-16 border-t border-neutral-100">
+        <div className="mt-24 pt-16 border-t border-neutral-100 dark:border-neutral-800">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <h2 className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-black text-neutral-900 dark:text-white tracking-tight">
                 Destinos que te enamorarán
               </h2>
-              <p className="text-neutral-500 mt-2 font-medium">Basado en tus intereses y la categoría {place.category}</p>
+              <p className="text-neutral-500 dark:text-neutral-400 mt-2 font-medium">Basado en tus intereses y la categoría {place.category}</p>
             </div>
-            <button className="hidden md:flex items-center gap-1 font-bold text-neutral-900 underline underline-offset-8 decoration-2 hover:text-airbnb transition-colors">
+            <button className="hidden md:flex items-center gap-1 font-bold text-neutral-900 dark:text-white underline underline-offset-8 decoration-2 hover:text-airbnb transition-colors">
               Ver todos <ChevronRight className="w-5 h-5" />
             </button>
           </div>

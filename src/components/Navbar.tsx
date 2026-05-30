@@ -27,6 +27,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [avatarError, setAvatarError] = useState(false);
@@ -38,6 +39,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isFavoritesActive = pathname === '/favorites';
+
+  // Detectar scroll para compactar las tabs móviles (ocultar emojis)
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleTabClick = (tabId: Tab) => {
     setActiveTab(tabId);
@@ -427,14 +435,7 @@ export default function Navbar() {
           <Search className={`w-5 h-5 ${activeTab === 'stays' && pathname === '/' ? 'stroke-[2.5px]' : ''}`} />
           <span className="text-[10px] font-bold">Explora</span>
         </button>
-        <button 
-          onClick={() => handleTabClick('exploro')}
-          className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === 'exploro' ? 'text-amber-500' : 'text-neutral-400'}`}
-        >
-          <LayoutDashboard className={`w-5 h-5 ${activeTab === 'exploro' ? 'stroke-[2.5px]' : ''}`} />
-          <span className="text-[10px] font-bold">Exploro</span>
-        </button>
-        <button 
+        <button
           onClick={() => router.push(isAuthenticated ? '/favorites' : '/login')}
           className={`flex flex-col items-center gap-1.5 transition-all ${isFavoritesActive ? 'text-airbnb' : 'text-neutral-400'}`}
         >
@@ -468,46 +469,36 @@ export default function Navbar() {
           </div>
         </button>
 
-        {/* Tabs de Categorías Superiores (Alojamientos, Experiencias, Servicios) */}
-        <div className="flex justify-center items-center gap-8 border-b border-neutral-100 dark:border-border-color overflow-x-auto scrollbar-hide">
-          <button 
-            onClick={() => handleTabClick('stays')}
-            className={`relative pb-3 flex flex-col items-center gap-1 group min-w-[80px] transition-all ${activeTab === 'stays' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-xl group-active:scale-90 transition-transform">🏠</span>
-              <span className={`text-xs font-bold whitespace-nowrap ${activeTab === 'stays' ? 'opacity-100' : 'opacity-80'}`}>Alojamientos</span>
-            </div>
-            {activeTab === 'stays' && (
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-neutral-900 dark:bg-white rounded-full animate-in fade-in slide-in-from-bottom-1" />
-            )}
-          </button>
-
-          <button 
-            onClick={() => handleTabClick('experiences')}
-            className={`relative pb-3 flex flex-col items-center gap-1 group min-w-[80px] transition-all ${activeTab === 'experiences' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
-          >
-            <div className="relative flex flex-col items-center">
-              <span className="text-xl group-active:scale-90 transition-transform">🎈</span>
-              <span className={`text-xs font-bold whitespace-nowrap ${activeTab === 'experiences' ? 'opacity-100' : 'opacity-80'}`}>Experiencias</span>
-            </div>
-            {activeTab === 'experiences' && (
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-neutral-900 dark:bg-white rounded-full animate-in fade-in slide-in-from-bottom-1" />
-            )}
-          </button>
-
-          <button 
-            onClick={() => handleTabClick('services')}
-            className={`relative pb-3 flex flex-col items-center gap-1 group min-w-[80px] transition-all ${activeTab === 'services' ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-800'}`}
-          >
-            <div className="relative flex flex-col items-center">
-              <span className="text-xl group-active:scale-90 transition-transform">🛎️</span>
-              <span className={`text-xs font-bold whitespace-nowrap ${activeTab === 'services' ? 'opacity-100' : 'opacity-80'}`}>Servicios</span>
-            </div>
-            {activeTab === 'services' && (
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-neutral-900 dark:bg-white rounded-full animate-in fade-in slide-in-from-bottom-1" />
-            )}
-          </button>
+        {/* Tabs de Categorías Superiores (Alojamientos, Experiencias, Servicios, Exploro) */}
+        <div className="flex justify-around items-center overflow-x-auto scrollbar-hide transition-all duration-300">
+          {([
+            { id: 'stays',       emoji: '🏠', label: 'Alojamientos' },
+            { id: 'experiences', emoji: '🎈', label: 'Experiencias'  },
+            { id: 'services',    emoji: '🛎️', label: 'Servicios'    },
+            { id: 'exploro',     emoji: '🧭', label: 'Exploro'       },
+          ] as const).map(({ id, emoji, label }) => (
+            <button
+              key={id}
+              onClick={() => handleTabClick(id)}
+              className={`relative flex flex-col items-center gap-0.5 group min-w-[72px] flex-1 transition-all duration-300 ${scrolled ? 'pb-2 pt-1' : 'pb-3 pt-1'} ${activeTab === id ? 'text-neutral-900 dark:text-white' : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'}`}
+            >
+              {/* Emoji — se oculta al hacer scroll */}
+              <span
+                className={`text-xl transition-all duration-300 group-active:scale-90 ${scrolled ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-8 opacity-100'}`}
+                aria-hidden="true"
+              >
+                {emoji}
+              </span>
+              {/* Nombre — siempre visible */}
+              <span className={`text-[11px] font-bold whitespace-nowrap transition-all duration-300 ${activeTab === id ? 'opacity-100' : 'opacity-70'} ${scrolled ? 'text-xs' : ''}`}>
+                {label}
+              </span>
+              {/* Indicador activo */}
+              {activeTab === id && (
+                <div className="absolute bottom-0 left-1/4 right-1/4 h-[2.5px] bg-neutral-900 dark:bg-white rounded-full animate-in fade-in slide-in-from-bottom-1" />
+              )}
+            </button>
+          ))}
         </div>
       </div>
 

@@ -5,11 +5,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Map, List, X, Star, MapPin, MessageCircle, Zap, Users, CheckCircle } from 'lucide-react';
+import { X, Star, MapPin, MessageCircle, Zap, Users, CheckCircle } from 'lucide-react';
 
-import CategoryBar from '@/components/CategoryBar';
 import PlaceCard from '@/components/PlaceCard';
-import PlaceGrid from '@/components/PlaceGrid';
 import CarouselGrid from '@/components/CarouselGrid';
 import ExperienceCard from '@/components/ExperienceCard';
 import ServiceCard from '@/components/ServiceCard';
@@ -20,30 +18,21 @@ import { useAppStore } from '@/store/useAppStore';
 import { getPlaces, getExperiences, getServices } from '@/services/api';
 import type { Place, Experience, Service } from '@/services/mockData';
 
-// Componente de Mapa dinámico (solo cliente para evitar problemas con MapLibre/Leaflet)
-import dynamic from 'next/dynamic';
-const ExploroMap = dynamic(() => import('@/components/map/ExploroMap'), { 
-  ssr: false, 
-  loading: () => <LoadingSpinner /> 
-});
 
 function HomeContent() {
   const searchParams = useSearchParams();
   const searchParam = searchParams.get('search');
-  
+
   // Zustand State
   const activeTab = useAppStore(state => state.activeTab);
-  const activeCategory = useAppStore(state => state.activeCategory);
-  const setActiveCategory = useAppStore(state => state.setActiveCategory);
   const searchQuery = useAppStore(state => state.searchQuery);
 
   // Local Data State
   const [places, setPlaces] = useState<Place[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  
+
   const [isLoading, setIsLoading] = useState(true);
-  const [showMapView, setShowMapView] = useState(false);
   const [dismissedHints, setDismissedHints] = useState<Set<string>>(new Set());
 
   const dismissHint = (tab: string) => setDismissedHints(prev => new Set(prev).add(tab));
@@ -54,44 +43,33 @@ function HomeContent() {
       setIsLoading(true);
       try {
         const query = searchParam || searchQuery;
-        
+
         if (activeTab === 'stays') {
-          const data = await getPlaces(query, activeCategory);
+          const data = await getPlaces(query);
           setPlaces(data);
         } else if (activeTab === 'experiences') {
-          const data = await getExperiences(activeCategory);
+          const data = await getExperiences();
           setExperiences(data);
         } else if (activeTab === 'services') {
-          const data = await getServices(activeCategory);
+          const data = await getServices();
           setServices(data);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
-        // Simular transition delay suave
         setTimeout(() => setIsLoading(false), 300);
       }
     };
 
     fetchData();
-  }, [activeTab, activeCategory, searchParam, searchQuery]);
-
-  // Si estamos en Mobile y ocultamos Search, aseguremos que el state esté limpio
-  useEffect(() => {
-    setActiveCategory('all');
-  }, [activeTab, setActiveCategory]);
+  }, [activeTab, searchParam, searchQuery]);
 
   return (
     <div className="min-h-screen bg-bg-primary transition-colors duration-300 relative pb-20">
-      
+
       {/* Tab: Alojamientos */}
       {activeTab === 'stays' && (
         <>
-          {/* Barra de categorías — solo en stays */}
-          <CategoryBar
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
-          />
           <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 mt-4 md:mt-8">
 
             {/* Hint: cómo funcionan las recomendaciones */}
@@ -131,11 +109,7 @@ function HomeContent() {
               </div>
             )}
 
-            {showMapView ? (
-              <div className="h-[calc(100vh-250px)] w-full rounded-2xl overflow-hidden shadow-card border border-neutral-200 dark:border-border-color animate-fade-in relative z-0">
-                <ExploroMap />
-              </div>
-            ) : isLoading ? (
+            {isLoading ? (
               <div className="flex justify-center py-20"><LoadingSpinner size="lg" text="Cargando alojamientos..." /></div>
             ) : places.length === 0 ? (
               <div className="flex justify-center py-20 text-neutral-500 dark:text-neutral-400">No se encontraron alojamientos.</div>
@@ -144,7 +118,7 @@ function HomeContent() {
                 <CarouselGrid title="Alojamientos populares en tu zona">
                   {places.slice(0, 5).map(place => <PlaceCard key={place.id} place={place} />)}
                 </CarouselGrid>
-                
+
                 {places.length > 5 && (
                   <CarouselGrid title="Disponibles este fin de semana">
                     {places.slice(5).map(place => <PlaceCard key={`weekend-${place.id}`} place={place} />)}
@@ -213,7 +187,7 @@ function HomeContent() {
               <CarouselGrid title="Más populares" subtitle="Descubre las actividades favoritas">
                 {experiences.map(exp => <ExperienceCard key={exp.id} experience={exp} />)}
               </CarouselGrid>
-              
+
               {/* Carrusel Aventura */}
               <CarouselGrid title="Sumérgete en la cultura local" subtitle="Exploro Originals">
                 {experiences.filter(e => e.isOriginal).map(exp => <ExperienceCard key={`orig-${exp.id}`} experience={exp} />)}

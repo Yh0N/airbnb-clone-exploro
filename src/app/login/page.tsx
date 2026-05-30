@@ -55,30 +55,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-20 bg-neutral-50/50">
+    <div className="min-h-screen flex items-center justify-center px-4 py-20 bg-neutral-50/50 dark:bg-neutral-900">
       <div className="w-full max-w-[480px] animate-in fade-in zoom-in-95 duration-500">
         
         {/* Card Contenedora Premium */}
-        <div className="bg-white border border-neutral-200 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.06)] overflow-hidden">
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.06)] overflow-hidden">
           
           {/* Header con botón de volver */}
-          <div className="relative border-b border-neutral-100 px-6 py-5 flex items-center justify-center">
+          <div className="relative border-b border-neutral-100 dark:border-neutral-800 px-6 py-5 flex items-center justify-center">
             <button 
               onClick={() => router.back()}
-              className="absolute left-6 p-2 hover:bg-neutral-100 rounded-full transition-colors text-neutral-600"
+              className="absolute left-6 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors text-neutral-600 dark:text-neutral-400"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-base font-extrabold text-neutral-900 tracking-tight">Iniciar sesión</h1>
+            <h1 className="text-base font-extrabold text-neutral-900 dark:text-white tracking-tight">Iniciar sesión</h1>
           </div>
 
           {/* Body del Formulario */}
           <div className="p-8 md:p-10">
             <div className="mb-10 text-left">
-              <h2 className="text-2xl font-black text-neutral-900 tracking-tight mb-2">
+              <h2 className="text-2xl font-black text-neutral-900 dark:text-white tracking-tight mb-2">
                 Bienvenido a Exploro
               </h2>
-              <p className="text-neutral-500 text-[15px] font-medium leading-relaxed">
+              <p className="text-neutral-500 dark:text-neutral-400 text-[15px] font-medium leading-relaxed">
                 Inicia sesión para descubrir y gestionar los mejores destinos de Nariño.
               </p>
             </div>
@@ -93,11 +93,11 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-0">
               {/* Contenedor de Inputs agrupados estilo Airbnb */}
-              <div className={`rounded-2xl border transition-all shadow-sm overflow-hidden ${focusedField ? 'border-2 border-airbnb' : 'border-neutral-300'}`}>
+              <div className={`rounded-2xl border transition-all shadow-sm overflow-hidden ${focusedField ? 'border-2 border-airbnb' : 'border-neutral-300 dark:border-neutral-600'}`}>
                 
                 {/* Campo Email */}
                 <div 
-                  className="relative p-4 bg-white"
+                  className="relative p-4 bg-white dark:bg-neutral-800"
                 >
                   <label 
                     htmlFor="login-email"
@@ -116,7 +116,7 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setFocusedField('email')}
                     onBlur={() => setFocusedField(null)}
-                    className="w-full pt-4 pb-0 bg-transparent text-neutral-900 text-base font-medium border-0 focus:ring-0 focus:outline-none focus-visible:ring-0 placeholder:opacity-0 focus:placeholder:opacity-50 transition-all min-h-[48px] shadow-none outline-none"
+                    className="w-full pt-4 pb-0 bg-transparent text-neutral-900 dark:text-white text-base font-medium border-0 focus:ring-0 focus:outline-none focus-visible:ring-0 placeholder:opacity-0 focus:placeholder:opacity-50 transition-all min-h-[48px] shadow-none outline-none"
                     required
                     placeholder="ejemplo@correo.com"
                   />
@@ -124,11 +124,11 @@ export default function LoginPage() {
                 </div>
 
                 {/* Línea divisoria limpia */}
-                <div className="h-[1px] bg-neutral-100 mx-4" />
+                <div className="h-[1px] bg-neutral-100 dark:bg-neutral-700 mx-4" />
 
                 {/* Campo Contraseña */}
                 <div 
-                  className="relative p-4 bg-white"
+                  className="relative p-4 bg-white dark:bg-neutral-800"
                 >
                   <label 
                     htmlFor="login-password"
@@ -147,7 +147,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setFocusedField('password')}
                     onBlur={() => setFocusedField(null)}
-                    className="w-full pt-4 pb-0 bg-transparent text-neutral-900 text-base font-medium border-0 focus:ring-0 focus:outline-none focus-visible:ring-0 placeholder:opacity-0 focus:placeholder:opacity-50 transition-all min-h-[48px] shadow-none outline-none"
+                    className="w-full pt-4 pb-0 bg-transparent text-neutral-900 dark:text-white text-base font-medium border-0 focus:ring-0 focus:outline-none focus-visible:ring-0 placeholder:opacity-0 focus:placeholder:opacity-50 transition-all min-h-[48px] shadow-none outline-none"
                     required
                     placeholder="••••••••"
                   />
@@ -164,12 +164,12 @@ export default function LoginPage() {
               <div className="mt-6 flex flex-col items-center gap-4">
                 <Link 
                   href="#" 
-                  className="text-xs font-bold text-neutral-900 hover:text-airbnb transition-colors underline underline-offset-4 decoration-neutral-200 hover:decoration-airbnb"
+                  className="text-xs font-bold text-neutral-900 dark:text-white hover:text-airbnb transition-colors underline underline-offset-4 decoration-neutral-200 hover:decoration-airbnb"
                 >
                   ¿Olvidaste tu contraseña?
                 </Link>
                 
-                <p className="text-[11px] text-neutral-400 font-medium italic">
+                <p className="text-[11px] text-neutral-400 dark:text-neutral-500 font-medium italic">
                   Para fines de demostración, puedes usar cualquier credencial.
                 </p>
               </div>
@@ -189,7 +189,7 @@ export default function LoginPage() {
             {/* Divisor con Estilo */}
             <div className="flex items-center gap-4 my-10 px-2">
               <div className="flex-1 h-[1px] bg-neutral-200" />
-              <span className="text-[11px] font-black text-neutral-400 uppercase tracking-widest">o</span>
+              <span className="text-[11px] font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">o</span>
               <div className="flex-1 h-[1px] bg-neutral-200" />
             </div>
 
@@ -199,7 +199,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => handleSocialLogin('google')}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-4 border-2 border-neutral-100 rounded-2xl py-3.5 font-bold text-sm text-neutral-800 hover:bg-neutral-50 hover:border-neutral-200 transition-all active:scale-[0.98] disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-4 border-2 border-neutral-100 dark:border-neutral-700 rounded-2xl py-3.5 font-bold text-sm text-neutral-800 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:border-neutral-200 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -213,13 +213,13 @@ export default function LoginPage() {
 
             {/* Footer de Registro */}
             <div className="mt-12 text-center space-y-2">
-              <p className="text-neutral-500 text-sm font-medium">
+              <p className="text-neutral-500 dark:text-neutral-400 text-sm font-medium">
                 ¿Aún no eres parte de la comunidad?{' '}
                 <Link href="/register" className="text-airbnb font-semibold hover:underline">
                   Crea una cuenta
                 </Link>
               </p>
-              <p className="text-neutral-400 text-xs">
+              <p className="text-neutral-400 dark:text-neutral-500 text-xs">
                 Puedes registrarte como turista o como PYME.
               </p>
             </div>

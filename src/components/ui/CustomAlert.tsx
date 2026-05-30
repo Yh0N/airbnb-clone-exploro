@@ -92,7 +92,7 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
         {/* Header con Icono */}
         <div className="flex items-start justify-between p-6 pb-2">
           <div className="flex items-center gap-4">
-            <div className={cn("p-2 rounded-2xl bg-white shadow-sm", config.iconColor)}>
+            <div className={cn("p-2 rounded-2xl bg-white dark:bg-neutral-800 shadow-sm", config.iconColor)}>
               <Icon className="w-6 h-6" />
             </div>
             <h3 className={cn("text-lg font-bold leading-none", config.text)}>
@@ -115,12 +115,12 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
         </div>
 
         {/* Footer con Botones */}
-        <div className="flex items-center justify-end gap-3 p-6 pt-2 bg-white/50 backdrop-blur-md">
+        <div className="flex items-center justify-end gap-3 p-6 pt-2 bg-white/50 dark:bg-neutral-900/30 backdrop-blur-md">
           {onConfirm && (
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm font-semibold text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors disabled:opacity-50"
             >
               {cancelText}
             </button>

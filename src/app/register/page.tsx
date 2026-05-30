@@ -132,17 +132,17 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 dark:bg-neutral-900 min-h-screen">
       <div className="w-full max-w-md">
-        <div className="bg-white border border-neutral-200 rounded-xl shadow-card overflow-hidden">
-          <div className="relative border-b border-neutral-200 px-6 py-5 flex items-center justify-center">
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-card overflow-hidden">
+          <div className="relative border-b border-neutral-200 dark:border-neutral-700 px-6 py-5 flex items-center justify-center">
             <button 
               onClick={() => router.back()}
-              className="absolute left-6 p-2 hover:bg-neutral-100 rounded-full transition-colors text-neutral-600"
+              className="absolute left-6 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors text-neutral-600 dark:text-neutral-400"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-bold text-neutral-800">Regístrate en Exploro</h1>
+            <h1 className="text-lg font-bold text-neutral-800 dark:text-white">Regístrate en Exploro</h1>
           </div>
 
           <div className="p-6">
@@ -155,7 +155,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Tipo de Cuenta - AT TOP */}
               <div>
-                <p className="text-sm font-semibold text-neutral-800 mb-3 text-center">
+                <p className="text-sm font-semibold text-neutral-800 dark:text-white mb-3 text-center">
                   ¿Cómo quieres usar Exploro?
                 </p>
                 <div className="grid grid-cols-2 gap-3">
@@ -165,7 +165,7 @@ export default function RegisterPage() {
                     className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-all ${
                       accountType === 'user' 
                       ? 'border-neutral-900 bg-neutral-900 text-white shadow-md' 
-                      : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300 hover:bg-neutral-50'
+                      : 'border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700'
                     }`}
                   >
                     <span className="text-xl">👤</span>
@@ -177,7 +177,7 @@ export default function RegisterPage() {
                     className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-all ${
                       accountType === 'pyme' 
                       ? 'border-airbnb bg-airbnb text-white shadow-md' 
-                      : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300 hover:bg-neutral-50'
+                      : 'border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700'
                     }`}
                   >
                     <span className="text-xl">🏢</span>
@@ -186,13 +186,13 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-neutral-100">
+              <div className="space-y-4 pt-4 border-t border-neutral-100 dark:border-neutral-700">
                 
                 {/* CAMPOS ESPECÍFICOS: USUARIO VS PYME */}
                 {accountType === 'user' ? (
                   <>
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Nombre y Apellido
                       </label>
                       <div className="relative">
@@ -200,7 +200,7 @@ export default function RegisterPage() {
                           type="text"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                           required
                           placeholder="Tu nombre completo"
                         />
@@ -209,7 +209,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Teléfono (Opcional)
                       </label>
                       <div className="relative">
@@ -217,7 +217,7 @@ export default function RegisterPage() {
                           type="tel"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                           placeholder="Tu número de teléfono"
                         />
                         <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -227,7 +227,7 @@ export default function RegisterPage() {
                 ) : (
                   <>
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Nombre de Empresa
                       </label>
                       <div className="relative">
@@ -235,7 +235,7 @@ export default function RegisterPage() {
                           type="text"
                           value={companyName}
                           onChange={(e) => setCompanyName(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                           required
                           placeholder="Nombre comercial"
                         />
@@ -244,14 +244,14 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Descripción
                       </label>
                       <div className="relative">
                         <textarea
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors resize-none h-24"
+                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors resize-none h-24"
                           required
                           placeholder="Breve descripción del negocio"
                         />
@@ -260,7 +260,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Dirección
                       </label>
                       <div className="relative">
@@ -268,7 +268,7 @@ export default function RegisterPage() {
                           type="text"
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                           required
                           placeholder="Ubicación de la empresa"
                         />
@@ -277,7 +277,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Teléfono
                       </label>
                       <div className="relative">
@@ -285,7 +285,7 @@ export default function RegisterPage() {
                           type="tel"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                           required
                           placeholder="Teléfono de contacto"
                         />
@@ -294,7 +294,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Redes Sociales (Opcional)
                       </label>
                       <div className="relative">
@@ -302,7 +302,7 @@ export default function RegisterPage() {
                           type="text"
                           value={socialMedia}
                           onChange={(e) => setSocialMedia(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                           placeholder="Instagram, X, etc."
                         />
                         <LinkIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -313,7 +313,7 @@ export default function RegisterPage() {
 
                 {/* COMMON FIELDS */}
                 <div className="relative">
-                  <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                  <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                     Correo electrónico
                   </label>
                   <div className="relative">
@@ -321,7 +321,7 @@ export default function RegisterPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                      className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                       required
                       placeholder="correo@ejemplo.com"
                     />
@@ -333,7 +333,7 @@ export default function RegisterPage() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Contraseña
                       </label>
                       <div className="relative">
@@ -341,7 +341,7 @@ export default function RegisterPage() {
                           type={showPassword ? 'text' : 'password'}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-10 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                          className="w-full pt-7 pb-3 px-4 pr-10 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                           required
                           placeholder="Mínimo 8 caracteres"
                         />
@@ -356,7 +356,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 font-medium z-10">
+                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
                         Confirmar
                       </label>
                       <div className="relative">
@@ -364,7 +364,7 @@ export default function RegisterPage() {
                           type={showPassword ? 'text' : 'password'}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-10 border border-neutral-300 rounded-lg focus:border-neutral-800 focus:ring-1 focus:ring-neutral-800 outline-none text-base transition-colors"
+                          className="w-full pt-7 pb-3 px-4 pr-10 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
                           required
                           placeholder="Repetir"
                         />
@@ -377,7 +377,7 @@ export default function RegisterPage() {
                   {password.length > 0 && (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <div className="flex-1 bg-neutral-200 rounded-full h-1.5 mr-3">
+                        <div className="flex-1 bg-neutral-200 dark:bg-neutral-700 rounded-full h-1.5 mr-3">
                           <div
                             className={`h-1.5 rounded-full transition-all duration-500 ${strengthColor}`}
                             style={{ width: strengthWidth }}
@@ -391,12 +391,12 @@ export default function RegisterPage() {
                         {passwordRules.map(rule => (
                           <div key={rule.id} className="flex items-center gap-2">
                             <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0 ${
-                              rule.test(password) ? 'bg-green-100 text-green-600' : 'bg-neutral-100 text-neutral-400'
+                              rule.test(password) ? 'bg-green-100 text-green-600' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400'
                             }`}>
                               {rule.test(password) ? '✓' : '·'}
                             </span>
                             <span className={`text-xs ${
-                              rule.test(password) ? 'text-green-700 font-medium' : 'text-neutral-400'
+                              rule.test(password) ? 'text-green-700 font-medium' : 'text-neutral-400 dark:text-neutral-500'
                             }`}>{rule.label}</span>
                           </div>
                         ))}
@@ -409,10 +409,10 @@ export default function RegisterPage() {
               {/* Preferencias (Solo Turista) */}
               {accountType === 'user' && (
                 <div className="pt-2">
-                  <p className="text-sm font-semibold text-neutral-800 mb-1">
+                  <p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">
                     Tus intereses (Selecciona al menos 3) <span className="text-red-500">*</span>
                   </p>
-                  <p className="text-xs text-neutral-500 mb-3">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-3">
                     Seleccionados: {selectedInterests.length}/3
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -423,8 +423,8 @@ export default function RegisterPage() {
                         onClick={() => toggleInterest(cat)}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
                           selectedInterests.includes(cat)
-                            ? 'bg-neutral-800 text-white border-neutral-800'
-                            : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
+                            ? 'bg-neutral-800 dark:bg-white text-white dark:text-neutral-900 border-neutral-800 dark:border-white'
+                            : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-400'
                         }`}
                       >
                         {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -456,7 +456,7 @@ export default function RegisterPage() {
             {/* Redes Sociales Divisor */}
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-[1px] bg-neutral-200" />
-              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">o</span>
+              <span className="text-[10px] font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">o</span>
               <div className="flex-1 h-[1px] bg-neutral-200" />
             </div>
 
@@ -466,7 +466,7 @@ export default function RegisterPage() {
                 type="button"
                 onClick={() => handleSocialLogin('google')}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 border border-neutral-300 rounded-xl py-3 text-sm font-bold text-neutral-700 hover:bg-neutral-50 transition-all active:scale-[0.98] disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 border border-neutral-300 dark:border-neutral-700 rounded-xl py-3 text-sm font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -479,7 +479,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="text-center mt-6">
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                 ¿Ya tienes cuenta?{' '}
                 <Link href="/login" className="text-airbnb font-semibold hover:underline">
                   Inicia sesión

@@ -952,9 +952,9 @@ export default function ExploroDashboard() {
                     )}
                 </div>
             ) : (
-                <div className="space-y-4 animate-fade-in overflow-x-auto pb-4 w-full">
+                <div className="space-y-4 animate-fade-in pb-4 w-full">
                     {/* Contador de resultados */}
-                    <div className="flex items-center justify-between px-1 min-w-[800px]">
+                    <div className="flex items-center justify-between px-1">
                         <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">
                             {searchedData.length} resultado{searchedData.length !== 1 ? 's' : ''}
                             {searchQuery && <span className="text-airbnb"> · "{searchQuery}"</span>}
@@ -966,7 +966,115 @@ export default function ExploroDashboard() {
                         )}
                     </div>
 
-                    {/* ... Table UI ... */}
+                    {/* ── MOBILE: tarjetas apiladas ── */}
+                    <div className="md:hidden space-y-2.5">
+                      {paginatedData.map((item, idx) => {
+                        const itemId = String(item.id || item.id_usuario || item.id_lugar || item.id_pyme || item.id_resena || idx);
+                        const isExpanded = expandedRowId === itemId;
+                        const image = item.avatar || item.image || item.images?.[0];
+                        const name = item.nombre || item.name || 'Sin nombre';
+                        const isPyme = !!item.id_pyme;
+                        return (
+                          <React.Fragment key={itemId}>
+                            {/* Card principal */}
+                            <div className={`bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-sm transition-all ${isExpanded ? 'rounded-t-2xl border-b-0' : 'rounded-2xl'}`}>
+                              <div className="flex items-center gap-3 px-4 py-3.5">
+                                {/* Botón expandir */}
+                                {activeTab !== 'reviews' && (
+                                  <button
+                                    onClick={() => setExpandedRowId(isExpanded ? null : itemId)}
+                                    className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${isExpanded ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400' : 'text-neutral-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20'}`}
+                                  >
+                                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                  </button>
+                                )}
+                                {/* Thumbnail */}
+                                <button
+                                  onClick={() => {
+                                    if (activeTab === 'users') router.push(`/users/${item.id}`);
+                                    else if (isPyme) router.push(`/pymes/${item.id_pyme}`);
+                                    else if (item.id_lugar || item.id) router.push(`/places/${item.id_lugar || item.id}`);
+                                  }}
+                                  className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center text-xl overflow-hidden shrink-0 border border-neutral-100 dark:border-neutral-800 active:scale-95 transition-transform"
+                                >
+                                  {image ? <img src={image} alt={name} className="w-full h-full object-cover" /> : getItemEmoji(item)}
+                                </button>
+                                {/* Info */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-bold text-sm text-neutral-800 dark:text-white truncate leading-tight">{name}</p>
+                                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                    <div className="flex items-center gap-0.5">
+                                      <Star className={`w-3 h-3 ${item.rating > 0 ? 'fill-amber-400 text-amber-400' : 'text-neutral-300'}`} />
+                                      <span className="text-[11px] text-neutral-500 dark:text-neutral-400">{item.rating > 0 ? Number(item.rating).toFixed(1) : '0.0'}</span>
+                                    </div>
+                                    <span className="text-[10px] px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 rounded-full border border-neutral-200 dark:border-neutral-700">
+                                      {isPyme ? '🏢' : '📍'} {item.categoria || item.tipo || 'General'}
+                                    </span>
+                                    {(activeTab === 'places_pymes' || activeTab === 'my_places') && (
+                                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${item.aprobado ? 'bg-green-50 text-green-700 border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/40' : isPyme ? 'bg-yellow-50 text-yellow-700 border-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/40' : 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/40'}`}>
+                                        {item.aprobado ? 'Publicado' : isPyme ? 'Pendiente' : 'En revisión'}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                {/* Acciones rápidas */}
+                                <div className="flex items-center gap-0.5 shrink-0">
+                                  {(activeTab === 'places_pymes' || activeTab === 'my_places' || activeTab === 'approvals') && !item.aprobado && isAdmin && (
+                                    <button
+                                      onClick={() => handleApprove(item.id_pyme || item.id)}
+                                      disabled={actionLoadingId === `approve-${item.id_pyme || item.id}`}
+                                      className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors disabled:opacity-50"
+                                      title="Aprobar"
+                                    >
+                                      {actionLoadingId === `approve-${item.id_pyme || item.id}` ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                                    </button>
+                                  )}
+                                  {(isAdmin || item.id_usuario === user?.id) && activeTab !== 'approvals' && (
+                                    <button
+                                      onClick={() => { setEditingItem(item); isPyme ? setIsCreatePymeOpen(true) : setIsCreatePlaceOpen(true); }}
+                                      className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                      title="Editar"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                  {(isAdmin || item.id_usuario === user?.id) && (
+                                    <button onClick={() => handleDelete(item)} className="p-2 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Eliminar">
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            {/* Expanded content */}
+                            {isExpanded && (
+                              <div className="border border-t-0 border-neutral-200 dark:border-neutral-800 rounded-b-2xl overflow-hidden bg-white dark:bg-neutral-900">
+                                <table className="w-full">
+                                  <tbody>
+                                    <ExpandedRowContent
+                                      item={item}
+                                      isAdmin={isAdmin}
+                                      router={router}
+                                      itemId={itemId}
+                                      getItemEmoji={getItemEmoji}
+                                      onOpenReview={(item) => {
+                                        const type = item.id_pyme ? 'pyme' : item.id_lugar ? 'place' : (item.id_usuario ? 'user' : 'place');
+                                        const id = item.id_pyme || item.id_lugar || item.id_usuario || item.id;
+                                        setReviewTarget({ type, id: String(id) });
+                                        setIsCreateReviewOpen(true);
+                                      }}
+                                    />
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+
+                    {/* ── DESKTOP: tabla con scroll horizontal ── */}
+                    <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left border-separate border-spacing-y-3 min-w-[800px]">
                         <thead>
                             <tr className="text-xs font-bold text-neutral-400 uppercase tracking-widest pl-4">
@@ -1218,10 +1326,11 @@ export default function ExploroDashboard() {
                             })}
                         </tbody>
                     </table>
+                    </div>{/* fin desktop wrapper */}
 
                     {/* Paginación */}
                     {totalPages > 1 && (
-                      <div className="flex items-center justify-center gap-2 pt-4 pb-2 min-w-[800px]">
+                      <div className="flex items-center justify-center gap-2 pt-4 pb-2 flex-wrap">
                         <button
                           onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                           disabled={safePage === 1}

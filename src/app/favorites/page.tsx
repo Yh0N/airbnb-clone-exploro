@@ -52,7 +52,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 py-8 min-h-[70vh]">
+    <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 py-8 min-h-[70vh] pb-24 md:pb-8">
       <button 
         onClick={() => router.back()}
         className="flex items-center gap-2 text-sm font-bold text-neutral-500 hover:text-neutral-900 transition-all mb-6 group w-fit"
@@ -61,10 +61,10 @@ export default function FavoritesPage() {
         Volver
       </button>
       <header className="mb-10">
-        <div className="flex items-center gap-2 text-sm text-neutral-500 mb-2 font-medium">
+        <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 mb-2 font-medium">
           <span className="hover:underline cursor-pointer" onClick={() => router.push('/')}>Exploro</span>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-neutral-900 font-bold">Favoritos</span>
+          <span className="text-neutral-900 dark:text-white font-bold">Favoritos</span>
         </div>
         <h1 className="text-3xl font-black text-neutral-900 dark:text-white tracking-tight">Favoritos</h1>
       </header>

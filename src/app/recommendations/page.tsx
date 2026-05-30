@@ -61,7 +61,7 @@ export default function RecommendationsPage() {
       <div className="mb-12">
         <div className="flex items-center gap-3 mb-6">
           <Sparkles className="w-6 h-6 text-airbnb" />
-          <h2 className="text-2xl font-bold text-neutral-800">
+          <h2 className="text-2xl font-bold text-neutral-800 dark:text-white">
             Seleccionados para ti
           </h2>
         </div>
@@ -72,7 +72,7 @@ export default function RecommendationsPage() {
       <div className="mb-12">
         <div className="flex items-center gap-3 mb-6">
           <TrendingUp className="w-6 h-6 text-green-600" />
-          <h2 className="text-2xl font-bold text-neutral-800">
+          <h2 className="text-2xl font-bold text-neutral-800 dark:text-white">
             Tendencias en Nariño
           </h2>
         </div>
@@ -80,12 +80,12 @@ export default function RecommendationsPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-neutral-100 rounded-2xl p-8 md:p-12 text-center">
+      <div className="bg-neutral-100 dark:bg-neutral-800 rounded-2xl p-8 md:p-12 text-center">
         <MapPin className="w-12 h-12 text-airbnb mx-auto mb-4" />
-        <h3 className="text-2xl font-bold text-neutral-800 mb-3">
+        <h3 className="text-2xl font-bold text-neutral-800 dark:text-white mb-3">
           ¿Quieres recomendaciones más precisas?
         </h3>
-        <p className="text-neutral-500 max-w-lg mx-auto mb-6">
+        <p className="text-neutral-500 dark:text-neutral-400 max-w-lg mx-auto mb-6">
           Inicia sesión y guarda tus lugares favoritos para que nuestro sistema de
           recomendaciones pueda sugerirte destinos personalizados.
         </p>
