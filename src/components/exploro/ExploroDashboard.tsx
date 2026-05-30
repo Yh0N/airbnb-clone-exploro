@@ -1054,6 +1054,7 @@ export default function ExploroDashboard() {
                                       isAdmin={isAdmin}
                                       router={router}
                                       itemId={itemId}
+                                      getItemEmoji={getItemEmoji}
                                       onOpenReview={(item) => {
                                         const type = item.id_pyme ? 'pyme' : item.id_lugar ? 'place' : (item.id_usuario ? 'user' : 'place');
                                         const id = item.id_pyme || item.id_lugar || item.id_usuario || item.id;
