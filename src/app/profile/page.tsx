@@ -197,7 +197,7 @@ function ProfileContent() {
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8">
       {/* Botón Volver */}
       <button 
         onClick={() => router.back()}

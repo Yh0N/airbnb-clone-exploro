@@ -170,7 +170,7 @@ export default function PlaceDetailPage() {
   };
 
   return (
-    <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       
       {/* Botón Volver */}
       <button 
@@ -214,7 +214,7 @@ export default function PlaceDetailPage() {
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex-1">
-              <h1 className="text-4xl md:text-5xl font-black text-neutral-900 tracking-tighter mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-neutral-900 dark:text-white tracking-tighter mb-4">
                 {place.name}
               </h1>
               
@@ -456,8 +456,8 @@ export default function PlaceDetailPage() {
       </div>
 
       {/* Sección de Reseñas y Comentarios */}
-      <div id="reviews-section" className="mt-24 pt-16 border-t border-neutral-100">
-        <div className="flex items-center justify-between mb-12">
+      <div id="reviews-section" className="mt-24 pt-16 border-t border-neutral-100 dark:border-neutral-800">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
           <div>
             <h2 className="text-2xl md:text-3xl font-black text-neutral-900 tracking-tight flex items-center gap-3">
               <Star className="w-8 h-8 text-amber-400 fill-amber-400" />

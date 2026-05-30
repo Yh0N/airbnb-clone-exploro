@@ -52,7 +52,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 py-8 min-h-[70vh]">
+    <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 py-8 min-h-[70vh] pb-24 md:pb-8">
       <button 
         onClick={() => router.back()}
         className="flex items-center gap-2 text-sm font-bold text-neutral-500 hover:text-neutral-900 transition-all mb-6 group w-fit"
