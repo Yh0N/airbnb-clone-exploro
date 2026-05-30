@@ -192,19 +192,19 @@ export default function PymeDetailPage() {
                   Cómo llegar
                 </button>
 
-                {(pyme.whatsapp || pyme.telefono) && (
+                {pyme.whatsapp && (
                   <button
                     onClick={handleWhatsApp}
-                    className="flex items-center gap-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 bg-neutral-50 dark:bg-neutral-800 hover:bg-white dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
+                    className="flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/40 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
                   >
                     <MessageCircle className="w-4 h-4 text-emerald-600" />
-                    WhatsApp
+                    {pyme.whatsapp}
                   </button>
                 )}
                 {pyme.telefono && (
                   <a
                     href={`tel:${pyme.telefono}`}
-                    className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-neutral-50 hover:bg-white border border-neutral-200 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
+                    className="flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800/40 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
                   >
                     <Phone className="w-4 h-4 text-blue-500" />
                     {pyme.telefono}
