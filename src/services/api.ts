@@ -641,6 +641,14 @@ export const getAllPymes = async () => {
     return (response.data as any[]).map(mapPyme); 
 };
 
+export const getPyme = async (id: number): Promise<any | null> => {
+    if (USE_MOCK) {
+        return { id, nombre: 'Pyme Mock', tipo: 'Restaurante' };
+    }
+    const response = await api.get(`/pymes/${id}`);
+    return mapPyme(response.data);
+};
+
 export const deletePyme = async (id: number) => {
     if (USE_MOCK) return { message: 'Pyme eliminada (Mock)' };
     const response = await api.delete(`/pymes/${id}`);
