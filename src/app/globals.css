@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe area para iPhones con home indicator */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* ===== GLOBAL STYLES - AIRBNB CLONE 2025 ===== */
 
 :root {
