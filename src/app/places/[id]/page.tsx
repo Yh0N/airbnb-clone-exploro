@@ -6,10 +6,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
-  Star, MapPin, Share, Heart, ChevronRight, Award, 
-  Shield, Calendar, Flag, Mountain, TreePine, 
-  Camera, Info, InfoIcon, ExternalLink,
-  Map, MessageCircle, Bookmark, ChevronLeft
+  Star, MapPin, Share, ChevronRight,
+  Shield, Mountain, TreePine,
+  Camera, InfoIcon,
+  Map, MessageCircle, Bookmark, ChevronLeft, Pencil
 } from 'lucide-react';
 import ImageGallery from '@/components/ImageGallery';
 import PlaceCard from '@/components/PlaceCard';
@@ -281,9 +281,18 @@ export default function PlaceDetailPage() {
                   Compartir
                 </button>
 
+                {canEdit && (
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800/40 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Editar
+                  </button>
+                )}
               </div>
 
-              {/* Fila 2: CTA principal (y editar si es owner) */}
+              {/* Fila 2: CTA principal */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
@@ -294,16 +303,6 @@ export default function PlaceDetailPage() {
                 >
                   Calificar
                 </button>
-
-                {canEdit && (
-                  <button
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-2xl transition-all shadow-xl active:scale-95 whitespace-nowrap"
-                  >
-                    <Info className="w-4 h-4" />
-                    Editar
-                  </button>
-                )}
               </div>
             </div>
           </div>
