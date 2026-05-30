@@ -235,7 +235,7 @@ export default function PymeOnboarding() {
                   </div>
                   <div className="text-left">
                     <p className="font-black text-sm">Iniciar sesión con otra cuenta</p>
-                    <p className="text-xs text-neutral-500 font-medium">Cerraré sesión y entraré con otra cuenta</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Cerraré sesión y entraré con otra cuenta</p>
                   </div>
                   <ArrowRight className="w-5 h-5 ml-auto opacity-40" />
                 </button>
@@ -250,7 +250,7 @@ export default function PymeOnboarding() {
                   </div>
                   <div className="text-left">
                     <p className="font-black text-sm">Crear una cuenta nueva</p>
-                    <p className="text-xs text-neutral-500 font-medium">Quiero ser pyme desde cero</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Quiero ser pyme desde cero</p>
                   </div>
                   <ArrowRight className="w-5 h-5 ml-auto opacity-40" />
                 </Link>
@@ -325,12 +325,12 @@ export default function PymeOnboarding() {
               "Desde que registré mi restaurante en PastoExplora, las reservas de turistas nacionales han aumentado un 40%. La plataforma es intuitiva y el soporte es excelente."
             </p>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-neutral-200 rounded-full overflow-hidden">
+              <div className="w-10 h-10 bg-neutral-200 dark:bg-neutral-600 rounded-full overflow-hidden">
                 <img src="https://i.pravatar.cc/150?u=rest" alt="User" />
               </div>
               <div>
                 <p className="text-xs font-black text-neutral-900 dark:text-white uppercase tracking-tight">Elena Rodríguez</p>
-                <p className="text-[10px] text-neutral-500 font-bold uppercase">Dueña de "Sabores del Galeras"</p>
+                <p className="text-[10px] text-neutral-500 dark:text-neutral-400 font-bold uppercase">Dueña de "Sabores del Galeras"</p>
               </div>
             </div>
           </div>
@@ -355,12 +355,12 @@ export default function PymeOnboarding() {
                   <div className="p-6 bg-neutral-50 dark:bg-neutral-800 rounded-3xl text-left space-y-2">
                     <ShieldCheck className="w-6 h-6 text-blue-500" />
                     <p className="text-sm font-black dark:text-white uppercase">Perfil Verificado</p>
-                    <p className="text-xs text-neutral-500">Tu cuenta ahora tiene permisos especiales.</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">Tu cuenta ahora tiene permisos especiales.</p>
                   </div>
                   <div className="p-6 bg-neutral-50 dark:bg-neutral-800 rounded-3xl text-left space-y-2">
                     <Globe className="w-6 h-6 text-airbnb" />
                     <p className="text-sm font-black dark:text-white uppercase">Visibilidad Global</p>
-                    <p className="text-xs text-neutral-500">Ya apareces en el mapa interactivo.</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">Ya apareces en el mapa interactivo.</p>
                   </div>
                </div>
                <button 
@@ -397,7 +397,7 @@ export default function PymeOnboarding() {
                   {step === 1 && (
                     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
                       <div className="space-y-2">
-                        <label className="text-xs font-black text-neutral-500 uppercase tracking-widest ml-1">Nombre Comercial</label>
+                        <label className="text-xs font-black text-neutral-500 dark:text-neutral-400 uppercase tracking-widest ml-1">Nombre Comercial</label>
                         <input 
                           type="text" 
                           value={form.nombre}
@@ -457,7 +457,7 @@ export default function PymeOnboarding() {
                               className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-[18px] text-sm font-black transition-all ${
                                   locationMode === 'address' 
                                   ? 'bg-white dark:bg-neutral-700 text-airbnb shadow-xl scale-[1.02]' 
-                                  : 'text-neutral-500 hover:text-neutral-700'
+                                  : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'
                               }`}
                           >
                               <LayoutList className="w-5 h-5" />
@@ -485,7 +485,7 @@ export default function PymeOnboarding() {
                               onChange={val => setForm({...form, prefijo_direccion: val})}
                             />
                             <div className="space-y-2">
-                              <label className="text-xs font-black text-neutral-500 uppercase tracking-widest ml-1">Dirección Exacta</label>
+                              <label className="text-xs font-black text-neutral-500 dark:text-neutral-400 uppercase tracking-widest ml-1">Dirección Exacta</label>
                               <input 
                                 type="text" 
                                 value={form.direccion_detalle}
@@ -495,7 +495,7 @@ export default function PymeOnboarding() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <label className="text-xs font-black text-neutral-500 uppercase tracking-widest ml-1">Ciudad / Municipio</label>
+                              <label className="text-xs font-black text-neutral-500 dark:text-neutral-400 uppercase tracking-widest ml-1">Ciudad / Municipio</label>
                               <input 
                                 type="text" 
                                 value={form.ciudad}
@@ -660,7 +660,7 @@ function StepItem({ num, active, done, title, desc }: { num: number, active: boo
           <h4 className={`text-base font-black tracking-tight ${active ? 'text-neutral-900 dark:text-white' : 'text-neutral-400'}`}>
             {title}
           </h4>
-          <p className="text-xs text-neutral-500 font-bold uppercase tracking-tight">{desc}</p>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-tight">{desc}</p>
        </div>
     </div>
   );

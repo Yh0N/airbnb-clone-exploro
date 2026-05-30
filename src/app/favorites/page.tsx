@@ -61,10 +61,10 @@ export default function FavoritesPage() {
         Volver
       </button>
       <header className="mb-10">
-        <div className="flex items-center gap-2 text-sm text-neutral-500 mb-2 font-medium">
+        <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 mb-2 font-medium">
           <span className="hover:underline cursor-pointer" onClick={() => router.push('/')}>Exploro</span>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-neutral-900 font-bold">Favoritos</span>
+          <span className="text-neutral-900 dark:text-white font-bold">Favoritos</span>
         </div>
         <h1 className="text-3xl font-black text-neutral-900 dark:text-white tracking-tight">Favoritos</h1>
       </header>

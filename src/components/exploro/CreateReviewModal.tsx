@@ -130,7 +130,7 @@ export default function CreateReviewModal({ isOpen, onClose, onCreated, initialT
             </div>
             <div>
               <h2 className="text-xl font-bold dark:text-white">{initialData ? 'Editar Reseña' : 'Nueva Reseña'}</h2>
-              <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">{initialData ? 'Actualiza tus comentarios' : 'Comparte tu experiencia'}</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider">{initialData ? 'Actualiza tus comentarios' : 'Comparte tu experiencia'}</p>
             </div>
           </div>
           <button onClick={handleClose} className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors group">
@@ -152,7 +152,7 @@ export default function CreateReviewModal({ isOpen, onClose, onCreated, initialT
 
           {initialTargetId ? (
             <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-700 flex flex-col items-center justify-center gap-2">
-              <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+              <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                 Estás calificando {targetType === 'place' ? 'un lugar turístico' : targetType === 'pyme' ? 'un negocio (pyme)' : 'a un usuario/guía'}
               </span>
               <span className="text-lg font-black text-neutral-800 dark:text-white">
