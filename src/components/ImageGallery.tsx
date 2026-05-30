@@ -502,11 +502,19 @@ export default function ImageGallery({
 
           {/* Imagen con animación suave */}
           <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
-            <img
-              src={validImages[modalIndex]}
-              alt={`${placeName} - ${modalIndex + 1}`}
-              className="max-w-full max-h-full object-contain select-none shadow-2xl transition-all duration-500"
-            />
+            {imageErrors[modalIndex] ? (
+              <div className="flex flex-col items-center justify-center gap-4 text-white/50">
+                <ImageIcon className="w-20 h-20" />
+                <p className="text-sm font-medium">Imagen no disponible</p>
+              </div>
+            ) : (
+              <img
+                src={validImages[modalIndex]}
+                alt={`${placeName} - ${modalIndex + 1}`}
+                className="max-w-full max-h-full object-contain select-none shadow-2xl transition-all duration-500"
+                onError={() => setImageErrors(prev => ({ ...prev, [modalIndex]: true }))}
+              />
+            )}
 
             {/* Botón eliminar en modal */}
             {canDelete(validImages[modalIndex]) && (

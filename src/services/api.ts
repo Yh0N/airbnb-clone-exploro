@@ -1,14 +1,13 @@
 import axios from 'axios';
-import { 
-  mockPlaces as places, 
-  mockUser, 
-  experiences, 
+import {
+  mockPlaces as places,
+  mockUser,
+  experiences,
   services,
   simulateApiDelay as delay,
-  type Place, 
-  type User, 
-  type Experience, 
-  type Service 
+  type Place,
+  type Experience,
+  type Service
 } from './mockData';
 
 
@@ -49,8 +48,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 const PROD_API_BASE = 'https://exploro-api.onrender.com';
 
@@ -114,30 +111,6 @@ const mapPlace = (b: any): any => {
   };
 };
 
-const mapExperience = (b: any): Experience => ({
-  id: b.id_experiencia || b.id,
-  title: b.titulo || b.title,
-  category: b.categoria || b.category,
-  host: b.anfitrion || b.host,
-  image: b.foto || b.image,
-  price: b.precio || b.price,
-  rating: b.calificacion || b.rating,
-  reviews_count: b.numero_reseñas || b.reviews_count,
-  duration: b.duracion || b.duration,
-  isOriginal: b.es_original || b.isOriginal
-});
-
-const mapService = (b: any): Service => ({
-  id: b.id_servicio || b.id,
-  title: b.titulo || b.title,
-  provider: b.proveedor || b.provider,
-  category: b.categoria || b.category,
-  image: b.foto || b.image,
-  price: b.precio || b.price,
-  pricingType: b.tipo_cobro || b.pricingType,
-  rating: b.calificacion || b.rating,
-  reviews_count: b.numero_reseñas || b.reviews_count
-});
 
 const mapPyme = (b: any): any => {
   const fotosArray = typeof b.fotos === 'string' ? b.fotos.split(',').filter(Boolean) : (Array.isArray(b.fotos) ? b.fotos : []);
@@ -737,9 +710,9 @@ export const getPopularPlaces = async () => {
     return (response.data as any[]).map(mapPlace);
 };
 
-export const getNearbyRecommendations = async (lat: number, lng: number) => {
+export const getNearbyRecommendations = async (lat: number, lng: number, radiusKm: number = 1) => {
     if (USE_MOCK) return [];
-    const response = await api.get(`/recommendations/nearby?latitud=${lat}&longitud=${lng}`);
+    const response = await api.get(`/recommendations/nearby?latitud=${lat}&longitud=${lng}&radio_km=${radiusKm}`);
     return (response.data as any[]).map(mapPlace);
 };
 

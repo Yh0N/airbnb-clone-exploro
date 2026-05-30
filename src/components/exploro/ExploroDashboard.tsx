@@ -25,13 +25,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  X,
-  Image as ImageIcon,
-  ArrowRight
+  X
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import * as api from '@/services/api';
-import { getCategoriaConfig, getItemEmoji as getItemEmojiShared } from '@/lib/taxonomy';
+import { getItemEmoji as getItemEmojiShared } from '@/lib/taxonomy';
 import CreatePlaceModal from './CreatePlaceModal';
 import CreatePymeModal from './CreatePymeModal';
 import CreateReviewModal from './CreateReviewModal';
@@ -249,103 +247,6 @@ const ExpandedRowContent = ({ item, isAdmin, router, itemId, getItemEmoji, onOpe
     );
 };
 
-// Mini-card for the map split-view entity list
-function MapMiniCard({ item, isSelected, entityId, onClick, onOpenReview, router }: {
-  item: any;
-  isSelected: boolean;
-  entityId: string;
-  onClick: () => void;
-  onOpenReview: () => void;
-  router: any;
-}) {
-  const name = item.nombre || item.name || 'Sin nombre';
-  const image = item.image || item.images?.[0] || item.avatar;
-  const rating = item.rating;
-  const location = item.ubicacion_textual || item.location || '';
-  const isPyme = !!item.id_pyme;
-  const catLabel = (item.categoria || item.tipo || 'Lugar').toLowerCase();
-  const [imgError, setImgError] = React.useState(false);
-  const hasValidImg = image && isImageValid(image) && !imgError;
-
-  const CAT_COLORS: Record<string, string> = {
-    gastronomia: 'bg-orange-500', naturaleza: 'bg-green-500',
-    cultura: 'bg-purple-500', comercio: 'bg-pink-500',
-    recreacion: 'bg-amber-500', servicios: 'bg-slate-500',
-    turismo: 'bg-blue-500', hospedaje: 'bg-emerald-500',
-  };
-  const catBg = Object.keys(CAT_COLORS).find(k => catLabel.includes(k));
-  const pillColor = catBg ? CAT_COLORS[catBg] : 'bg-airbnb';
-
-  return (
-    <div
-      data-entity-id={entityId}
-      className={`group flex gap-3 px-4 py-3.5 cursor-pointer border-b border-neutral-100 dark:border-neutral-800 transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 ${
-        isSelected
-          ? 'bg-airbnb/5 dark:bg-airbnb/10 border-l-[3px] border-l-airbnb pl-[13px]'
-          : 'border-l-[3px] border-l-transparent'
-      }`}
-      onClick={onClick}
-    >
-      {/* Thumbnail */}
-      <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-100 dark:bg-neutral-800 shadow-sm flex items-center justify-center">
-        {hasValidImg ? (
-          <img 
-            src={image} 
-            alt={name} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <span className="text-2xl">{getItemEmojiShared(item)}</span>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
-        <div className="flex items-center gap-1.5">
-          <p className="font-bold text-sm text-neutral-800 dark:text-white truncate leading-tight">{name}</p>
-          {isPyme && (
-            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400 uppercase shrink-0">Pyme</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${pillColor} capitalize`}>
-            {catLabel}
-          </span>
-          {rating > 0 && (
-            <div className="flex items-center gap-0.5">
-              <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-              <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400">{Number(rating).toFixed(1)}</span>
-            </div>
-          )}
-        </div>
-
-        {location && (
-          <p className="text-[11px] text-neutral-400 truncate leading-tight">{location}</p>
-        )}
-      </div>
-
-      {/* Quick actions */}
-      <div className="flex flex-col gap-1 justify-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <button
-          onClick={(e) => { e.stopPropagation(); const id = item.id_lugar || item.id_pyme || item.id; isPyme ? router.push(`/pymes/${id}`) : router.push(`/places/${id}`); }}
-          title="Ver ficha"
-          className="p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
-        >
-          <ArrowRight className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-300" />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onOpenReview(); }}
-          title="Calificar"
-          className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
-        >
-          <Star className="w-3.5 h-3.5 text-amber-500" />
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default function ExploroDashboard() {
   const router = useRouter();
@@ -448,7 +349,7 @@ export default function ExploroDashboard() {
             result = await api.getPopularPlaces();
           } else {
             if (userLocation) {
-              result = await api.getNearbyRecommendations(userLocation[0], userLocation[1]);
+              result = await api.getNearbyRecommendations(userLocation[0], userLocation[1], nearbyRadius);
             } else {
               showMsg('Ubicación necesaria para recomendaciones cercanas', 'error');
               result = [];
@@ -779,25 +680,50 @@ export default function ExploroDashboard() {
             )}
 
             {activeTab === 'recommendations' && (
-              <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color">
-                <button
-                  onClick={() => setRecommendationType('personalized')}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'personalized' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
-                >
-                  Para ti
-                </button>
-                <button
-                  onClick={() => setRecommendationType('popular')}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'popular' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
-                >
-                  Populares
-                </button>
-                <button
-                  onClick={() => setRecommendationType('nearby')}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'nearby' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
-                >
-                  Cercanos
-                </button>
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Selector de tipo */}
+                <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color">
+                  <button
+                    onClick={() => setRecommendationType('personalized')}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'personalized' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                  >
+                    Para ti
+                  </button>
+                  <button
+                    onClick={() => setRecommendationType('popular')}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'popular' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                  >
+                    Populares
+                  </button>
+                  <button
+                    onClick={() => setRecommendationType('nearby')}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${recommendationType === 'nearby' ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
+                  >
+                    Cercanos
+                  </button>
+                </div>
+
+                {/* Selector de radio — solo cuando está en modo Cercanos */}
+                {recommendationType === 'nearby' && (
+                  <div className="flex items-center gap-1 bg-white dark:bg-neutral-900 p-1 rounded-2xl border border-blue-200 dark:border-blue-800/40 shadow-sm">
+                    <span className="text-[10px] font-black text-blue-400 uppercase pl-2 pr-1 flex items-center gap-1">
+                      <Navigation className="w-2.5 h-2.5" /> Radio:
+                    </span>
+                    {[0.4, 0.7, 1, 1.4].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setNearbyRadius(r)}
+                        className={`px-2.5 py-1 rounded-xl text-[10px] font-black transition-all ${
+                          nearbyRadius === r
+                            ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20'
+                            : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                        }`}
+                      >
+                        {r < 1 ? `${r * 1000}m` : `${r}km`}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -954,27 +880,30 @@ export default function ExploroDashboard() {
             )}
             {recommendationType === 'nearby' && (
               <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/20 dark:border-blue-800/40 p-4">
-                <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3">¿Cómo funcionan los Cercanos?</p>
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-1">Cercanos inteligentes — útil para decidir a dónde ir</p>
+                <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mb-3">
+                  No es lo mismo que <span className="font-bold">Cercanos (1km)</span> del menú lateral. Ese es un mapa de todo lo que hay cerca, sin filtros. Esta sección es diferente: combina tu ubicación con tus preferencias personales y solo te sugiere lugares cercanos que te pueden interesar y que todavía no has visitado — para ayudarte a decidir, no solo a explorar.
+                </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="flex items-start gap-2">
                     <MapPin className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Tu ubicación actual</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Usa tu GPS para mostrarte los lugares turísticos más cercanos a donde estás en este momento.</p>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Cerca tuyo y a tu gusto</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Solo aparecen lugares cercanos que coinciden con las categorías de interés de tu perfil.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <Navigation className="w-4 h-4 text-teal-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Filtro por radio</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Ajusta el radio de búsqueda (400m a 1.4km) con los controles que aparecen arriba.</p>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Sin repetir lo que ya viste</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">El sistema excluye automáticamente los lugares que ya calificaste, para siempre mostrarte algo nuevo.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <Star className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Ordenados por distancia</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Los resultados van del más cercano al más lejano para facilitar tu decisión.</p>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Del más cercano al más lejano</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Los resultados se ordenan por distancia para que tomes la decisión más fácil y rápida.</p>
                     </div>
                   </div>
                 </div>
