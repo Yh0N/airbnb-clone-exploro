@@ -10,6 +10,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'unpkg.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'exploro-api.onrender.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.onrender.com',
+      },
     ],
   },
 };

@@ -52,10 +52,15 @@ api.interceptors.response.use(
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+const PROD_API_BASE = 'https://exploro-api.onrender.com';
+
 export const resolvePhotoUrl = (url: string): string => {
   if (!url) return '';
   if (url.startsWith('http') || url.startsWith('data:')) return url;
-  return `${API_BASE}${url}`;
+  // Si la URL es relativa, la resolvemos con la base correcta.
+  // Primero usamos la variable de entorno (local dev), si no existe usamos producción.
+  const base = process.env.NEXT_PUBLIC_API_URL || PROD_API_BASE;
+  return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 // ===== MAPPERS (Transformación Backend -> Frontend) =====
@@ -302,6 +307,41 @@ export const toggleFavorite = async (placeId: number) => {
   return response.data;
 };
 
+// Mapea los valores del CategoryBar a los parámetros correctos del backend
+// Algunos son categorías principales (categoria=X) y otros son subcategorías (subcategoria=X)
+const buildPlaceParams = (category?: string, search?: string): Record<string, string> => {
+  const params: Record<string, string> = {};
+  if (search) params.search = search;
+  if (!category || category === 'all') return params;
+
+  const categoryMapping: Record<string, { categoria?: string; subcategoria?: string }> = {
+    naturaleza: { categoria: 'naturaleza' },
+    cultura:    { categoria: 'cultura' },
+    gastronomia:{ categoria: 'gastronomia' },
+    hospedaje:  { categoria: 'hospedaje' },
+    comercio:   { categoria: 'comercio' },
+    recreacion: { categoria: 'recreacion' },
+    servicios:  { categoria: 'servicios' },
+    aventura:   { subcategoria: 'deporte' },
+    religion:   { subcategoria: 'iglesia' },
+    artesania:  { subcategoria: 'artesanias' },
+    termal:     { subcategoria: 'termal' },
+    mirador:    { subcategoria: 'mirador' },
+    historico:  { subcategoria: 'historico' },
+    lago:       { subcategoria: 'laguna' },
+    parque:     { subcategoria: 'parque' },
+  };
+
+  const mapping = categoryMapping[category.toLowerCase()];
+  if (mapping) {
+    if (mapping.categoria) params.categoria = mapping.categoria;
+    if (mapping.subcategoria) params.subcategoria = mapping.subcategoria;
+  } else {
+    params.categoria = category;
+  }
+  return params;
+};
+
 export const getPlaces = async (search?: string, category?: string): Promise<Place[]> => {
   if (USE_MOCK) {
     await delay(800);
@@ -311,22 +351,16 @@ export const getPlaces = async (search?: string, category?: string): Promise<Pla
     }
     if (search) {
       const q = search.toLowerCase();
-      results = results.filter((p: Place) => 
-        p.name.toLowerCase().includes(q) || 
+      results = results.filter((p: Place) =>
+        p.name.toLowerCase().includes(q) ||
         p.location.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q)
       );
     }
     return results;
   }
-  const params: any = {};
-  if (category && category !== 'all') {
-    params.categoria = category;
-  }
-  if (search) {
-    params.search = search; // El backend parece no tener este parámetro aún en list_places, pero lo dejamos por si acaso
-  }
-  
+
+  const params = buildPlaceParams(category, search);
   const response = await api.get('/places', { params });
   return response.data.map(mapPlace);
 };
@@ -358,133 +392,175 @@ export const getPlace = async (id: number): Promise<Place | null> => {
 };
 
 export const getExperiences = async (category?: string): Promise<Experience[]> => {
-  // 1. Obtener datos quemados (mock) locales del frontend
-  let results = [...experiences];
-  if (category && category !== 'all') {
-    results = results.filter(exp => exp.category.toLowerCase() === category.toLowerCase());
-  }
-
   if (USE_MOCK) {
     await delay(600);
+    let results = [...experiences];
+    if (category && category !== 'all') {
+      results = results.filter(exp => exp.category.toLowerCase() === category.toLowerCase());
+    }
     return results;
   }
 
-  // 2. Obtener datos reales de la base de datos (Lugares con categoría 'experiencia' o similar)
   try {
-    const response = await api.get('/places');
-    const dbExperiences = response.data
-      .filter((p: any) => {
-        const cat = (p.categoria || '').toLowerCase();
-        return cat === 'experiencia' || cat === 'experiencias' || cat === 'aventura' || cat === 'cultura';
-      })
+    // Fetch places de categorías turísticas + pymes de turismo en paralelo
+    const [placesRes, pymesRes] = await Promise.all([
+      api.get('/places').catch(() => ({ data: [] })),
+      api.get('/pymes').catch(() => ({ data: [] })),
+    ]);
+
+    // Categorías de lugares que representan "experiencias" en la taxonomía
+    const expCategories = new Set(['recreacion', 'cultura', 'naturaleza']);
+
+    const placesAsExperiences: Experience[] = placesRes.data
+      .filter((p: any) => expCategories.has((p.categoria || '').toLowerCase()))
       .map((p: any) => {
         const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
+        const categoryLabels: Record<string, string> = {
+          recreacion: 'Recreación',
+          cultura: 'Cultura',
+          naturaleza: 'Naturaleza',
+        };
         return {
           id: p.id_lugar,
           title: p.nombre,
-          category: p.categoria || 'Experiencia',
-          host: p.host_name || p.pyme?.nombre || 'Anfitrión Local',
-          image: resolvePhotoUrl(p.foto_principal || (fotosArray[0] || '')),
-          price: p.precio ? `$${p.precio.toLocaleString()} COP` : 'Acceso gratuito',
-          rating: p.calificacion_promedio || 0.0,
+          category: categoryLabels[(p.categoria || '').toLowerCase()] || p.categoria || 'Experiencia',
+          host: p.host_name || 'Anfitrión Local',
+          image: resolvePhotoUrl(p.foto_principal || fotosArray[0] || ''),
+          price: p.precio ? `$${Number(p.precio).toLocaleString()} COP` : '$50,000 COP',
+          rating: p.calificacion_promedio || 0,
           reviews_count: p.numero_reseñas || 0,
           duration: '3 horas',
-          isOriginal: false
+          isOriginal: false,
         };
       });
 
-    // Filtrar los de la BD por categoría si se requiere
-    let filteredDb = dbExperiences;
+    // Pymes de turismo (agencias, guías, tour operadoras) como experiencias
+    const pymesAsExperiences: Experience[] = pymesRes.data
+      .filter((p: any) => (p.tipo || '').toLowerCase() === 'turismo')
+      .map((p: any) => {
+        const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
+        return {
+          id: p.id_pyme + 10000,
+          title: p.nombre,
+          category: 'Turismo & Tours',
+          host: p.nombre,
+          image: resolvePhotoUrl(p.foto_principal || fotosArray[0] || ''),
+          price: '$80,000 COP',
+          rating: p.calificacion_promedio || 0,
+          reviews_count: p.numero_reseñas || 0,
+          duration: '4 horas',
+          isOriginal: false,
+        };
+      });
+
+    let allExperiences = [...placesAsExperiences, ...pymesAsExperiences];
+
     if (category && category !== 'all') {
       const catLower = category.toLowerCase();
-      const normalize = (s: string) => s.toLowerCase().replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u");
-      filteredDb = dbExperiences.filter((e: any) => normalize(e.category) === normalize(catLower));
+      allExperiences = allExperiences.filter(e => e.category.toLowerCase().includes(catLower));
     }
 
-    results = [...results, ...filteredDb];
-  } catch (error) {
-    console.error('Error fetching real experiences from API:', error);
-  }
+    // Si la BD no tiene datos aún, mostrar el mock como fallback
+    if (allExperiences.length === 0) {
+      let mockResults = [...experiences];
+      if (category && category !== 'all') {
+        mockResults = mockResults.filter(exp => exp.category.toLowerCase() === category.toLowerCase());
+      }
+      return mockResults;
+    }
 
-  return results;
+    return allExperiences;
+  } catch (error) {
+    console.error('Error fetching experiences:', error);
+    let results = [...experiences];
+    if (category && category !== 'all') {
+      results = results.filter(exp => exp.category.toLowerCase() === category.toLowerCase());
+    }
+    return results;
+  }
 };
 
 export const getServices = async (category?: string): Promise<Service[]> => {
-  // 1. Obtener datos quemados (mock) locales del frontend
-  let results = [...services];
-  if (category && category !== 'all') {
-    results = results.filter(srv => srv.category.toLowerCase() === category.toLowerCase());
-  }
-
   if (USE_MOCK) {
     await delay(600);
+    let results = [...services];
+    if (category && category !== 'all') {
+      results = results.filter(srv => srv.category.toLowerCase() === category.toLowerCase());
+    }
     return results;
   }
 
-  // 2. Obtener datos reales de la base de datos (Lugares de categoría servicio o Pymes de tipo servicio)
   try {
-    // Consultamos lugares y pymes para ver si hay servicios reales en la BD
-    const [placesRes, pymesRes] = await Promise.all([
-      api.get('/places').catch(() => ({ data: [] })),
-      api.get('/pymes').catch(() => ({ data: [] }))
+    // Fetch pymes (todos son negocios que ofrecen servicios) y lugares de categoría 'servicios'
+    const [pymesRes, placesRes] = await Promise.all([
+      api.get('/pymes').catch(() => ({ data: [] })),
+      api.get('/places', { params: { categoria: 'servicios' } }).catch(() => ({ data: [] })),
     ]);
 
-    const dbServicesFromPlaces = placesRes.data
-      .filter((p: any) => {
-        const cat = (p.categoria || '').toLowerCase();
-        return cat === 'servicio' || cat === 'servicios';
-      })
-      .map((p: any) => {
-        const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
-        return {
-          id: p.id_lugar,
-          title: p.nombre,
-          provider: p.host_name || p.pyme?.nombre || 'Proveedor Local',
-          category: p.categoria || 'Servicio',
-          image: resolvePhotoUrl(p.foto_principal || (fotosArray[0] || '')),
-          price: p.precio ? `$${p.precio.toLocaleString()} COP` : '$50,000 COP',
-          pricingType: 'per_hour' as const,
-          rating: p.calificacion_promedio || 0.0,
-          reviews_count: p.numero_reseñas || 0
-        };
-      });
+    // Todas las pymes representan servicios disponibles para el turista
+    const pymesAsServices: Service[] = pymesRes.data.map((p: any) => {
+      const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
+      const tipoLabels: Record<string, string> = {
+        gastronomia: 'Gastronomía',
+        hospedaje: 'Hospedaje',
+        turismo: 'Turismo & Tours',
+        comercio: 'Comercio',
+        servicios: 'Servicios',
+      };
+      return {
+        id: p.id_pyme + 1000,
+        title: p.nombre,
+        provider: p.nombre,
+        category: tipoLabels[(p.tipo || '').toLowerCase()] || p.tipo || 'Servicio',
+        image: resolvePhotoUrl(p.foto_principal || fotosArray[0] || ''),
+        price: '$60,000 COP',
+        pricingType: 'per_hour' as const,
+        rating: p.calificacion_promedio || 0,
+        reviews_count: p.numero_reseñas || 0,
+      };
+    });
 
-    const dbServicesFromPymes = pymesRes.data
-      .filter((p: any) => {
-        const tipo = (p.tipo || '').toLowerCase();
-        return tipo === 'servicio' || tipo === 'servicios' || tipo === 'agencia';
-      })
-      .map((p: any) => {
-        const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
-        return {
-          id: p.id_pyme + 1000, // Evitar colisión de IDs con lugares
-          title: p.nombre,
-          provider: p.nombre || 'Pyme local',
-          category: p.tipo || 'Servicio',
-          image: resolvePhotoUrl(p.foto_principal || (fotosArray[0] || '')),
-          price: '$60,000 COP',
-          pricingType: 'per_hour' as const,
-          rating: p.calificacion_promedio || 0.0,
-          reviews_count: p.numero_reseñas || 0
-        };
-      });
+    // Lugares con categoría 'servicios' (transporte, farmacias, parqueaderos, etc.)
+    const placesAsServices: Service[] = placesRes.data.map((p: any) => {
+      const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
+      return {
+        id: p.id_lugar,
+        title: p.nombre,
+        provider: p.host_name || 'Proveedor Local',
+        category: p.subcategoria || 'Servicio',
+        image: resolvePhotoUrl(p.foto_principal || fotosArray[0] || ''),
+        price: p.precio ? `$${Number(p.precio).toLocaleString()} COP` : '$50,000 COP',
+        pricingType: 'per_hour' as const,
+        rating: p.calificacion_promedio || 0,
+        reviews_count: p.numero_reseñas || 0,
+      };
+    });
 
-    const dbServices = [...dbServicesFromPlaces, ...dbServicesFromPymes];
+    let allServices = [...pymesAsServices, ...placesAsServices];
 
-    // Filtrar los de la BD por categoría si se requiere
-    let filteredDb = dbServices;
     if (category && category !== 'all') {
       const catLower = category.toLowerCase();
-      const normalize = (s: string) => s.toLowerCase().replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u");
-      filteredDb = dbServices.filter((s: any) => normalize(s.category) === normalize(catLower));
+      allServices = allServices.filter(s => s.category.toLowerCase().includes(catLower));
     }
 
-    results = [...results, ...filteredDb];
-  } catch (error) {
-    console.error('Error fetching real services from API:', error);
-  }
+    // Si la BD no tiene datos aún, mostrar el mock como fallback
+    if (allServices.length === 0) {
+      let mockResults = [...services];
+      if (category && category !== 'all') {
+        mockResults = mockResults.filter(srv => srv.category.toLowerCase() === category.toLowerCase());
+      }
+      return mockResults;
+    }
 
-  return results;
+    return allServices;
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    let results = [...services];
+    if (category && category !== 'all') {
+      results = results.filter(srv => srv.category.toLowerCase() === category.toLowerCase());
+    }
+    return results;
+  }
 };
 
 export const loginSocial = async (provider: 'google' | 'facebook', rol: number = 1) => {

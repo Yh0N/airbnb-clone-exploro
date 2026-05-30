@@ -653,13 +653,15 @@ export default function ExploroDashboard() {
               />
             )}
 
-            <TabButton
-              active={activeTab === 'reviews'}
-              onClick={() => { setActiveTab('reviews'); setReviewFilter(null); }}
-              icon={<MessageSquare className="w-4 h-4" />}
-              label="Reseñas"
-              mobileLabel="Reseñas"
-            />
+            {isAdmin && (
+              <TabButton
+                active={activeTab === 'reviews'}
+                onClick={() => { setActiveTab('reviews'); setReviewFilter(null); }}
+                icon={<MessageSquare className="w-4 h-4" />}
+                label="Reseñas"
+                mobileLabel="Reseñas"
+              />
+            )}
             <TabButton
               active={activeTab === 'recommendations'}
               onClick={() => setActiveTab('recommendations')}

@@ -289,7 +289,7 @@ export default function PlaceDetailPage() {
 
                 <button
                   onClick={handleReport}
-                  className="flex items-center gap-2 text-xs font-bold text-neutral-400 hover:text-red-500 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-100 px-3 py-2.5 rounded-xl transition-all whitespace-nowrap flex-shrink-0"
+                  className="hidden flex items-center gap-2 text-xs font-bold text-neutral-400 hover:text-red-500 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-100 px-3 py-2.5 rounded-xl transition-all whitespace-nowrap flex-shrink-0"
                   title="Reportar este lugar"
                 >
                   <AlertTriangle className="w-4 h-4" />
