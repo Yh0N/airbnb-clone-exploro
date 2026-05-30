@@ -84,6 +84,10 @@ const mapUser = (b: any): any => ({
 
 const mapPlace = (b: any): any => {
   const fotosArray = typeof b.fotos === 'string' ? b.fotos.split(',').filter(Boolean) : (Array.isArray(b.fotos) ? b.fotos : []);
+  const mainImage = resolvePhotoUrl(b.foto_principal || '');
+  const otherImages = fotosArray.map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f && f !== mainImage);
+  // Siempre incluir foto_principal al inicio del array de imágenes
+  const images = mainImage ? [mainImage, ...otherImages] : otherImages;
   return {
     id: b.id_lugar,
     nombre: b.nombre,
@@ -93,8 +97,8 @@ const mapPlace = (b: any): any => {
     category: b.categoria || 'naturaleza',
     categoria: b.categoria,
     subcategoria: b.subcategoria,
-    image: resolvePhotoUrl(b.foto_principal || ''),
-    images: fotosArray.map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f),
+    image: mainImage || otherImages[0] || '',
+    images,
     price: b.precio ? `$${b.precio.toLocaleString()} COP` : 'Acceso gratuito',
     price_category: b.precio ? `$${b.precio.toLocaleString()} COP` : 'Acceso gratuito',
     rating: b.calificacion_promedio || 0,

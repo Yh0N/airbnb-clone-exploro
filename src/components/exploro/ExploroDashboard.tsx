@@ -666,8 +666,8 @@ export default function ExploroDashboard() {
               active={activeTab === 'recommendations'}
               onClick={() => setActiveTab('recommendations')}
               icon={<Zap className="w-4 h-4" />}
-              label="IA Recomendaciones"
-              mobileLabel="IA"
+              label="Recomendaciones"
+              mobileLabel="Rec"
             />
             <TabButton
               active={activeTab === 'nearby'}
@@ -706,7 +706,7 @@ export default function ExploroDashboard() {
                    activeTab === 'my_places' ? (isPyme ? 'Mis Lugares y Pymes' : 'Mis Lugares') :
                    activeTab === 'users' ? 'Usuarios' :
                    activeTab === 'nearby' ? 'Lugares Cercanos' :
-                   activeTab === 'reviews' ? (reviewFilter ? `Reseñas de ${reviewFilter.name}` : 'Reseñas') : 'IA Recomendaciones'}
+                   activeTab === 'reviews' ? (reviewFilter ? `Reseñas de ${reviewFilter.name}` : 'Reseñas') : 'Recomendaciones'}
                 </span>
                 {viewMode === 'map' && (
                   <span className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/30 text-[9px] font-black uppercase tracking-wider flex-shrink-0">
@@ -890,6 +890,96 @@ export default function ExploroDashboard() {
           }`}>
             {message.type === 'success' ? <CheckCircle className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
             <span className="text-sm font-medium">{message.text}</span>
+          </div>
+        )}
+
+        {/* Hints de recomendaciones — explica al usuario cómo funciona cada modo */}
+        {activeTab === 'recommendations' && (
+          <div className="mx-4 md:mx-8 mt-3 animate-fade-in">
+            {recommendationType === 'personalized' && (
+              <div className="rounded-xl border border-airbnb/20 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/20 dark:border-airbnb/30 p-4">
+                <p className="text-sm font-semibold text-airbnb mb-3">¿Cómo funcionan las recomendaciones Para ti?</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="flex items-start gap-2">
+                    <Zap className="w-4 h-4 text-airbnb mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Basadas en tus preferencias</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">El sistema analiza las categorías de tu interés según tu perfil y reseñas anteriores.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Star className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Mejoran con tus reseñas</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Cuantas más reseñas dejes, más precisas y personalizadas serán las sugerencias.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Users className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Exclusivo para tu usuario</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Resultados únicos para ti. Inicia sesión para obtener sugerencias más relevantes.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {recommendationType === 'popular' && (
+              <div className="rounded-xl border border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/20 dark:border-yellow-800/40 p-4">
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-400 mb-3">¿Cómo funcionan los Populares?</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="flex items-start gap-2">
+                    <Star className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Mejor calificación</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Se muestran los lugares con mayor calificación promedio según las reseñas de los usuarios.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <MessageSquare className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Más reseñas</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Los lugares con más opiniones de viajeros tienen mayor visibilidad en esta sección.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Zap className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Actualización en tiempo real</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">La lista se actualiza automáticamente cuando se publican nuevas reseñas en la plataforma.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {recommendationType === 'nearby' && (
+              <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/20 dark:border-blue-800/40 p-4">
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3">¿Cómo funcionan los Cercanos?</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Tu ubicación actual</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Usa tu GPS para mostrarte los lugares turísticos más cercanos a donde estás en este momento.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Navigation className="w-4 h-4 text-teal-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Filtro por radio</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Ajusta el radio de búsqueda (400m a 1.4km) con los controles que aparecen arriba.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Star className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Ordenados por distancia</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Los resultados van del más cercano al más lejano para facilitar tu decisión.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

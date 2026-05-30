@@ -64,22 +64,32 @@ export default function PlaceCard({ place }: PlaceCardProps) {
   return (
     <Link href={`/places/${place.id}`} className="group block">
       <div className="relative aspect-square rounded-xl overflow-hidden mb-3">
-        {/* Imagen con transición */}
-        {!imageLoaded && (
-          <div className="absolute inset-0 skeleton" />
+        {/* Imagen con transición o placeholder si no hay fotos */}
+        {place.images.length === 0 ? (
+          <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800 flex flex-col items-center justify-center gap-2">
+            <span className="text-5xl opacity-25">🏔️</span>
+            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Sin foto</span>
+          </div>
+        ) : (
+          <>
+            {!imageLoaded && (
+              <div className="absolute inset-0 skeleton" />
+            )}
+            <div className="relative w-full h-full overflow-hidden">
+              <img
+                src={place.images[currentImage]}
+                alt={place.name}
+                className={`w-full h-full object-cover transition-all duration-500 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageLoaded(true)}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </>
         )}
-        <div className="relative w-full h-full overflow-hidden">
-          <img
-            src={place.images[currentImage]}
-            alt={place.name}
-            className={`w-full h-full object-cover transition-all duration-500 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
 
         {/* Botón favorito */}
         <button
