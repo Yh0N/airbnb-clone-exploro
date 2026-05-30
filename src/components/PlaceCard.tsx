@@ -22,6 +22,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
   );
   const [heartAnimating, setHeartAnimating] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const handleFavorite = useCallback(async (e: React.MouseEvent) => {
@@ -64,8 +65,8 @@ export default function PlaceCard({ place }: PlaceCardProps) {
   return (
     <Link href={`/places/${place.id}`} className="group block">
       <div className="relative aspect-square rounded-xl overflow-hidden mb-3">
-        {/* Imagen con transición o placeholder si no hay fotos */}
-        {place.images.length === 0 ? (
+        {/* Imagen con transición o placeholder si no hay fotos / falló la carga */}
+        {place.images.length === 0 || imageError ? (
           <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800 flex flex-col items-center justify-center gap-2">
             <span className="text-5xl opacity-25">🏔️</span>
             <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Sin foto</span>
@@ -83,7 +84,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
                   imageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
                 onLoad={() => setImageLoaded(true)}
-                onError={() => setImageLoaded(true)}
+                onError={() => { setImageLoaded(true); setImageError(true); }}
                 loading="lazy"
                 decoding="async"
               />

@@ -268,6 +268,8 @@ export default function ExploroDashboard() {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [nearbyRadius, setNearbyRadius] = useState<number>(1);
   const [recommendationType, setRecommendationType] = useState<RecommendationType>('personalized');
+  const [dismissedRecommendationHints, setDismissedRecommendationHints] = useState<Set<string>>(new Set());
+  const dismissRecommendationHint = (type: string) => setDismissedRecommendationHints(prev => new Set(prev).add(type));
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 15;
@@ -642,7 +644,10 @@ export default function ExploroDashboard() {
                     onClick={() => setEntityFilter(f)}
                     className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${entityFilter === f ? 'bg-white dark:bg-neutral-700 shadow-sm text-airbnb' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
                   >
-                    {f === 'all' ? 'Todos' : f === 'places' ? '📍 Lugares' : '🏢 Pymes'}
+                    {f === 'all' ? 'Todos' : f === 'places'
+                      ? <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3" /> Lugares</span>
+                      : <span className="flex items-center gap-1.5"><Store className="w-3 h-3" /> Pymes</span>
+                    }
                   </button>
                 ))}
               </div>
@@ -811,102 +816,84 @@ export default function ExploroDashboard() {
 
         {/* Message Banner */}
         {message && (
-          <div className={`mx-4 md:mx-8 mt-3 p-3 rounded-xl flex items-center gap-3 animate-slide-in ${
-            message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30' : 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30'
+          <div className={`mx-4 md:mx-8 mt-3 rounded-xl flex items-center gap-0 animate-slide-in shadow-sm overflow-hidden ${
+            message.type === 'success'
+              ? 'bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-900/30'
+              : 'bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-900/30'
           }`}>
-            {message.type === 'success' ? <CheckCircle className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
-            <span className="text-sm font-medium">{message.text}</span>
+            {/* Barra lateral de color */}
+            <div className={`w-1 self-stretch flex-shrink-0 ${message.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`} />
+
+            {/* Icono */}
+            <div className={`flex-shrink-0 px-3 py-3 ${message.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+              {message.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+            </div>
+
+            {/* Texto */}
+            <div className="flex-1 py-3 min-w-0">
+              <p className={`text-sm font-semibold leading-tight ${message.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+                {message.type === 'success' ? '¡Listo!' : 'Algo salió mal'}
+              </p>
+              <p className={`text-xs mt-0.5 ${message.type === 'success' ? 'text-green-600/80 dark:text-green-400/70' : 'text-red-500/80 dark:text-red-400/70'}`}>
+                {message.text}
+              </p>
+            </div>
+
+            {/* Botón cerrar */}
+            <button
+              onClick={() => setMessage(null)}
+              className={`flex-shrink-0 p-3 transition-colors ${
+                message.type === 'success'
+                  ? 'text-green-400 hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30'
+                  : 'text-red-300 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30'
+              }`}
+              aria-label="Cerrar"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
 
         {/* Hints de recomendaciones — explica al usuario cómo funciona cada modo */}
         {activeTab === 'recommendations' && (
           <div className="mx-4 md:mx-8 mt-3 animate-fade-in">
-            {recommendationType === 'personalized' && (
-              <div className="rounded-xl border border-airbnb/20 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/20 dark:border-airbnb/30 p-4">
-                <p className="text-sm font-semibold text-airbnb mb-3">¿Cómo funcionan las recomendaciones Para ti?</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="flex items-start gap-2">
-                    <Zap className="w-4 h-4 text-airbnb mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Basadas en tus preferencias</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">El sistema analiza las categorías de tu interés según tu perfil y reseñas anteriores.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Star className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Mejoran con tus reseñas</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Cuantas más reseñas dejes, más precisas y personalizadas serán las sugerencias.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Users className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Exclusivo para tu usuario</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Resultados únicos para ti. Inicia sesión para obtener sugerencias más relevantes.</p>
-                    </div>
-                  </div>
-                </div>
+            {recommendationType === 'personalized' && !dismissedRecommendationHints.has('personalized') && (
+              <div className="relative flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-airbnb/20 bg-rose-50 dark:bg-rose-950/20 dark:border-airbnb/20 px-4 py-3 pr-10">
+                <span className="text-xs font-bold text-airbnb flex items-center gap-1.5 flex-shrink-0">
+                  <Zap className="w-3.5 h-3.5" /> Para ti:
+                </span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400">Lugares según tus intereses y categorías favoritas de tu perfil.</span>
+                <span className="text-neutral-300 hidden sm:inline">·</span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1"><Star className="w-3 h-3 text-yellow-400" /> Mejoran cuantas más reseñas dejes.</span>
+                <button onClick={() => dismissRecommendationHint('personalized')} className="absolute top-2.5 right-2.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors" aria-label="Cerrar">
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
             )}
-            {recommendationType === 'popular' && (
-              <div className="rounded-xl border border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/20 dark:border-yellow-800/40 p-4">
-                <p className="text-sm font-semibold text-amber-700 dark:text-amber-400 mb-3">¿Cómo funcionan los Populares?</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="flex items-start gap-2">
-                    <Star className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Mejor calificación</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Se muestran los lugares con mayor calificación promedio según las reseñas de los usuarios.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MessageSquare className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Más reseñas</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Los lugares con más opiniones de viajeros tienen mayor visibilidad en esta sección.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Zap className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Actualización en tiempo real</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">La lista se actualiza automáticamente cuando se publican nuevas reseñas en la plataforma.</p>
-                    </div>
-                  </div>
-                </div>
+            {recommendationType === 'popular' && !dismissedRecommendationHints.has('popular') && (
+              <div className="relative flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-800/30 px-4 py-3 pr-10">
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 flex-shrink-0">
+                  <Star className="w-3.5 h-3.5" /> Populares:
+                </span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400">Los mejor calificados según reseñas reales de viajeros.</span>
+                <span className="text-neutral-300 hidden sm:inline">·</span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1"><Zap className="w-3 h-3 text-orange-400" /> Se actualiza en tiempo real.</span>
+                <button onClick={() => dismissRecommendationHint('popular')} className="absolute top-2.5 right-2.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors" aria-label="Cerrar">
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
             )}
-            {recommendationType === 'nearby' && (
-              <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/20 dark:border-blue-800/40 p-4">
-                <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-1">Cercanos inteligentes — útil para decidir a dónde ir</p>
-                <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mb-3">
-                  No es lo mismo que <span className="font-bold">Cercanos (1km)</span> del menú lateral. Ese es un mapa de todo lo que hay cerca, sin filtros. Esta sección es diferente: combina tu ubicación con tus preferencias personales y solo te sugiere lugares cercanos que te pueden interesar y que todavía no has visitado — para ayudarte a decidir, no solo a explorar.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Cerca tuyo y a tu gusto</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Solo aparecen lugares cercanos que coinciden con las categorías de interés de tu perfil.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Navigation className="w-4 h-4 text-teal-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Sin repetir lo que ya viste</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">El sistema excluye automáticamente los lugares que ya calificaste, para siempre mostrarte algo nuevo.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Star className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Del más cercano al más lejano</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Los resultados se ordenan por distancia para que tomes la decisión más fácil y rápida.</p>
-                    </div>
-                  </div>
-                </div>
+            {recommendationType === 'nearby' && !dismissedRecommendationHints.has('nearby') && (
+              <div className="relative flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800/30 px-4 py-3 pr-10">
+                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 flex-shrink-0">
+                  <Navigation className="w-3.5 h-3.5" /> Cercanos inteligentes:
+                </span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400">Distancia + tus preferencias. Distinto a <span className="font-semibold text-neutral-600 dark:text-neutral-300">Cercanos (1km)</span> que muestra todo sin filtros.</span>
+                <span className="text-neutral-300 hidden sm:inline">·</span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1"><Star className="w-3 h-3 text-yellow-400" /> Excluye lugares que ya reseñaste.</span>
+                <button onClick={() => dismissRecommendationHint('nearby')} className="absolute top-2.5 right-2.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors" aria-label="Cerrar">
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
             )}
           </div>

@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { X, Star, MapPin, MessageCircle, Zap, Users, CheckCircle } from 'lucide-react';
+import { X, Star, MessageCircle, Zap, Users, CheckCircle } from 'lucide-react';
 
 import PlaceCard from '@/components/PlaceCard';
 import CarouselGrid from '@/components/CarouselGrid';
@@ -45,7 +45,7 @@ function HomeContent() {
         const query = searchParam || searchQuery;
 
         if (activeTab === 'stays') {
-          const data = await getPlaces(query);
+          const data = await getPlaces(query, 'hospedaje');
           setPlaces(data);
         } else if (activeTab === 'experiences') {
           const data = await getExperiences();
@@ -71,43 +71,6 @@ function HomeContent() {
       {activeTab === 'stays' && (
         <>
           <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 mt-4 md:mt-8">
-
-            {/* Hint: cómo funcionan las recomendaciones */}
-            {!dismissedHints.has('stays') && (
-              <div className="relative mb-6 rounded-2xl border border-airbnb/20 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/20 dark:border-airbnb/30 p-4 animate-fade-in">
-                <button
-                  onClick={() => dismissHint('stays')}
-                  className="absolute top-3 right-3 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-                  aria-label="Cerrar"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <p className="text-sm font-semibold text-airbnb mb-3">¿Cómo funcionan las recomendaciones?</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="flex items-start gap-2">
-                    <Star className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Populares</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Los lugares con mejor calificación y más reseñas aparecen primero.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Cerca de ti</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Activa tu ubicación para ver los lugares más cercanos a donde estás.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MessageCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-800 dark:text-white">Deja tu reseña</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Califica cada lugar que visites y ayuda a otros viajeros a elegir mejor.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {isLoading ? (
               <div className="flex justify-center py-20"><LoadingSpinner size="lg" text="Cargando alojamientos..." /></div>
