@@ -48,17 +48,9 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
     debounceRef.current = setTimeout(async () => {
       setSuggestLoading(true);
       try {
-        // Photon: OSM geocoder con soporte CORS completo
-        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(valor)}&limit=5&lang=es&bbox=-78.9,-4.2,-66.8,12.4`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const items: Suggestion[] = (data.features ?? []).map((f: any) => {
-          const p = f.properties ?? {};
-          const parts = [p.name, p.street, p.housenumber].filter(Boolean).join(' ');
-          const sub = [p.city || p.town || p.village, p.state, p.country].filter(Boolean).join(', ');
-          const [lon, lat] = f.geometry?.coordinates ?? [0, 0];
-          return { label: parts || sub, sublabel: sub, lat, lon };
-        });
+        // Llama al proxy interno para evitar CORS
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(valor)}`);
+        const items: Suggestion[] = await res.json();
         setSuggestions(items);
         setShowSuggestions(items.length > 0);
       } catch { setSuggestions([]); }
