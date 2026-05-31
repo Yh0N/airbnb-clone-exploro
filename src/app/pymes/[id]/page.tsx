@@ -3,16 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Star, MapPin, Share, ChevronRight,
+  Star, MapPin, Share,
   Shield, Store, Phone,
-  MessageCircle, Bookmark, ChevronLeft
+  MessageCircle, ChevronLeft
 } from 'lucide-react';
 import ImageGallery from '@/components/ImageGallery';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { getPyme, getPymeReviews, resolvePhotoUrl } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import CreateReviewModal from '@/components/exploro/CreateReviewModal';
-import type { Place } from '@/types/place';
 
 import dynamic from 'next/dynamic';
 const MapComponent = dynamic(() => import('@/components/MapView'), { ssr: false });
@@ -117,9 +116,6 @@ export default function PymeDetailPage() {
     );
   }
 
-  const isAdmin = user?.rol === 3;
-  const isOwner = isAuthenticated && user?.id === pyme.id_usuario;
-  const canEdit = isAdmin || isOwner;
   const isGuestFavorite = (pyme.rating ?? 0) >= 4.8;
 
   return (

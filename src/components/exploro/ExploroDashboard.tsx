@@ -576,7 +576,7 @@ export default function ExploroDashboard() {
               active={activeTab === 'nearby'}
               onClick={() => setActiveTab('nearby')}
               icon={<Navigation className="w-4 h-4" />}
-              label="Cercanos (1km)"
+              label="Cercanos"
               mobileLabel="Cercanos"
             />
           </nav>
@@ -888,7 +888,7 @@ export default function ExploroDashboard() {
                 <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 flex-shrink-0">
                   <Navigation className="w-3.5 h-3.5" /> Cercanos inteligentes:
                 </span>
-                <span className="text-xs text-neutral-500 dark:text-neutral-400">Distancia + tus preferencias. Distinto a <span className="font-semibold text-neutral-600 dark:text-neutral-300">Cercanos (1km)</span> que muestra todo sin filtros.</span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400">Distancia + tus preferencias. Distinto a <span className="font-semibold text-neutral-600 dark:text-neutral-300">Cercanos</span> que muestra todo sin filtros.</span>
                 <span className="text-neutral-300 hidden sm:inline">·</span>
                 <span className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1"><Star className="w-3 h-3 text-yellow-400" /> Excluye lugares que ya reseñaste.</span>
                 <button onClick={() => dismissRecommendationHint('nearby')} className="absolute top-2.5 right-2.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors" aria-label="Cerrar">
