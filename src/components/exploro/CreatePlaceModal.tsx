@@ -51,24 +51,39 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
       .replace(/\bcra\b/gi, 'carrera').replace(/\bkra\b/gi, 'carrera')
       .replace(/\bcll?\b/gi, 'calle').replace(/\bav\b/gi, 'avenida')
       .replace(/#/g, ' ');
-    // Siempre buscar dentro de Pasto, Nariño
-    const query = `${normalizado}, Pasto, Nariño, Colombia`;
+    // Forzar contexto Pasto en el query para que Nominatim priorice esa zona
+    const query = `${normalizado}, Pasto, Nariño`;
 
     debounceRef.current = setTimeout(async () => {
       setSuggestLoading(true);
       try {
-        // viewbox = bounding box de Pasto, bounded=1 restringe a esa área
-        const viewbox = '-77.5,1.4,-77.1,1.1';
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=co&addressdetails=1&viewbox=${viewbox}&bounded=1`;
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=10&countrycodes=co&addressdetails=1`;
         const res = await fetch(url);
         const data = await res.json();
-        const items: Suggestion[] = data.map((f: any) => {
-          const a = f.address ?? {};
-          const calle = [a.road, a.house_number].filter(Boolean).join(' ');
-          const label = calle || f.display_name.split(',')[0];
-          const sublabel = [a.suburb || a.neighbourhood, a.city || a.town || a.village || a.municipality, a.state].filter(Boolean).join(', ');
-          return { label: label.trim(), sublabel: sublabel || 'Colombia', lat: parseFloat(f.lat), lon: parseFloat(f.lon) };
-        });
+
+        const items: Suggestion[] = (data as any[])
+          // Filtrar solo resultados de Pasto / Nariño
+          .filter((f: any) => {
+            const a = f.address ?? {};
+            const estado = (a.state ?? '').toLowerCase();
+            const ciudad = (a.city ?? a.town ?? a.municipality ?? '').toLowerCase();
+            return estado.includes('nariño') || ciudad.includes('pasto');
+          })
+          .slice(0, 5)
+          .map((f: any) => {
+            const a = f.address ?? {};
+            // Construir label con calle + número si existe, si no usar display_name simplificado
+            const partes = [a.road, a.house_number].filter(Boolean).join(' ');
+            const label = partes || f.display_name.split(',')[0].trim();
+            // Sublabel: barrio + ciudad
+            const sublabel = [
+              a.suburb || a.neighbourhood || a.quarter,
+              a.city || a.town || a.village || a.municipality || 'Pasto',
+              a.state || 'Nariño',
+            ].filter(Boolean).join(', ');
+            return { label, sublabel, lat: parseFloat(f.lat), lon: parseFloat(f.lon) };
+          });
+
         setSuggestions(items);
         setShowSuggestions(items.length > 0);
       } catch { setSuggestions([]); }
@@ -89,8 +104,11 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
   });
 
   const seleccionarSugerencia = (s: { label: string; sublabel: string; lat: number; lon: number }) => {
+    // Solo llenar el texto — el backend geocodifica con precisión al guardar.
+    // No usamos las coordenadas de Nominatim porque OSM no tiene datos
+    // de números de casa en Pasto y pone el pin en lugar equivocado.
     const direccion = [s.label, s.sublabel].filter(Boolean).join(', ');
-    setForm(f => ({ ...f, direccion, latitud: String(s.lat), longitud: String(s.lon) }));
+    setForm(f => ({ ...f, direccion, latitud: '', longitud: '' }));
     setSuggestions([]);
     setShowSuggestions(false);
   };
@@ -501,7 +519,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                   )}
                 </div>
                 <p className="text-[11px] text-neutral-400 font-medium pl-1">
-                  Escribe para ver sugerencias. Las coordenadas se rellenan automáticamente.
+                  Escribe la dirección o usa <span className="font-bold text-blue-500">Elegir en Mapa</span> para ubicar el pin exacto.
                 </p>
               </div>
             ) : (
