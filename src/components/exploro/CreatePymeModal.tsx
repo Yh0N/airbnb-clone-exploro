@@ -601,18 +601,18 @@ export default function CreatePymeModal({ isOpen, onClose, onCreated, initialDat
                     <button
                       type="button"
                       onClick={() => setShowMapPicker(true)}
-                      className="flex items-center gap-1.5 text-[10px] font-black text-blue-600 hover:text-blue-700 transition-colors uppercase bg-white dark:bg-neutral-800 px-2 py-1 rounded-lg shadow-sm border border-blue-100 dark:border-blue-900/50"
+                      className="flex items-center gap-1.5 text-[10px] font-black text-blue-600 hover:text-blue-700 transition-colors uppercase bg-white dark:bg-neutral-800 px-2 py-1 rounded-lg shadow-sm border border-blue-100 dark:border-blue-900/50 whitespace-nowrap"
                     >
-                      <MapIcon className="w-3 h-3" />
+                      <MapIcon className="w-3 h-3 shrink-0" />
                       Elegir en Mapa
                     </button>
                     <button
                       type="button"
                       onClick={handleGeolocate}
                       disabled={geoLoading}
-                      className="flex items-center gap-1.5 text-[10px] font-black text-airbnb hover:text-rose-600 transition-colors disabled:opacity-50 uppercase bg-white dark:bg-neutral-800 px-2 py-1 rounded-lg shadow-sm border border-rose-100 dark:border-rose-900/50"
+                      className="flex items-center gap-1.5 text-[10px] font-black text-airbnb hover:text-rose-600 transition-colors disabled:opacity-50 uppercase bg-white dark:bg-neutral-800 px-2 py-1 rounded-lg shadow-sm border border-rose-100 dark:border-rose-900/50 whitespace-nowrap"
                     >
-                      {geoLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Navigation className="w-3 h-3" />}
+                      {geoLoading ? <Loader2 className="w-3 h-3 animate-spin shrink-0" /> : <Navigation className="w-3 h-3 shrink-0" />}
                       Mi ubicación
                     </button>
                   </div>

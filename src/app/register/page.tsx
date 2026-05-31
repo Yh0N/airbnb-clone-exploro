@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building, Info, Link as LinkIcon, ChevronLeft } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building, Info, MessageCircle, Link as LinkIcon, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import * as api from '@/services/api';
 
@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -94,6 +95,7 @@ export default function RegisterPage() {
             descripcion: description,
             ubicacion_textual: address,
             telefono: phone,
+            whatsapp: whatsapp || undefined,
             redes_sociales: socialMedia,
             tipo: 'otro' // Default type
           });
@@ -208,19 +210,36 @@ export default function RegisterPage() {
                       </div>
                     </div>
 
-                    <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
-                        Teléfono (Opcional)
-                      </label>
+                    <div className="grid grid-cols-2 gap-3">
                       <div className="relative">
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
-                          placeholder="Tu número de teléfono"
-                        />
-                        <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                        <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
+                          Teléfono (Opcional)
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
+                            placeholder="Tu número"
+                          />
+                          <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
+                          WhatsApp (Opcional)
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="tel"
+                            value={whatsapp}
+                            onChange={(e) => setWhatsapp(e.target.value)}
+                            className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-emerald-600 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-600 dark:focus:ring-emerald-400 outline-none text-base transition-colors"
+                            placeholder="WhatsApp"
+                          />
+                          <MessageCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />
+                        </div>
                       </div>
                     </div>
                   </>
@@ -276,20 +295,37 @@ export default function RegisterPage() {
                       </div>
                     </div>
 
-                    <div className="relative">
-                      <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
-                        Teléfono
-                      </label>
+                    <div className="grid grid-cols-2 gap-3">
                       <div className="relative">
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
-                          required
-                          placeholder="Teléfono de contacto"
-                        />
-                        <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                        <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
+                          Teléfono
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-neutral-800 dark:focus:border-neutral-400 focus:ring-1 focus:ring-neutral-800 dark:focus:ring-neutral-400 outline-none text-base transition-colors"
+                            required
+                            placeholder="Teléfono"
+                          />
+                          <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <label className="absolute top-2 left-4 text-xs text-neutral-500 dark:text-neutral-400 font-medium z-10">
+                          WhatsApp
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="tel"
+                            value={whatsapp}
+                            onChange={(e) => setWhatsapp(e.target.value)}
+                            className="w-full pt-7 pb-3 px-4 pr-12 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg focus:border-emerald-600 dark:focus:border-emerald-400 focus:ring-1 focus:ring-emerald-600 dark:focus:ring-emerald-400 outline-none text-base transition-colors"
+                            placeholder="WhatsApp"
+                          />
+                          <MessageCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />
+                        </div>
                       </div>
                     </div>
 

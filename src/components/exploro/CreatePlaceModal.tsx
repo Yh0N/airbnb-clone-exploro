@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, MapPin, Navigation, Loader2, Plus, Map, Hash, Edit, Camera, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { X, MapPin, Navigation, Loader2, Plus, Map, Hash, Edit, Camera, Upload, Image as ImageIcon, Trash2, Search } from 'lucide-react';
 import { resolvePhotoUrl } from '@/services/api';
 import * as api from '@/services/api';
 import { useAlert } from '@/context/AlertContext';
@@ -24,6 +24,48 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
   const [showMapPicker, setShowMapPicker] = useState(false);
   const { showAlert } = useAlert();
   const [locationMode, setLocationMode] = useState<'direccion' | 'coordenadas'>('direccion');
+
+  // Autocomplete de dirección
+  const [suggestions, setSuggestions] = useState<{ display_name: string; lat: string; lon: string }[]>([]);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cierra el dropdown al hacer clic fuera
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (suggestRef.current && !suggestRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const buscarSugerencias = useCallback((valor: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (valor.length < 3) { setSuggestions([]); setShowSuggestions(false); return; }
+    debounceRef.current = setTimeout(async () => {
+      setSuggestLoading(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(valor)}&format=json&limit=5&countrycodes=co&addressdetails=1`,
+          { headers: { 'Accept-Language': 'es' } }
+        );
+        const data = await res.json();
+        setSuggestions(data);
+        setShowSuggestions(data.length > 0);
+      } catch { setSuggestions([]); }
+      finally { setSuggestLoading(false); }
+    }, 400);
+  }, []);
+
+  const seleccionarSugerencia = (s: { display_name: string; lat: string; lon: string }) => {
+    setForm(f => ({ ...f, direccion: s.display_name, latitud: s.lat, longitud: s.lon }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(resolvePhotoUrl(initialData?.foto_principal || initialData?.image) || null);
 
@@ -354,7 +396,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
 
           {/* ── Ubicación ── */}
           <div className="space-y-5 bg-neutral-50/50 dark:bg-neutral-800/20 p-6 rounded-2xl border border-neutral-100 dark:border-border-color">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <label className="text-[13px] font-black text-neutral-400 uppercase tracking-wider flex items-center gap-2">
                 <Navigation className="w-4 h-4" /> Ubicación
               </label>
@@ -362,18 +404,18 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                 <button
                   type="button"
                   onClick={() => setShowMapPicker(true)}
-                  className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-all"
+                  className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-all whitespace-nowrap"
                 >
-                  <Map className="w-3.5 h-3.5" />
+                  <Map className="w-3.5 h-3.5 shrink-0" />
                   Elegir en Mapa
                 </button>
                 <button
                   type="button"
                   onClick={handleGeolocate}
                   disabled={geoLoading}
-                  className="flex items-center gap-1.5 text-xs font-bold text-airbnb hover:text-airbnb-dark bg-airbnb/10 hover:bg-airbnb/20 px-3 py-1.5 rounded-lg transition-all"
+                  className="flex items-center gap-1.5 text-xs font-bold text-airbnb hover:text-airbnb-dark bg-airbnb/10 hover:bg-airbnb/20 px-3 py-1.5 rounded-lg transition-all whitespace-nowrap"
                 >
-                  {geoLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MapPin className="w-3.5 h-3.5" />}
+                  {geoLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <MapPin className="w-3.5 h-3.5 shrink-0" />}
                   Autodetectar
                 </button>
               </div>
@@ -399,15 +441,47 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
 
             {locationMode === 'direccion' ? (
               <div className="space-y-2 animate-in fade-in slide-in-from-right-4 duration-300">
-                <input
-                  type="text"
-                  required={locationMode === 'direccion'}
-                  value={form.direccion}
-                  onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-                  placeholder="Ej. Calle 18 # 25-10, Centro, Pasto"
-                  className="w-full px-4 py-3.5 bg-white dark:bg-bg-primary border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-airbnb/30 focus:border-airbnb transition-all dark:text-white font-medium"
-                />
-                <p className="text-[11px] text-neutral-400 font-medium pl-1">Se geocodificará automáticamente al guardar.</p>
+                <div className="relative" ref={suggestRef}>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required={locationMode === 'direccion'}
+                      value={form.direccion}
+                      onChange={(e) => {
+                        setForm({ ...form, direccion: e.target.value });
+                        buscarSugerencias(e.target.value);
+                      }}
+                      onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                      placeholder="Ej. Calle 18 # 25-10, Centro, Pasto"
+                      className="w-full pl-4 pr-10 py-3.5 bg-white dark:bg-bg-primary border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-airbnb/30 focus:border-airbnb transition-all dark:text-white font-medium"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
+                      {suggestLoading
+                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                        : <Search className="w-4 h-4" />}
+                    </div>
+                  </div>
+
+                  {showSuggestions && suggestions.length > 0 && (
+                    <ul className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg overflow-hidden">
+                      {suggestions.map((s, i) => (
+                        <li key={i}>
+                          <button
+                            type="button"
+                            onMouseDown={() => seleccionarSugerencia(s)}
+                            className="w-full text-left px-4 py-3 text-sm text-neutral-700 dark:text-neutral-200 hover:bg-airbnb/5 dark:hover:bg-neutral-700 flex items-start gap-3 transition-colors border-b border-neutral-100 dark:border-neutral-700 last:border-0"
+                          >
+                            <MapPin className="w-4 h-4 text-airbnb shrink-0 mt-0.5" />
+                            <span className="line-clamp-2 leading-snug">{s.display_name}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <p className="text-[11px] text-neutral-400 font-medium pl-1">
+                  Escribe para ver sugerencias. Las coordenadas se rellenan automáticamente.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-left-4 duration-300">
