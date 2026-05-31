@@ -225,9 +225,11 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
         payload.ubicacion_textual = form.direccion;
       }
 
-      let placeId = initialData?.id;
-      if (initialData?.id) {
-        await api.updatePlace(initialData.id, payload);
+      // La API devuelve id_lugar, no id — cubrir ambos casos
+      const existingId = initialData?.id_lugar || initialData?.id;
+      let placeId = existingId;
+      if (existingId) {
+        await api.updatePlace(existingId, payload);
       } else {
         const newPlace = await api.createPlace(payload);
         placeId = newPlace.id_lugar;
