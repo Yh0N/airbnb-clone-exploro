@@ -1,34 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Proxy server-side hacia Photon (Komoot) para evitar CORS desde el browser.
-// El fetch sale desde el servidor de Next.js, no desde el navegador del usuario.
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q');
   if (!q || q.length < 3) return NextResponse.json([]);
 
+  // Normalizar formato colombiano: "cra" → "carrera", "cll"/"cl" → "calle"
+  const normalizado = q
+    .replace(/\bcra\b/gi, 'carrera')
+    .replace(/\bcll?\b/gi, 'calle')
+    .replace(/\bkra\b/gi, 'carrera')
+    .replace(/\bav\b/gi, 'avenida')
+    .replace(/#/g, '');
+
+  // Añadir "Colombia" si el usuario no lo escribió
+  const query = normalizado.toLowerCase().includes('colombia')
+    ? normalizado
+    : `${normalizado}, Colombia`;
+
   try {
-    const url =
-      `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lang=es&bbox=-78.9,-4.2,-66.8,12.4`;
+    const url = `https://nominatim.openstreetmap.org/search?` +
+      `q=${encodeURIComponent(query)}` +
+      `&format=json&limit=6&countrycodes=co&addressdetails=1&accept-language=es`;
 
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'Exploro-App/1.0' },
-      next: { revalidate: 0 },
+      headers: {
+        'User-Agent': 'ExploroApp/1.0 (contacto@exploro.co)',
+        'Accept-Language': 'es',
+      },
     });
 
     if (!res.ok) return NextResponse.json([]);
 
     const data = await res.json();
 
-    const items = (data.features ?? []).map((f: any) => {
-      const p = f.properties ?? {};
-      const label = [p.name, p.street, p.housenumber].filter(Boolean).join(' ') || p.display_name || '';
-      const sublabel = [p.city || p.town || p.village, p.state, p.country].filter(Boolean).join(', ');
-      const [lon, lat] = f.geometry?.coordinates ?? [0, 0];
-      return { label, sublabel, lat, lon };
+    const items = data.map((f: any) => {
+      const addr = f.address ?? {};
+      // Construir label principal: calle + número si existen
+      const calle = [addr.road, addr.house_number].filter(Boolean).join(' ');
+      const label = calle || f.display_name.split(',')[0];
+      // Sublabel: barrio/ciudad, depto
+      const sublabel = [
+        addr.suburb || addr.neighbourhood,
+        addr.city || addr.town || addr.village || addr.municipality,
+        addr.state,
+      ].filter(Boolean).join(', ');
+
+      return {
+        label: label.trim(),
+        sublabel: sublabel || 'Colombia',
+        lat: parseFloat(f.lat),
+        lon: parseFloat(f.lon),
+      };
     });
 
     return NextResponse.json(items);
-  } catch {
+  } catch (e) {
+    console.error('[geocode]', e);
     return NextResponse.json([]);
   }
 }

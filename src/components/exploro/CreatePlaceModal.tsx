@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, MapPin, Navigation, Loader2, Plus, Map, Hash, Edit, Camera, Upload, Image as ImageIcon, Trash2, Search } from 'lucide-react';
+import { X, MapPin, Navigation, Loader2, Plus, Map, Hash, Edit, Camera, Upload, Trash2, Search } from 'lucide-react';
 import { resolvePhotoUrl } from '@/services/api';
 import * as api from '@/services/api';
 import { useAlert } from '@/context/AlertContext';
@@ -45,17 +45,34 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
   const buscarSugerencias = useCallback((valor: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (valor.length < 3) { setSuggestions([]); setShowSuggestions(false); return; }
+
+    // Normalizar formato colombiano antes de buscar
+    const normalizado = valor
+      .replace(/\bcra\b/gi, 'carrera').replace(/\bkra\b/gi, 'carrera')
+      .replace(/\bcll?\b/gi, 'calle').replace(/\bav\b/gi, 'avenida')
+      .replace(/#/g, ' ');
+    const query = normalizado.toLowerCase().includes('colombia')
+      ? normalizado : `${normalizado}, Colombia`;
+
     debounceRef.current = setTimeout(async () => {
       setSuggestLoading(true);
       try {
-        // Llama al proxy interno para evitar CORS
-        const res = await fetch(`/api/geocode?q=${encodeURIComponent(valor)}`);
-        const items: Suggestion[] = await res.json();
+        // Sin headers custom → sin preflight → CORS de Nominatim funciona
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=co&addressdetails=1`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const items: Suggestion[] = data.map((f: any) => {
+          const a = f.address ?? {};
+          const calle = [a.road, a.house_number].filter(Boolean).join(' ');
+          const label = calle || f.display_name.split(',')[0];
+          const sublabel = [a.suburb || a.neighbourhood, a.city || a.town || a.village || a.municipality, a.state].filter(Boolean).join(', ');
+          return { label: label.trim(), sublabel: sublabel || 'Colombia', lat: parseFloat(f.lat), lon: parseFloat(f.lon) };
+        });
         setSuggestions(items);
         setShowSuggestions(items.length > 0);
       } catch { setSuggestions([]); }
       finally { setSuggestLoading(false); }
-    }, 450);
+    }, 500);
   }, []);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(resolvePhotoUrl(initialData?.foto_principal || initialData?.image) || null);
