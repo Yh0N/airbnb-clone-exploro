@@ -51,14 +51,15 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
       .replace(/\bcra\b/gi, 'carrera').replace(/\bkra\b/gi, 'carrera')
       .replace(/\bcll?\b/gi, 'calle').replace(/\bav\b/gi, 'avenida')
       .replace(/#/g, ' ');
-    const query = normalizado.toLowerCase().includes('colombia')
-      ? normalizado : `${normalizado}, Colombia`;
+    // Siempre buscar dentro de Pasto, Nariño
+    const query = `${normalizado}, Pasto, Nariño, Colombia`;
 
     debounceRef.current = setTimeout(async () => {
       setSuggestLoading(true);
       try {
-        // Sin headers custom → sin preflight → CORS de Nominatim funciona
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=co&addressdetails=1`;
+        // viewbox = bounding box de Pasto, bounded=1 restringe a esa área
+        const viewbox = '-77.5,1.4,-77.1,1.1';
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=co&addressdetails=1&viewbox=${viewbox}&bounded=1`;
         const res = await fetch(url);
         const data = await res.json();
         const items: Suggestion[] = data.map((f: any) => {
