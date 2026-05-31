@@ -14,6 +14,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
   const { isAuthenticated } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [heartAnimating, setHeartAnimating] = useState(false);
 
   const handleFavorite = (e: React.MouseEvent) => {
@@ -25,28 +26,31 @@ export default function ServiceCard({ service }: ServiceCardProps) {
     setTimeout(() => setHeartAnimating(false), 300);
   };
 
-  const getPricingLabel = () => {
-    switch (service.pricingType) {
-      case 'per_hour': return '/ hora';
-      case 'per_person': return '/ persona';
-      case 'per_group': return '/ grupo';
-      default: return '';
-    }
-  };
+  const sinFoto = !service.image || imageError;
 
   return (
     <Link href={`/services/${service.id}`} className="group block h-full">
       <div className="relative aspect-video sm:aspect-square rounded-2xl overflow-hidden mb-3">
-        {!imageLoaded && <div className="absolute inset-0 skeleton" />}
-        <img
-          src={service.image}
-          alt={service.title}
-          loading="lazy"
-          onLoad={() => setImageLoaded(true)}
-          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
+        {sinFoto ? (
+          <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800 flex flex-col items-center justify-center gap-2">
+            <span className="text-5xl opacity-25">🛎️</span>
+            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Sin foto</span>
+          </div>
+        ) : (
+          <>
+            {!imageLoaded && <div className="absolute inset-0 skeleton" />}
+            <img
+              src={service.image}
+              alt={service.title}
+              loading="lazy"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+              className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          </>
+        )}
 
         <button
           onClick={handleFavorite}
@@ -83,14 +87,8 @@ export default function ServiceCard({ service }: ServiceCardProps) {
             <span>{service.rating} ({service.reviews_count})</span>
           </div>
         </div>
-        
         <p className="text-[14px] text-neutral-500 dark:text-neutral-400 line-clamp-1">
           Servicio de {service.category} profesional
-        </p>
-        
-        <p className="text-[15px] text-neutral-800 dark:text-white pt-1">
-          <span className="font-semibold">{service.price}</span> 
-          <span className="text-neutral-500 font-normal"> {getPricingLabel()}</span>
         </p>
       </div>
     </Link>

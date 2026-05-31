@@ -14,6 +14,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
   const { isAuthenticated } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [heartAnimating, setHeartAnimating] = useState(false);
 
   const handleFavorite = (e: React.MouseEvent) => {
@@ -25,19 +26,31 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
     setTimeout(() => setHeartAnimating(false), 300);
   };
 
+  const sinFoto = !experience.image || imageError;
+
   return (
     <Link href={`/experiences/${experience.id}`} className="group block h-full">
       <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
-        {!imageLoaded && <div className="absolute inset-0 skeleton" />}
-        <img
-          src={experience.image}
-          alt={experience.title}
-          loading="lazy"
-          onLoad={() => setImageLoaded(true)}
-          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
+        {sinFoto ? (
+          <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800 flex flex-col items-center justify-center gap-2">
+            <span className="text-5xl opacity-25">🎭</span>
+            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Sin foto</span>
+          </div>
+        ) : (
+          <>
+            {!imageLoaded && <div className="absolute inset-0 skeleton" />}
+            <img
+              src={experience.image}
+              alt={experience.title}
+              loading="lazy"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+              className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          </>
+        )}
 
         <button
           onClick={handleFavorite}
@@ -69,13 +82,9 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
           <span className="text-neutral-400">·</span>
           <span className="text-neutral-500 font-normal">{experience.category}</span>
         </div>
-        
         <h3 className="font-semibold text-base text-neutral-800 dark:text-white line-clamp-2 leading-tight">
           {experience.title}
         </h3>
-        <p className="text-[15px] font-semibold text-neutral-800 dark:text-white pt-1">
-          Desde {experience.price} <span className="text-neutral-500 font-normal">/ persona</span>
-        </p>
       </div>
     </Link>
   );

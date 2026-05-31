@@ -25,19 +25,18 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
   const { showAlert } = useAlert();
   const [locationMode, setLocationMode] = useState<'direccion' | 'coordenadas'>('direccion');
 
-  // Autocomplete de dirección
-  const [suggestions, setSuggestions] = useState<{ display_name: string; lat: string; lon: string }[]>([]);
+  // Autocomplete de dirección (Photon — Komoot, sin API key, CORS permitido)
+  type Suggestion = { label: string; sublabel: string; lat: number; lon: number };
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Cierra el dropdown al hacer clic fuera
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (suggestRef.current && !suggestRef.current.contains(e.target as Node)) {
+      if (suggestRef.current && !suggestRef.current.contains(e.target as Node))
         setShowSuggestions(false);
-      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -49,23 +48,23 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
     debounceRef.current = setTimeout(async () => {
       setSuggestLoading(true);
       try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(valor)}&format=json&limit=5&countrycodes=co&addressdetails=1`,
-          { headers: { 'Accept-Language': 'es' } }
-        );
+        // Photon: OSM geocoder con soporte CORS completo
+        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(valor)}&limit=5&lang=es&bbox=-78.9,-4.2,-66.8,12.4`;
+        const res = await fetch(url);
         const data = await res.json();
-        setSuggestions(data);
-        setShowSuggestions(data.length > 0);
+        const items: Suggestion[] = (data.features ?? []).map((f: any) => {
+          const p = f.properties ?? {};
+          const parts = [p.name, p.street, p.housenumber].filter(Boolean).join(' ');
+          const sub = [p.city || p.town || p.village, p.state, p.country].filter(Boolean).join(', ');
+          const [lon, lat] = f.geometry?.coordinates ?? [0, 0];
+          return { label: parts || sub, sublabel: sub, lat, lon };
+        });
+        setSuggestions(items);
+        setShowSuggestions(items.length > 0);
       } catch { setSuggestions([]); }
       finally { setSuggestLoading(false); }
-    }, 400);
+    }, 450);
   }, []);
-
-  const seleccionarSugerencia = (s: { display_name: string; lat: string; lon: string }) => {
-    setForm(f => ({ ...f, direccion: s.display_name, latitud: s.lat, longitud: s.lon }));
-    setSuggestions([]);
-    setShowSuggestions(false);
-  };
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(resolvePhotoUrl(initialData?.foto_principal || initialData?.image) || null);
 
@@ -78,6 +77,13 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
     latitud: initialData?.latitude?.toString() || initialData?.latitud?.toString() || '',
     longitud: initialData?.longitude?.toString() || initialData?.longitud?.toString() || '',
   });
+
+  const seleccionarSugerencia = (s: { label: string; sublabel: string; lat: number; lon: number }) => {
+    const direccion = [s.label, s.sublabel].filter(Boolean).join(', ');
+    setForm(f => ({ ...f, direccion, latitud: String(s.lat), longitud: String(s.lon) }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
 
   // Efecto para cargar datos si cambian (para edición)
   React.useEffect(() => {
@@ -469,10 +475,15 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                           <button
                             type="button"
                             onMouseDown={() => seleccionarSugerencia(s)}
-                            className="w-full text-left px-4 py-3 text-sm text-neutral-700 dark:text-neutral-200 hover:bg-airbnb/5 dark:hover:bg-neutral-700 flex items-start gap-3 transition-colors border-b border-neutral-100 dark:border-neutral-700 last:border-0"
+                            className="w-full text-left px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-700 flex items-start gap-3 transition-colors border-b border-neutral-100 dark:border-neutral-700 last:border-0"
                           >
                             <MapPin className="w-4 h-4 text-airbnb shrink-0 mt-0.5" />
-                            <span className="line-clamp-2 leading-snug">{s.display_name}</span>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-neutral-800 dark:text-white truncate">{s.label}</p>
+                              {s.sublabel && s.sublabel !== s.label && (
+                                <p className="text-xs text-neutral-400 truncate">{s.sublabel}</p>
+                              )}
+                            </div>
                           </button>
                         </li>
                       ))}

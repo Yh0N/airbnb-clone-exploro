@@ -187,9 +187,6 @@ export default function PlaceCard({ place }: PlaceCardProps) {
             {place.location}
           </p>
         )}
-        <p className="text-[14px] text-neutral-800 dark:text-white font-semibold pt-0.5">
-          {place.price} <span className="font-normal text-neutral-500 dark:text-neutral-400">/ noche</span>
-        </p>
       </div>
     </Link>
   );
