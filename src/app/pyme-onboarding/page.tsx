@@ -364,7 +364,7 @@ export default function PymeOnboarding() {
                   </div>
                </div>
                <button 
-                 onClick={() => router.push('/dashboard')}
+                 onClick={() => router.push('/')}
                  className="w-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 py-5 rounded-3xl font-black text-lg transition-all hover:scale-[1.02] active:scale-95 shadow-xl"
                >
                  Ir a mi Panel de Gestión

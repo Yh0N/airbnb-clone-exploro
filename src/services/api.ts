@@ -37,12 +37,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Si recibimos un 401 em cualquier petición, el token ha expirado
       if (typeof window !== 'undefined') {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
-        // Redirigir al inicio para forzar re-login si es necesario
-        // window.location.href = '/login'; 
+        // Solo redirigir si no estamos ya en login/register
+        const ruta = window.location.pathname;
+        if (!ruta.startsWith('/login') && !ruta.startsWith('/register')) {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);
@@ -635,10 +637,10 @@ export const approvePyme = async (id: number) => {
 };
 
 // ===== CRUD PYMES =====
-export const getAllPymes = async () => {
+export const getAllPymes = async (soloAprobadas: boolean = true) => {
     if (USE_MOCK) return [{ id: 1, nombre: 'Pyme Mock', tipo: 'Restaurante' }];
-    const response = await api.get('/pymes');
-    return (response.data as any[]).map(mapPyme); 
+    const response = await api.get('/pymes', { params: { solo_aprobadas: soloAprobadas } });
+    return (response.data as any[]).map(mapPyme);
 };
 
 export const getPyme = async (id: number): Promise<any | null> => {

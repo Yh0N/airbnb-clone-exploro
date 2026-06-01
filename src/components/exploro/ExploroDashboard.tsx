@@ -322,7 +322,7 @@ export default function ExploroDashboard() {
           const canSeeAdmin = !!user;
           const [lugares, pymes] = await Promise.all([
             canSeeAdmin ? api.getAllPlacesAdmin() : api.getAllPlaces(),
-            api.getAllPymes(),
+            api.getAllPymes(false),
           ]);
           result = [...(Array.isArray(lugares) ? lugares : []), ...(Array.isArray(pymes) ? pymes : [])];
           break;
@@ -1184,7 +1184,7 @@ export default function ExploroDashboard() {
 
                                     <td className={`px-6 py-5 text-right pr-10 ${isExpanded ? 'rounded-tr-2xl' : 'rounded-r-2xl'}`}>
                                         <div className="flex justify-end gap-2">
-                                            {(activeTab === 'places_pymes' || activeTab === 'my_places' || activeTab === 'approvals') && !item.aprobado && isAdmin && (
+                                            {(activeTab === 'places_pymes' || activeTab === 'my_places') && !item.aprobado && isAdmin && (
                                                 <div className="flex gap-1">
                                                     <button
                                                       onClick={() => handleApprove(item.id_pyme || item.id)}

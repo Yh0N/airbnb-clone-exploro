@@ -103,15 +103,34 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
     longitud: initialData?.longitude?.toString() || initialData?.longitud?.toString() || '',
   });
 
+  const [geoStatus, setGeoStatus] = useState<'idle' | 'buscando' | 'encontrado' | 'noEncontrado'>('idle');
+
   const seleccionarSugerencia = (s: { label: string; sublabel: string; lat: number; lon: number }) => {
-    // Solo llenar el texto — el backend geocodifica con precisión al guardar.
-    // No usamos las coordenadas de Nominatim porque OSM no tiene datos
-    // de números de casa en Pasto y pone el pin en lugar equivocado.
     const direccion = [s.label, s.sublabel].filter(Boolean).join(', ');
-    setForm(f => ({ ...f, direccion, latitud: '', longitud: '' }));
+    setForm(f => ({ ...f, direccion, latitud: String(s.lat), longitud: String(s.lon) }));
     setSuggestions([]);
     setShowSuggestions(false);
+    setGeoStatus('encontrado');
   };
+
+  // Geocodifica la dirección cuando el usuario escribe (sin seleccionar sugerencia)
+  const geocodificarDireccion = useCallback((valor: string) => {
+    if (valor.length < 5) { setGeoStatus('idle'); return; }
+    setGeoStatus('buscando');
+    setTimeout(async () => {
+      try {
+        const q = encodeURIComponent(`${valor}, Pasto, Nariño, Colombia`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=co`);
+        const data = await res.json();
+        if (data?.[0]) {
+          setForm(f => ({ ...f, latitud: String(data[0].lat), longitud: String(data[0].lon) }));
+          setGeoStatus('encontrado');
+        } else {
+          setGeoStatus('noEncontrado');
+        }
+      } catch { setGeoStatus('noEncontrado'); }
+    }, 900);
+  }, []);
 
   // Efecto para cargar datos si cambian (para edición)
   React.useEffect(() => {
@@ -201,11 +220,11 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
       return;
     }
     if (locationMode === 'coordenadas' && (!form.latitud || !form.longitud)) {
-      showAlert({ type: 'warning', title: 'Faltan datos', message: 'Las coordenadas son obligatorias en este modo.' });
+      showAlert({ type: 'warning', title: 'Faltan datos', message: 'Ingresa latitud y longitud.' });
       return;
     }
     if (locationMode === 'direccion' && !form.direccion) {
-      showAlert({ type: 'warning', title: 'Faltan datos', message: 'La dirección es obligatoria en este modo.' });
+      showAlert({ type: 'warning', title: 'Faltan datos', message: 'La dirección es obligatoria.' });
       return;
     }
 
@@ -218,9 +237,10 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
         subcategoria: form.subcategoria,
       };
 
-      if (locationMode === 'coordenadas') {
+      if (form.latitud && form.longitud) {
         payload.latitud = parseFloat(form.latitud);
         payload.longitud = parseFloat(form.longitud);
+        payload.ubicacion_textual = form.direccion || undefined;
       } else {
         payload.ubicacion_textual = form.direccion;
       }
@@ -247,8 +267,17 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
       }
     } catch (error: any) {
       console.error('Error saving place:', error);
+      const status = error?.response?.status;
       const detail = error?.response?.data?.detail;
-      showAlert({ type: 'error', title: 'Error al guardar', message: detail || 'No pudimos guardar los cambios. Por favor, verifica tu conexión e intenta de nuevo.' });
+
+      if (status === 401) {
+        showAlert({ type: 'error', title: 'Sesión expirada', message: 'Tu sesión expiró. Por favor inicia sesión de nuevo.' });
+        setTimeout(() => { window.location.href = '/login'; }, 2000);
+      } else if (status === 403) {
+        showAlert({ type: 'error', title: 'Sin permiso', message: 'Solo el dueño o un administrador puede editar este lugar.' });
+      } else {
+        showAlert({ type: 'error', title: 'Error al guardar', message: detail || 'No pudimos guardar los cambios. Verifica tu conexión e intenta de nuevo.' });
+      }
     } finally {
       setLoading(false);
     }
@@ -484,19 +513,34 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                       required={locationMode === 'direccion'}
                       value={form.direccion}
                       onChange={(e) => {
-                        setForm({ ...form, direccion: e.target.value });
-                        buscarSugerencias(e.target.value);
+                        const v = e.target.value;
+                        setForm(f => ({ ...f, direccion: v }));
+                        buscarSugerencias(v);
+                        geocodificarDireccion(v);
                       }}
                       onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                      placeholder="Ej. Calle 18 # 25-10, Centro, Pasto"
+                      placeholder="Ej. Cra 16 #18-99, Centro, Pasto"
                       className="w-full pl-4 pr-10 py-3.5 bg-white dark:bg-bg-primary border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-airbnb/30 focus:border-airbnb transition-all dark:text-white font-medium"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
-                      {suggestLoading
+                      {suggestLoading || geoStatus === 'buscando'
                         ? <Loader2 className="w-4 h-4 animate-spin" />
                         : <Search className="w-4 h-4" />}
                     </div>
                   </div>
+
+                  {/* Indicador de geocodificación */}
+                  {geoStatus === 'encontrado' && form.latitud && (
+                    <div className="flex items-center gap-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      Ubicación aproximada encontrada — abre el mapa para ajustar el pin exacto
+                    </div>
+                  )}
+                  {geoStatus === 'noEncontrado' && (
+                    <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg">
+                      No se encontró la dirección — usa <span className="font-bold">Elegir en Mapa</span> para marcar el punto
+                    </div>
+                  )}
 
                   {showSuggestions && suggestions.length > 0 && (
                     <ul className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg overflow-hidden">
@@ -520,8 +564,8 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                     </ul>
                   )}
                 </div>
-                <p className="text-[11px] text-neutral-400 font-medium pl-1">
-                  Escribe la dirección o usa <span className="font-bold text-blue-500">Elegir en Mapa</span> para ubicar el pin exacto.
+                <p className="text-[11px] font-medium pl-1 text-amber-600 dark:text-amber-400">
+                  ⚠ Debes usar <span className="font-bold">Elegir en Mapa</span> o <span className="font-bold">Autodetectar</span> para fijar el pin exacto. La dirección es solo referencia.
                 </p>
               </div>
             ) : (

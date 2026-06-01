@@ -102,8 +102,7 @@ export default function RegisterPage() {
         } catch (err) {
           console.error("Error creating PYME profile", err);
         }
-        // Redirect to dashboard where they can manage their pyme
-        router.push('/dashboard');
+        router.push('/');
       }
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Error al crear la cuenta. Intenta de nuevo.');
