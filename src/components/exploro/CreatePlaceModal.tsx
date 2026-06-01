@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, MapPin, Navigation, Loader2, Plus, Map, Hash, Edit, Camera, Upload, Trash2, Search } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, MapPin, Navigation, Loader2, Plus, Map, Edit, Camera, Upload, Trash2 } from 'lucide-react';
 import { resolvePhotoUrl } from '@/services/api';
 import * as api from '@/services/api';
 import { useAlert } from '@/context/AlertContext';
@@ -23,74 +23,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
   const [geoLoading, setGeoLoading] = useState(false);
   const [showMapPicker, setShowMapPicker] = useState(false);
   const { showAlert } = useAlert();
-  const [locationMode, setLocationMode] = useState<'direccion' | 'coordenadas'>('direccion');
-
-  // Autocomplete de dirección (Photon — Komoot, sin API key, CORS permitido)
-  type Suggestion = { label: string; sublabel: string; lat: number; lon: number };
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [suggestLoading, setSuggestLoading] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const suggestRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (suggestRef.current && !suggestRef.current.contains(e.target as Node))
-        setShowSuggestions(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  const buscarSugerencias = useCallback((valor: string) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (valor.length < 3) { setSuggestions([]); setShowSuggestions(false); return; }
-
-    // Normalizar formato colombiano antes de buscar
-    const normalizado = valor
-      .replace(/\bcra\b/gi, 'carrera').replace(/\bkra\b/gi, 'carrera')
-      .replace(/\bcll?\b/gi, 'calle').replace(/\bav\b/gi, 'avenida')
-      .replace(/#/g, ' ');
-    // Forzar contexto Pasto en el query para que Nominatim priorice esa zona
-    const query = `${normalizado}, Pasto, Nariño`;
-
-    debounceRef.current = setTimeout(async () => {
-      setSuggestLoading(true);
-      try {
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=10&countrycodes=co&addressdetails=1`;
-        const res = await fetch(url);
-        const data = await res.json();
-
-        const items: Suggestion[] = (data as any[])
-          // Filtrar solo resultados de Pasto / Nariño
-          .filter((f: any) => {
-            const a = f.address ?? {};
-            const estado = (a.state ?? '').toLowerCase();
-            const ciudad = (a.city ?? a.town ?? a.municipality ?? '').toLowerCase();
-            return estado.includes('nariño') || ciudad.includes('pasto');
-          })
-          .slice(0, 5)
-          .map((f: any) => {
-            const a = f.address ?? {};
-            // Construir label con calle + número si existe, si no usar display_name simplificado
-            const partes = [a.road, a.house_number].filter(Boolean).join(' ');
-            const label = partes || f.display_name.split(',')[0].trim();
-            // Sublabel: barrio + ciudad
-            const sublabel = [
-              a.suburb || a.neighbourhood || a.quarter,
-              a.city || a.town || a.village || a.municipality || 'Pasto',
-              a.state || 'Nariño',
-            ].filter(Boolean).join(', ');
-            return { label, sublabel, lat: parseFloat(f.lat), lon: parseFloat(f.lon) };
-          });
-
-        setSuggestions(items);
-        setShowSuggestions(items.length > 0);
-      } catch { setSuggestions([]); }
-      finally { setSuggestLoading(false); }
-    }, 500);
-  }, []);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(resolvePhotoUrl(initialData?.foto_principal || initialData?.image) || null);
 
   const [form, setForm] = useState({
@@ -103,34 +36,6 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
     longitud: initialData?.longitude?.toString() || initialData?.longitud?.toString() || '',
   });
 
-  const [geoStatus, setGeoStatus] = useState<'idle' | 'buscando' | 'encontrado' | 'noEncontrado'>('idle');
-
-  const seleccionarSugerencia = (s: { label: string; sublabel: string; lat: number; lon: number }) => {
-    const direccion = [s.label, s.sublabel].filter(Boolean).join(', ');
-    setForm(f => ({ ...f, direccion, latitud: String(s.lat), longitud: String(s.lon) }));
-    setSuggestions([]);
-    setShowSuggestions(false);
-    setGeoStatus('encontrado');
-  };
-
-  // Geocodifica la dirección cuando el usuario escribe (sin seleccionar sugerencia)
-  const geocodificarDireccion = useCallback((valor: string) => {
-    if (valor.length < 5) { setGeoStatus('idle'); return; }
-    setGeoStatus('buscando');
-    setTimeout(async () => {
-      try {
-        const q = encodeURIComponent(`${valor}, Pasto, Nariño, Colombia`);
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=co`);
-        const data = await res.json();
-        if (data?.[0]) {
-          setForm(f => ({ ...f, latitud: String(data[0].lat), longitud: String(data[0].lon) }));
-          setGeoStatus('encontrado');
-        } else {
-          setGeoStatus('noEncontrado');
-        }
-      } catch { setGeoStatus('noEncontrado'); }
-    }, 900);
-  }, []);
 
   // Efecto para cargar datos si cambian (para edición)
   React.useEffect(() => {
@@ -144,11 +49,6 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
         latitud: initialData.latitude?.toString() || initialData.latitud?.toString() || '',
         longitud: initialData.longitude?.toString() || initialData.longitud?.toString() || '',
       });
-      if (initialData.latitude && initialData.longitude) {
-        setLocationMode('coordenadas');
-      } else if (initialData.location || initialData.ubicacion_textual) {
-        setLocationMode('direccion');
-      }
       setImagePreview(resolvePhotoUrl(initialData.foto_principal || initialData.image) || null);
     } else {
       setForm({ nombre: '', descripcion: '', categoria: '', subcategoria: '', direccion: '', latitud: '', longitud: '' });
@@ -187,7 +87,6 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
           longitud: pos.coords.longitude.toFixed(6),
         }));
         setGeoLoading(false);
-        setLocationMode('coordenadas');
       },
       (err) => {
         console.error('Geolocation error:', err);
@@ -219,12 +118,8 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
       showAlert({ type: 'warning', title: 'Faltan datos', message: 'Selecciona una subcategoría específica.' });
       return;
     }
-    if (locationMode === 'coordenadas' && (!form.latitud || !form.longitud)) {
+    if (!form.latitud || !form.longitud) {
       showAlert({ type: 'warning', title: 'Faltan datos', message: 'Ingresa latitud y longitud.' });
-      return;
-    }
-    if (locationMode === 'direccion' && !form.direccion) {
-      showAlert({ type: 'warning', title: 'Faltan datos', message: 'La dirección es obligatoria.' });
       return;
     }
 
@@ -486,96 +381,13 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
               </div>
             </div>
 
-            {/* Tabs (Solo Dirección y Coords) */}
-            <div className="flex bg-neutral-200 dark:bg-neutral-700 p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={() => setLocationMode('direccion')}
-                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${locationMode === 'direccion' ? 'bg-white dark:bg-neutral-800 shadow-sm text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
-              >
-                <Map className="w-4 h-4" /> Dirección
-              </button>
-              <button
-                type="button"
-                onClick={() => setLocationMode('coordenadas')}
-                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${locationMode === 'coordenadas' ? 'bg-white dark:bg-neutral-800 shadow-sm text-neutral-900 dark:text-white' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
-              >
-                <Hash className="w-4 h-4" /> Coordenadas
-              </button>
-            </div>
-
-            {locationMode === 'direccion' ? (
-              <div className="space-y-2 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="relative" ref={suggestRef}>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      required={locationMode === 'direccion'}
-                      value={form.direccion}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        setForm(f => ({ ...f, direccion: v }));
-                        buscarSugerencias(v);
-                        geocodificarDireccion(v);
-                      }}
-                      onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                      placeholder="Ej. Cra 16 #18-99, Centro, Pasto"
-                      className="w-full pl-4 pr-10 py-3.5 bg-white dark:bg-bg-primary border border-neutral-200 dark:border-border-color rounded-xl outline-none focus:ring-2 focus:ring-airbnb/30 focus:border-airbnb transition-all dark:text-white font-medium"
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
-                      {suggestLoading || geoStatus === 'buscando'
-                        ? <Loader2 className="w-4 h-4 animate-spin" />
-                        : <Search className="w-4 h-4" />}
-                    </div>
-                  </div>
-
-                  {/* Indicador de geocodificación */}
-                  {geoStatus === 'encontrado' && form.latitud && (
-                    <div className="flex items-center gap-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      Ubicación aproximada encontrada — abre el mapa para ajustar el pin exacto
-                    </div>
-                  )}
-                  {geoStatus === 'noEncontrado' && (
-                    <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg">
-                      No se encontró la dirección — usa <span className="font-bold">Elegir en Mapa</span> para marcar el punto
-                    </div>
-                  )}
-
-                  {showSuggestions && suggestions.length > 0 && (
-                    <ul className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-lg overflow-hidden">
-                      {suggestions.map((s, i) => (
-                        <li key={i}>
-                          <button
-                            type="button"
-                            onMouseDown={() => seleccionarSugerencia(s)}
-                            className="w-full text-left px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-700 flex items-start gap-3 transition-colors border-b border-neutral-100 dark:border-neutral-700 last:border-0"
-                          >
-                            <MapPin className="w-4 h-4 text-airbnb shrink-0 mt-0.5" />
-                            <div className="min-w-0">
-                              <p className="text-sm font-semibold text-neutral-800 dark:text-white truncate">{s.label}</p>
-                              {s.sublabel && s.sublabel !== s.label && (
-                                <p className="text-xs text-neutral-400 truncate">{s.sublabel}</p>
-                              )}
-                            </div>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                <p className="text-[11px] font-medium pl-1 text-amber-600 dark:text-amber-400">
-                  ⚠ Debes usar <span className="font-bold">Elegir en Mapa</span> o <span className="font-bold">Autodetectar</span> para fijar el pin exacto. La dirección es solo referencia.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-left-4 duration-300">
+            <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-neutral-400 ml-1 uppercase">Latitud</span>
                   <input
                     type="number"
                     step="any"
-                    required={locationMode === 'coordenadas'}
+                    required
                     value={form.latitud}
                     onChange={(e) => setForm({ ...form, latitud: e.target.value })}
                     placeholder="1.2136"
@@ -587,7 +399,7 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                   <input
                     type="number"
                     step="any"
-                    required={locationMode === 'coordenadas'}
+                    required
                     value={form.longitud}
                     onChange={(e) => setForm({ ...form, longitud: e.target.value })}
                     placeholder="-77.2811"
@@ -595,7 +407,6 @@ export default function CreatePlaceModal({ isOpen, onClose, onCreated, initialDa
                   />
                 </div>
               </div>
-            )}
           </div>
 
           {/* ── Acciones ── */}
