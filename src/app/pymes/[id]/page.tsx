@@ -180,13 +180,15 @@ export default function PymeDetailPage() {
             {/* ACCIONES PRINCIPALES */}
             <div className="flex flex-col gap-3 w-full md:w-auto">
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-                <button
-                  onClick={handleDirections}
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${pyme.latitud},${pyme.longitud}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-2 text-xs font-bold text-neutral-700 dark:text-neutral-200 bg-neutral-50 dark:bg-neutral-800 hover:bg-white dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 px-4 py-2.5 rounded-xl transition-all hover:shadow-md whitespace-nowrap flex-shrink-0"
                 >
                   <MapPin className="w-4 h-4 text-blue-600" />
                   Cómo llegar
-                </button>
+                </a>
 
                 {pyme.whatsapp && (
                   <button

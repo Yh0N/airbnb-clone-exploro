@@ -55,7 +55,7 @@ export default function PymeOnboarding() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
-  const [locationMode, setLocationMode] = useState<'address' | 'coordinates'>('address');
+  const [locationMode, setLocationMode] = useState<'address' | 'coordinates'>('coordinates');
   const [showWarning, setShowWarning] = useState(false);
   
   const [form, setForm] = useState({
@@ -451,7 +451,7 @@ export default function PymeOnboarding() {
                   {step === 2 && (
                     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
                       {/* Método de ubicación */}
-                      <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-[22px] border border-neutral-200 dark:border-neutral-700">
+                      <div className="hidden flex bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-[22px] border border-neutral-200 dark:border-neutral-700">
                           <button
                               onClick={() => setLocationMode('address')}
                               className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-[18px] text-sm font-black transition-all ${

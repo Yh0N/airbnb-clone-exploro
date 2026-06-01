@@ -510,8 +510,7 @@ export default function ExploroDashboard() {
       <aside className="w-full md:w-64 bg-white dark:bg-bg-secondary border-b md:border-r md:border-b-0 border-neutral-200 dark:border-border-color p-3 md:p-6 flex flex-col shrink-0">
         <div className="flex-1 md:space-y-2 overflow-x-auto md:overflow-y-auto custom-scrollbar md:pr-1 pb-1 md:pb-0">
           <div className="hidden md:block mb-8 pl-2">
-            <h2 className="text-xl font-bold text-airbnb tracking-tight flex items-center gap-2">
-              <Zap className="w-5 h-5" />
+            <h2 className="text-xl font-bold text-airbnb tracking-tight">
               Ecosistema Exploro
             </h2>
             <p className="text-xs text-neutral-500 font-medium">Panel de gestión integral</p>
@@ -571,13 +570,6 @@ export default function ExploroDashboard() {
               icon={<Zap className="w-4 h-4" />}
               label="Recomendaciones"
               mobileLabel="Rec"
-            />
-            <TabButton
-              active={activeTab === 'nearby'}
-              onClick={() => setActiveTab('nearby')}
-              icon={<Navigation className="w-4 h-4" />}
-              label="Cercanos"
-              mobileLabel="Cercanos"
             />
           </nav>
         </div>
