@@ -123,7 +123,7 @@ function ProfileContent() {
         if (activeTab === 'recommendations') {
           const recs = await getRecommendations();
           setRecommendations(recs);
-        } else if (activeTab === 'favorites') {
+        } else if (activeTab === 'favorites' || activeTab === 'info') {
           const allPlaces = await getPlaces();
           const favIds = user.favorites?.map((f: any) => typeof f === 'object' ? f.id : f) || [];
           const favs = allPlaces.filter(p => favIds.includes(p.id));
@@ -311,6 +311,55 @@ function ProfileContent() {
                     )}
                   </div>
                 </div>
+
+                {/* Sección de Favoritos en Resumen */}
+                {user.favorites && user.favorites.length > 0 && (
+                  <div className="bg-white dark:bg-neutral-800 p-8 rounded-3xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-2">
+                        <Heart className="w-5 h-5 text-airbnb" />
+                        <h3 className="text-xl font-black text-neutral-800 dark:text-white">Mis Favoritos</h3>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('favorites')}
+                        className="text-sm font-bold text-airbnb hover:underline flex items-center gap-1"
+                      >
+                        Ver todos <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {isLoading ? (
+                      <div className="flex gap-3 overflow-x-auto pb-1">
+                        {[1, 2, 3].map(i => (
+                          <div key={i} className="shrink-0 w-36 h-28 bg-neutral-100 dark:bg-neutral-700 rounded-2xl animate-pulse" />
+                        ))}
+                      </div>
+                    ) : favorites.length > 0 ? (
+                      <div className="flex gap-3 overflow-x-auto pb-1">
+                        {favorites.slice(0, 4).map(place => (
+                          <div
+                            key={place.id}
+                            onClick={() => router.push(`/places/${place.id}`)}
+                            className="shrink-0 w-36 rounded-2xl overflow-hidden border border-neutral-100 dark:border-neutral-700 cursor-pointer hover:shadow-md transition-shadow"
+                          >
+                            <div className="h-24 bg-neutral-100 dark:bg-neutral-700 overflow-hidden">
+                              {place.image ? (
+                                <img src={place.image} alt={place.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <MapPin className="w-6 h-6 text-neutral-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-2">
+                              <p className="text-xs font-bold text-neutral-800 dark:text-white truncate">{place.name}</p>
+                              <p className="text-xs text-neutral-500 dark:text-neutral-400 capitalize">{place.category}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
           )}
