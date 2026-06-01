@@ -28,8 +28,12 @@ export default function ServiceCard({ service }: ServiceCardProps) {
 
   const sinFoto = !service.image || imageError;
 
+  const href = service.entityType === 'pyme'
+    ? `/pymes/${service.entityId}`
+    : `/places/${service.entityId ?? service.id}`;
+
   return (
-    <Link href={`/services/${service.id}`} className="group block h-full">
+    <Link href={href} className="group block h-full">
       <div className="relative aspect-video sm:aspect-square rounded-2xl overflow-hidden mb-3">
         {sinFoto ? (
           <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800 flex flex-col items-center justify-center gap-2">

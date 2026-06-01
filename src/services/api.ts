@@ -116,6 +116,9 @@ const mapPlace = (b: any): any => {
 
 const mapPyme = (b: any): any => {
   const fotosArray = typeof b.fotos === 'string' ? b.fotos.split(',').filter(Boolean) : (Array.isArray(b.fotos) ? b.fotos : []);
+  const mainImage = resolvePhotoUrl(b.foto_principal || '');
+  const otherImages = fotosArray.map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f && f !== mainImage);
+  const images = mainImage ? [mainImage, ...otherImages] : otherImages;
   return {
     id: b.id_pyme,
     id_pyme: b.id_pyme,
@@ -131,8 +134,8 @@ const mapPyme = (b: any): any => {
     reviews_count: b.numero_reseñas || 0,
     aprobado: b.aprobado,
     subcategoria: b.subcategoria,
-    image: resolvePhotoUrl(b.foto_principal || ''),
-    images: fotosArray.map((f: string) => resolvePhotoUrl(f)).filter((f: string) => f),
+    image: mainImage,
+    images,
     telefono: b.telefono || null,
     whatsapp: b.whatsapp || null,
   };
@@ -401,6 +404,8 @@ export const getExperiences = async (category?: string): Promise<Experience[]> =
         };
         return {
           id: p.id_lugar,
+          entityType: 'place' as const,
+          entityId: p.id_lugar,
           title: p.nombre,
           category: categoryLabels[(p.categoria || '').toLowerCase()] || p.categoria || 'Experiencia',
           host: p.host_name || 'Anfitrión Local',
@@ -420,6 +425,8 @@ export const getExperiences = async (category?: string): Promise<Experience[]> =
         const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
         return {
           id: p.id_pyme + 10000,
+          entityType: 'pyme' as const,
+          entityId: p.id_pyme,
           title: p.nombre,
           category: 'Turismo & Tours',
           host: p.nombre,
@@ -488,6 +495,8 @@ export const getServices = async (category?: string): Promise<Service[]> => {
       };
       return {
         id: p.id_pyme + 1000,
+        entityType: 'pyme' as const,
+        entityId: p.id_pyme,
         title: p.nombre,
         provider: p.nombre,
         category: tipoLabels[(p.tipo || '').toLowerCase()] || p.tipo || 'Servicio',
@@ -504,6 +513,8 @@ export const getServices = async (category?: string): Promise<Service[]> => {
       const fotosArray = typeof p.fotos === 'string' ? p.fotos.split(',').filter(Boolean) : (Array.isArray(p.fotos) ? p.fotos : []);
       return {
         id: p.id_lugar,
+        entityType: 'place' as const,
+        entityId: p.id_lugar,
         title: p.nombre,
         provider: p.host_name || 'Proveedor Local',
         category: p.subcategoria || 'Servicio',

@@ -365,8 +365,8 @@ export default function ImageGallery({
         }`}>
           {/* Layout para 1 imagen */}
           {validImages.length === 1 && (
-            <div className="w-full h-full cursor-pointer overflow-hidden group bg-neutral-50 dark:bg-neutral-900/50 flex items-center justify-center" onClick={() => openModal(0)}>
-              {renderImage(validImages[0], 0, "max-w-full max-h-full object-contain")}
+            <div className="w-full h-full cursor-pointer overflow-hidden group relative" onClick={() => openModal(0)}>
+              {renderImage(validImages[0], 0, "w-full h-full")}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
             </div>
           )}

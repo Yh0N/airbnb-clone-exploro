@@ -39,6 +39,8 @@ export interface Experience {
   reviews_count: number;
   duration: string;
   isOriginal: boolean;
+  entityType?: 'place' | 'pyme';
+  entityId?: number;
 }
 
 export interface Service {
@@ -51,6 +53,8 @@ export interface Service {
   pricingType: 'per_hour' | 'per_person' | 'per_group';
   rating: number;
   reviews_count: number;
+  entityType?: 'place' | 'pyme';
+  entityId?: number;
 }
 
 

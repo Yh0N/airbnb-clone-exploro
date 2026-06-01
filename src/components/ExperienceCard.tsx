@@ -28,8 +28,12 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
 
   const sinFoto = !experience.image || imageError;
 
+  const href = experience.entityType === 'pyme'
+    ? `/pymes/${experience.entityId}`
+    : `/places/${experience.entityId ?? experience.id}`;
+
   return (
-    <Link href={`/experiences/${experience.id}`} className="group block h-full">
+    <Link href={href} className="group block h-full">
       <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
         {sinFoto ? (
           <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800 flex flex-col items-center justify-center gap-2">

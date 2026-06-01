@@ -608,6 +608,7 @@ export default function ExploroDashboard() {
                   {activeTab === 'places_pymes' ? (isAdmin ? 'Todos los Lugares y Pymes' : 'Explorar Lugares y Pymes') :
                    activeTab === 'my_places' ? (isPyme ? 'Mis Lugares y Pymes' : 'Mis Lugares') :
                    activeTab === 'users' ? 'Usuarios' :
+                   activeTab === 'approvals' ? 'Solicitudes Pyme' :
                    activeTab === 'nearby' ? 'Lugares Cercanos' :
                    activeTab === 'reviews' ? (reviewFilter ? `Reseñas de ${reviewFilter.name}` : 'Reseñas') : 'Recomendaciones'}
                 </span>
