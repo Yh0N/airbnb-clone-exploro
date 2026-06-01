@@ -45,6 +45,12 @@ export default function ImageGallery({
 
   const validImages = images && images.length > 0 ? images : [];
 
+  // Resetear errores y estados de carga cuando cambia el array de imágenes
+  useEffect(() => {
+    setImageErrors({});
+    setLoadedImages({});
+  }, [images.length]);
+
   // Cargar metadatos detallados (IDs y autores) para permitir eliminación
   useEffect(() => {
     if (entityId && entityType) {
