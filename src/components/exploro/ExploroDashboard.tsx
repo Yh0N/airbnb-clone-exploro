@@ -548,7 +548,7 @@ export default function ExploroDashboard() {
             {isAdmin && (
               <TabButton
                   active={activeTab === 'approvals'}
-                  onClick={() => setActiveTab('approvals')}
+                  onClick={() => { setActiveTab('approvals'); setViewMode('table'); }}
                   icon={<CheckCircle className="w-4 h-4" />}
                   label="Solicitudes Pyme"
                   mobileLabel="Solicitudes"
@@ -558,7 +558,7 @@ export default function ExploroDashboard() {
             {isAdmin && (
               <TabButton
                 active={activeTab === 'reviews'}
-                onClick={() => { setActiveTab('reviews'); setReviewFilter(null); }}
+                onClick={() => { setActiveTab('reviews'); setReviewFilter(null); setViewMode('table'); }}
                 icon={<MessageSquare className="w-4 h-4" />}
                 label="Reseñas"
                 mobileLabel="Reseñas"
@@ -658,7 +658,7 @@ export default function ExploroDashboard() {
             )}
 
             {/* View Toggle */}
-            {activeTab !== 'users' && (
+            {activeTab !== 'users' && activeTab !== 'approvals' && activeTab !== 'reviews' && (
               <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-xl border border-neutral-200 dark:border-border-color">
                   <button
                     onClick={() => setViewMode('table')}

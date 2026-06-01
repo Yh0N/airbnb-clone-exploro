@@ -26,9 +26,12 @@ import {
   ArrowRightLeft,
   X
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import * as api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import CustomSelect from '@/components/exploro/CustomSelect';
+
+const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false });
 
 const TIPOS_PYME = [
   { value: 'hotel', label: '🏨 Alojamiento / Hotel' },
@@ -538,6 +541,12 @@ export default function PymeOnboarding() {
                                 </div>
                               </div>
                            </div>
+
+                           <MapPicker
+                             lat={parseFloat(form.latitud) || 1.2136}
+                             lng={parseFloat(form.longitud) || -77.2811}
+                             onChange={(lat, lng) => setForm(f => ({ ...f, latitud: String(lat), longitud: String(lng) }))}
+                           />
                         </div>
                       )}
                     </div>

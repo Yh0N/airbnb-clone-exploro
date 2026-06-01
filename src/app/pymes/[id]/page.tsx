@@ -116,6 +116,29 @@ export default function PymeDetailPage() {
     );
   }
 
+  const isAdmin = user?.rol === 3;
+  const isOwner = isAuthenticated && user?.id === pyme.id_usuario;
+
+  if (!pyme.aprobado && !isAdmin && !isOwner) {
+    return (
+      <div className="max-w-[2520px] mx-auto px-4 sm:px-6 md:px-10 xl:px-20 py-32 text-center bg-neutral-50 dark:bg-neutral-900 min-h-screen">
+        <div className="w-24 h-24 bg-amber-50 dark:bg-amber-900/20 rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-8">
+          <Store className="w-12 h-12 text-amber-400" />
+        </div>
+        <h2 className="text-3xl font-bold text-neutral-800 dark:text-white mb-3 tracking-tight">Negocio pendiente de aprobación</h2>
+        <p className="text-neutral-500 dark:text-neutral-400 mb-10 max-w-md mx-auto leading-relaxed">
+          Este negocio aún no ha sido aprobado por el equipo de Exploro. Vuelve pronto.
+        </p>
+        <button
+          onClick={() => router.push('/')}
+          className="bg-neutral-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-neutral-800 transition-all shadow-lg hover:scale-105 active:scale-95"
+        >
+          Explorar otros destinos
+        </button>
+      </div>
+    );
+  }
+
   const isGuestFavorite = (pyme.rating ?? 0) >= 4.8;
 
   return (

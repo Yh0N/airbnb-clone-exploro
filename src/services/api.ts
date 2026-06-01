@@ -387,7 +387,7 @@ export const getExperiences = async (category?: string): Promise<Experience[]> =
     // Fetch places de categorías turísticas + pymes de turismo en paralelo
     const [placesRes, pymesRes] = await Promise.all([
       api.get('/places').catch(() => ({ data: [] })),
-      api.get('/pymes').catch(() => ({ data: [] })),
+      api.get('/pymes', { params: { solo_aprobadas: true } }).catch(() => ({ data: [] })),
     ]);
 
     // Categorías de lugares que representan "experiencias" en la taxonomía
@@ -479,7 +479,7 @@ export const getServices = async (category?: string): Promise<Service[]> => {
   try {
     // Fetch pymes (todos son negocios que ofrecen servicios) y lugares de categoría 'servicios'
     const [pymesRes, placesRes] = await Promise.all([
-      api.get('/pymes').catch(() => ({ data: [] })),
+      api.get('/pymes', { params: { solo_aprobadas: true } }).catch(() => ({ data: [] })),
       api.get('/places', { params: { categoria: 'servicios' } }).catch(() => ({ data: [] })),
     ]);
 

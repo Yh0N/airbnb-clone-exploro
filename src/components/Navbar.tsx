@@ -157,13 +157,8 @@ export default function Navbar() {
         <div className="flex items-start justify-between">
           
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
-            <div className="relative">
-              <svg viewBox="0 0 32 32" className="w-8 h-8 fill-airbnb transition-transform group-hover:scale-110" aria-label="Exploro">
-                <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.01.415v.262c0 4.422-3.344 6.444-7.5 6.444-2.42 0-4.124-.874-5.738-2.678l-.23-.267-.188-.224-.188.224c-1.384 1.59-3.057 2.664-5.098 2.898l-.41.043-.26.008C5.344 31 2 28.978 2 24.556v-.262l.01-.415c.05-.924.293-1.805.96-3.396l.145-.353c.986-2.296 5.146-11.005 7.1-14.836l.533-1.025C12.037 1.963 13.492 1 15.5 1h.5zm0 2c-1.239 0-2.122.587-3.122 2.508l-.527 1.013C10.418 10.33 6.312 18.88 5.35 21.123l-.143.346c-.566 1.353-.784 2.1-.826 2.9L4.375 24.6v.199c0 3.191 2.376 4.7 5.625 4.7 1.924 0 3.282-.665 4.635-2.197l.264-.305.401-.478.401.478c1.498 1.705 2.873 2.502 5.14 2.502 3.249 0 5.625-1.509 5.625-4.7v-.199l-.006-.231c-.042-.8-.26-1.547-.826-2.9l-.143-.346c-.962-2.244-5.068-10.794-6.998-14.6l-.527-1.016C16.622 3.587 15.739 3 14.5 3h-1z" />
-              </svg>
-            </div>
-            <span className="hidden lg:block text-airbnb font-bold text-xl tracking-tight">
+          <Link href="/" className="flex items-center group flex-shrink-0">
+            <span className="text-airbnb font-bold text-xl tracking-tight">
               Exploro
             </span>
           </Link>
